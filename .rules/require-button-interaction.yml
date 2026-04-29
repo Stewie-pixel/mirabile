@@ -1,0 +1,75 @@
+id: require-button-interaction
+language: Tsx
+files:
+  - src/**/*.tsx
+  - src/**/*.jsx
+
+rule:
+  kind: jsx_opening_element
+  all:
+    # Must be a <Button> component
+    - has:
+        kind: identifier
+        regex: '^Button$'
+
+    # Must NOT have onClick
+    - not:
+        has:
+          kind: jsx_attribute
+          has:
+            kind: property_identifier
+            regex: '^onClick$'
+
+    # Must NOT have asChild
+    - not:
+        has:
+          kind: jsx_attribute
+          has:
+            kind: property_identifier
+            regex: '^asChild$'
+
+    # Must NOT have type="submit" or type="reset"
+    - not:
+        has:
+          kind: jsx_attribute
+          all:
+            - has:
+                kind: property_identifier
+                regex: '^type$'
+            - any:
+                - has:
+                    kind: string
+                    regex: '^"(submit|reset)"$'
+                - has:
+                    kind: jsx_expression
+                    has:
+                      kind: string
+                      regex: '^"(submit|reset)"$'
+
+    # Must NOT be inside any *Trigger component (e.g., DialogTrigger, SheetTrigger)
+    - not:
+        inside:
+          stopBy: end
+          kind: jsx_element
+          has:
+            kind: jsx_opening_element
+            has:
+              kind: identifier
+              regex: 'Trigger$'
+
+    # Must NOT be inside <Link> or <a>
+    - not:
+        inside:
+          stopBy: end
+          kind: jsx_element
+          has:
+            kind: jsx_opening_element
+            has:
+              kind: identifier
+              regex: '^(Link|a)$'
+
+message: |
+  <Button> must be interactive. Please ensure its click behavior is implemented.
+  Add an onClick, type="submit", type="reset", or asChild prop, or wrap it in a *Trigger component, <Link>, or <a>.
+
+severity: error
