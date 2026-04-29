@@ -1,0 +1,34 @@
+id: selectItemWithEmptyValue
+language: Tsx
+files:
+  - src/**/*.tsx
+
+rule:
+  kind: jsx_opening_element
+  all:
+    # Must be a <SelectItem> component
+    - has:
+        kind: identifier
+        regex: '^SelectItem$'
+
+    # Must have a value attribute
+    - has:
+        kind: jsx_attribute
+        all:
+          - has:
+              kind: property_identifier
+              regex: '^value$'
+
+          # And the value must be an empty string (invalid)
+          - any:
+              - has:
+                  kind: string
+                  regex: '^""$'
+              - has:
+                  kind: jsx_expression
+                  has:
+                    kind: string
+                    regex: '^""$'
+
+message: "Detected a SelectItem component using an empty string as value: $MATCH. This is invalid and will cause a runtime error. Please fix it. If you want to represent 'all', use 'all' instead of an empty string."
+severity: error
