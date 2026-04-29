@@ -18,7 +18,8 @@ const PUBLIC_ROUTES = [...SYSTEM_PUBLIC_ROUTES, ...routePublicPaths];
 function matchPublicRoute(path: string, patterns: string[]) {
   return patterns.some(pattern => {
     if (pattern.includes('*')) {
-      const regex = new RegExp('^' + pattern.replace('*', '.*') + '$');
+      const escaped = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp('^' + escaped.replace(/\\\*/g, '.*') + '$');
       return regex.test(path);
     }
     return path === pattern;
