@@ -1,91 +1,208 @@
-# Welcome to Your Mirabile Project
+# 🌟 Mirabile — AI-Powered Career Roadmap Generator
 
-## Project Info
+**mirabile.app** is an AI-powered full-stack web application that transforms your dream career into a complete, personalized roadmap — including timelines, milestones, curated resources, and progress tracking.
 
-## Project Directory
+Built with **React**, **Vite**, **Supabase**, **TypeScript**, and **MeDo AI**.
 
-```
-├── README.md # Documentation
-├── components.json # Component library configuration
-├── index.html # Entry file
-├── package.json # Package management
-├── postcss.config.js # PostCSS configuration
-├── public # Static resources directory
-│   ├── favicon.png # Icon
-│   └── images # Image resources
-├── src # Source code directory
-│   ├── App.tsx # Entry file
-│   ├── components # Components directory
-│   ├── context # Context directory
-│   ├── db # Database configuration directory
-│   ├── hooks # Common hooks directory
-│   ├── index.css # Global styles
-│   ├── layout # Layout directory
-│   ├── lib # Utility library directory
-│   ├── main.tsx # Entry file
-│   ├── routes.tsx # Routing configuration
-│   ├── pages # Pages directory
-│   ├── services # Database interaction directory
-│   ├── types # Type definitions directory
-├── tsconfig.app.json # TypeScript frontend configuration file
-├── tsconfig.json # TypeScript configuration file
-├── tsconfig.node.json # TypeScript Node.js configuration file
-└── vite.config.ts # Vite configuration file
-```
+---
 
-## Tech Stack
+## 🚀 Features
 
-Vite, TypeScript, React, Supabase
+* 🔮 **AI-generated career roadmaps**
+* 🧭 **Timeline-adaptive plans** (1 week → 6 months)
+* 📚 **Resource generator** for each roadmap step
+* 📈 **Progress tracking** with persistent storage
+* 🔐 **Authentication** (Google SSO via Supabase)
+* 🎨 **Modern UI** using shadcn/ui + Radix
+* 🧩 **Custom lint rules** to prevent UI misuse
+* ⚡ **Fast dev environment** powered by Vite
+* 🗂️ **pnpm workspace** for scalable architecture
 
-## Development Guidelines
+---
 
-### How to edit code locally?
-
-You can choose [VSCode](https://code.visualstudio.com/Download) or any IDE you prefer. The only requirement is to have Node.js and npm installed.
-
-### Environment Requirements
+## 📁 Project Structure
 
 ```
-# Node.js ≥ 20
-# npm ≥ 10
-Example:
-# node -v   # v20.18.3
-# npm -v    # 10.8.2
+mirabile/
+├── .rules/                 # Custom AST-grep lint rules
+├── public/                 # Static assets
+├── src/
+│   ├── components/         # UI + common components
+│   ├── context/            # Global providers
+│   ├── db/                 # Supabase client + DB logic
+│   ├── hooks/              # Reusable hooks
+│   ├── layout/             # App layout + navbar
+│   ├── lib/                # Utilities
+│   ├── pages/              # Route pages
+│   ├── services/           # API + Supabase functions
+│   ├── types/              # TypeScript types
+│   ├── App.tsx             # Root component
+│   ├── main.tsx            # Entry point
+│   └── routes.tsx          # Routing config
+├── package.json
+├── pnpm-workspace.yml
+├── tsconfig.json
+├── vite.config.ts
+└── README.md
 ```
 
-### Installing Node.js on Windows
+---
+
+## 🛠️ Tech Stack
+
+* **Frontend:** React + TypeScript + Vite
+* **Backend:** Supabase Edge Functions
+* **Auth:** Supabase Auth (Google SSO)
+* **UI:** shadcn/ui, Radix UI, Tailwind CSS
+* **AI:** MeDo LLM plugins
+* **Linting:** Biome + AST-grep custom rules
+* **Package Manager:** pnpm
+
+---
+
+## 📦 Installation
+
+### 1. Install Node.js
+
+**Requirements:**
+
+* Node.js **≥ 20**
+* pnpm **≥ 8**
+
+Check versions:
+
+```sh
+node -v
+pnpm -v
+```
+
+Install Node.js:
+
+* Windows/macOS: https://nodejs.org
+* macOS (Homebrew):
+
+```sh
+brew install node
+```
+
+---
+
+### 2. Clone the Repository
+
+```sh
+git clone https://github.com/Stewie-pixel/mirabile.git
+cd mirabile
+```
+
+---
+
+### 3. Install Dependencies
+
+```sh
+pnpm install
+```
+
+---
+
+## ▶️ Running the App (Development)
+
+Start the dev server:
+
+```sh
+pnpm dev
+```
+
+If you encounter network binding issues:
+
+```sh
+pnpm dev -- --host 127.0.0.1
+```
+
+Fallback:
+
+```sh
+npx vite --host 127.0.0.1
+```
+
+App runs at:
 
 ```
-# Step 1: Visit the Node.js official website: https://nodejs.org/, click download. The website will automatically suggest a suitable version (32-bit or 64-bit) for your system.
-# Step 2: Run the installer: Double-click the downloaded installer to run it.
-# Step 3: Complete the installation: Follow the installation wizard to complete the process.
-# Step 4: Verify installation: Open Command Prompt (cmd) or your IDE terminal, and type `node -v` and `npm -v` to check if Node.js and npm are installed correctly.
+http://localhost:5173
 ```
 
-### Installing Node.js on macOS
+---
 
-```
-# Step 1: Using Homebrew (Recommended method): Open Terminal. Type the command `brew install node` and press Enter. If Homebrew is not installed, you need to install it first by running the following command in Terminal:
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-Alternatively, use the official installer: Visit the Node.js official website. Download the macOS .pkg installer. Open the downloaded .pkg file and follow the prompts to complete the installation.
-# Step 2: Verify installation: Open Command Prompt (cmd) or your IDE terminal, and type `node -v` and `npm -v` to check if Node.js and npm are installed correctly.
-```
+## 🔐 Environment Variables
 
-### After installation, follow these steps:
+Create a `.env` file in the project root:
 
-```
-# Step 1: Download the code package
-# Step 2: Extract the code package
-# Step 3: Open the code package with your IDE and navigate into the code directory
-# Step 4: In the IDE terminal, run the command to install dependencies: npm i
-# Step 5: In the IDE terminal, run the command to start the development server: npm run dev -- --host 127.0.0.1
-# Step 6: if step 5 failed, try this command to start the development server: npx vite --host 127.0.0.1
+```env
+VITE_SUPABASE_URL=your-url
+VITE_SUPABASE_ANON_KEY=your-key
 ```
 
-### How to develop backend services?
+For Edge Functions:
 
-Configure environment variables and install relevant dependencies.If you need to use a database, please use the official version of Supabase.
+```env
+SUPABASE_SERVICE_ROLE_KEY=your-service-role
+SUPABASE_URL=your-url
+```
 
-## Learn More
+---
 
-You can also check the help documentation: Download and Building the app（ [https://intl.cloud.baidu.com/en/doc/MIAODA/s/download-and-building-the-app-en](https://intl.cloud.baidu.com/en/doc/MIAODA/s/download-and-building-the-app-en)）to learn more detailed content.
+## 🧪 Linting & Code Quality
+
+Run custom AST-grep rules:
+
+```sh
+./.rules/check.sh
+```
+
+TypeScript checks:
+
+```sh
+pnpm typecheck
+```
+
+Run Biome:
+
+```sh
+pnpm biome check .
+```
+
+---
+
+## 🧱 Building for Production
+
+```sh
+pnpm build
+```
+
+Output directory:
+
+```
+dist/
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions!
+
+* Create a feature branch
+* Follow lint rules
+* Submit a pull request
+* Ensure CI checks pass
+
+---
+
+## 🔒 Security
+
+See `SECURITY.md` for supported versions and vulnerability reporting.
+
+---
+
+## 📜 License
+
+MIT © Stewie-pixel
