@@ -4,6 +4,7 @@ export const roadmapGenerationSchema = z.object({
   career_goal: z.string().min(3, 'Career goal must be at least 3 characters'),
   target_company: z.string().min(1, 'Please select a target company'),
   timeline: z.string().min(1, 'Please select a timeline'),
+  ai_model: z.string().min(1, 'Please select an AI model'),
 });
 
 export const loginSchema = z.object({
