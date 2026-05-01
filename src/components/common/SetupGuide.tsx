@@ -39,7 +39,7 @@ export function SetupGuide({ onDismiss }: SetupGuideProps) {
               <p className="text-sm text-muted-foreground">Select one or more providers to configure:</p>
               <ul className="list-disc list-inside text-sm text-muted-foreground ml-2 space-y-1">
                 <li>
-                  <strong>Google Gemini</strong> - Has free tier (Gemini 1.5 Flash)
+                  <strong>Google Gemini</strong> - Has free tier (Gemini 2.5 Flash)
                 </li>
                 <li>
                   <strong>OpenAI</strong> - ChatGPT models (paid)
