@@ -1,5 +1,8 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { corsHeaders } from '@supabase/supabase-js/cors'
+import { corsHeaders } from '@supabase/supabase-js/cors';
+import { createGoogleJWT, getGoogleAccessToken } from './google_oauth.ts';
+
+const serviceAccount = JSON.parse(Deno.env.get("GOOGLE_SERVICE_ACCOUNT")!);
 
 interface RoadmapRequest {
   career_goal: string;
@@ -17,8 +20,8 @@ interface AIModel {
 const AI_MODELS: Record<string, AIModel> = {
   'gpt-4o-mini': { id: 'gpt-4o-mini', provider: 'openai', modelId: 'gpt-4o-mini' },
   'gpt-3.5-turbo': { id: 'gpt-3.5-turbo', provider: 'openai', modelId: 'gpt-3.5-turbo' },
-  'gemini-1.5-flash': { id: 'gemini-1.5-flash', provider: 'gemini', modelId: 'gemini-1.5-flash' },
-  'gemini-1.5-pro': { id: 'gemini-1.5-pro', provider: 'gemini', modelId: 'gemini-1.5-pro' },
+  'gemini-2.5-flash': { id: 'gemini-2.5-flash', provider: 'gemini', modelId: 'gemini-2.5-flash' },
+  'gemini-2.5-pro': { id: 'gemini-2.5-pro', provider: 'gemini', modelId: 'gemini-2.5-pro' },
   'claude-3-5-sonnet': { id: 'claude-3-5-sonnet', provider: 'claude', modelId: 'claude-3-5-sonnet-20241022' },
   'claude-3-5-haiku': { id: 'claude-3-5-haiku', provider: 'claude', modelId: 'claude-3-5-haiku-20241022' },
 };
@@ -57,17 +60,21 @@ async function callOpenAI(apiKey: string, modelId: string, prompt: string): Prom
   return data.choices[0].message.content;
 }
 
-async function callGemini(apiKey: string, modelId: string, prompt: string): Promise<string> {
+async function callGemini(accessToken: string, projectId: string, location: string, modelId: string, prompt: string): Promise<string> {
+  const url = `https://aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:generateContent`;
+
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`,
+    url,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         contents: [
           {
+            role: 'user',
             parts: [
               {
                 text: prompt,
@@ -192,11 +199,6 @@ Deno.serve(async (req) => {
       if (!apiKey) {
         throw new Error('LLM_API_KEY (OpenAI) not configured. Please add it in Supabase Dashboard > Edge Functions > Secrets');
       }
-    } else if (modelConfig.provider === 'gemini') {
-      apiKey = Deno.env.get('GEMINI_API_KEY');
-      if (!apiKey) {
-        throw new Error('GEMINI_API_KEY not configured. Please add it in Supabase Dashboard > Edge Functions > Secrets');
-      }
     } else if (modelConfig.provider === 'claude') {
       apiKey = Deno.env.get('CLAUDE_API_KEY');
       if (!apiKey) {
@@ -275,7 +277,30 @@ Return ONLY valid JSON in this exact format:
       if (modelConfig.provider === 'openai') {
         content = await callOpenAI(apiKey!, modelConfig.modelId, prompt);
       } else if (modelConfig.provider === 'gemini') {
-        content = await callGemini(apiKey!, modelConfig.modelId, prompt);
+        const serviceAccountJson = Deno.env.get("GCP_SERVICE_ACCOUNT");
+        if (!serviceAccountJson) {
+          throw new Error("GCP_SERVICE_ACCOUNT not configured. Add it in Supabase Dashboard > Edge Functions > Secrets");
+        }
+      
+        const projectId = Deno.env.get("GCP_PROJECT_ID");
+        if (!projectId) {
+          throw new Error("GCP_PROJECT_ID not configured.");
+        }
+      
+        const location = Deno.env.get("GCP_LOCATION") || "us-central1";
+      
+        const serviceAccount = JSON.parse(serviceAccountJson);
+      
+        const jwt = await createSignedJWT(serviceAccount);
+        const accessToken = await exchangeJWTForAccessToken(jwt);
+      
+        content = await callGemini(
+          accessToken,
+          projectId,
+          location,
+          modelConfig.modelId,
+          prompt
+        );
       } else if (modelConfig.provider === 'claude') {
         content = await callClaude(apiKey!, modelConfig.modelId, prompt);
       } else {
