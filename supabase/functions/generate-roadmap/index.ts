@@ -28,7 +28,13 @@ const serviceAccount = JSON.parse(serviceAccountJson);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   try {
@@ -120,7 +126,7 @@ Deno.serve(async (req) => {
   } catch (err: any) {
     console.error("Error in generate-roadmap:", err);
     return new Response(
-      JSON.stringify({ error: err.message ?? "Unexpected error", details: String(err) }),
+      JSON.stringify({ error: err.message ?? "Unexpected error" }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -16,7 +16,8 @@ export async function insertSteps(
   const { data, error } = await supabase
     .from("roadmap_steps")
     .insert(stepsToInsert)
-    .select();
+    .select()
+    .order("step_order", { ascending: true });
 
   if (error) {
     console.error("Steps insert error:", error);

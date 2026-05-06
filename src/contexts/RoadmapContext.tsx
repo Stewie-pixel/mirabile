@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
-import type { Roadmap, RoadmapStep, Resource } from '@/types';
+import type { Roadmap, RoadmapStep } from '@/types';
 import { supabase } from '@/lib/supabase';
 
 interface RoadmapContextType {
@@ -82,6 +82,14 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setError(null);
       try {
+        const {
+          data: {session},
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          throw new Error('User not authenticated');
+        }
+
         const { data, error: funcError } = await supabase.functions.invoke('generate-roadmap', {
           body: { career_goal: careerGoal, target_company: targetCompany, timeline, ai_model: aiModel },
         });
