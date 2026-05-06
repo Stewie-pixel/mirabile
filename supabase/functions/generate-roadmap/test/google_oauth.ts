@@ -1,4 +1,4 @@
-import { createGoogleJWT, getGoogleAccessToken } from "../google_oauth.ts";
+import { createGoogleJWT, getGoogleAccessToken } from "../lib/google_oauth.ts";
 import serviceAccount from "./service-account.json" with { type: "json"};
 
 async function main() {
