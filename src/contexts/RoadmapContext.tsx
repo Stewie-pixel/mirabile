@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
-import type { Roadmap, RoadmapStep, Resource } from '@/types';
+import type { Roadmap, RoadmapStep } from '@/types';
 import { supabase } from '@/lib/supabase';
 
 interface RoadmapContextType {
@@ -10,7 +10,12 @@ interface RoadmapContextType {
   setCurrentRoadmap: (roadmap: Roadmap | null) => void;
   fetchRoadmap: (roadmapId: string) => Promise<void>;
   fetchUserRoadmaps: () => Promise<Roadmap[]>;
-  generateRoadmap: (careerGoal: string, targetCompany: string, timeline: string) => Promise<Roadmap | null>;
+  generateRoadmap: (
+    careerGoal: string,
+    targetCompany: string,
+    timeline: string,
+    aiModel: string
+  ) => Promise<Roadmap | null>;
 }
 
 const RoadmapContext = createContext<RoadmapContextType | undefined>(undefined);
@@ -68,17 +73,47 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const generateRoadmap = useCallback(
-    async (careerGoal: string, targetCompany: string, timeline: string): Promise<Roadmap | null> => {
+    async (
+      careerGoal: string,
+      targetCompany: string,
+      timeline: string,
+      aiModel: string
+    ): Promise<Roadmap | null> => {
       setLoading(true);
       setError(null);
       try {
+        const {
+          data: {session},
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          throw new Error('User not authenticated');
+        }
+
         const { data, error: funcError } = await supabase.functions.invoke('generate-roadmap', {
-          body: { career_goal: careerGoal, target_company: targetCompany, timeline },
+          body: { career_goal: careerGoal, target_company: targetCompany, timeline, ai_model: aiModel },
         });
 
         if (funcError) {
-          const errorMsg = await funcError?.context?.text();
-          throw new Error(errorMsg || funcError.message);
+          console.error('Edge Function error:', funcError);
+          let errorMsg = 'Failed to generate roadmap';
+          
+          try {
+            const errorText = await funcError?.context?.text();
+            if (errorText) {
+              const errorData = JSON.parse(errorText);
+              errorMsg = errorData.error || errorData.message || errorText;
+            }
+          } catch (e) {
+            errorMsg = funcError.message || errorMsg;
+          }
+          
+          throw new Error(errorMsg);
+        }
+
+        if (data?.error) {
+          console.error('API error response:', data);
+          throw new Error(data.error);
         }
 
         if (data?.roadmap) {
@@ -86,10 +121,13 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           setRoadmapSteps(data.steps || []);
           return data.roadmap;
         }
-        return null;
+        
+        throw new Error('No roadmap data returned from API');
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to generate roadmap');
-        return null;
+        console.error('Generate roadmap error:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to generate roadmap';
+        setError(errorMessage);
+        throw err;
       } finally {
         setLoading(false);
       }

@@ -61,6 +61,8 @@ export interface Roadmap {
   career_goal: string;
   target_company: string;
   timeline: string;
+  ai_model?: string;
+  ai_provider?: string;
   phases: RoadmapPhase[];
   steps?: RoadmapStep[];
   created_at: string;
@@ -92,6 +94,7 @@ export interface RoadmapGenerationRequest {
   career_goal: string;
   target_company: string;
   timeline: string;
+  ai_model?: string;
 }
 
 export interface RoadmapGenerationResponse {

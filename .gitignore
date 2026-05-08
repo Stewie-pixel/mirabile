@@ -26,3 +26,11 @@ dist-ssr
 # .env 
 .env
 .env.*.local
+
+# Supabase function build output
+supabase/functions/**/dist
+supabase/functions/**/node_modules
+supabase/.temp
+.supabase/functions/**/package-lock.json
+.supabase/functions/**/yarn.lock
+.supabase/functions/**/pnpm-lock.yaml

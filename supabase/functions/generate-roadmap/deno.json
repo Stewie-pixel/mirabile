@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "jsr:@supabase/supabase-js@2",
+    "@supabase/supabase-js/cors": "jsr:@supabase/supabase-js@2/cors"
+  },
+  "compileOptions": {
+    "lib": ["deno.ns", "deno.unstable", "dom"]
+  }
+}
