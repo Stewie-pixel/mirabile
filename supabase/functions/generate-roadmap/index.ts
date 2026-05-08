@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { corsHeaders } from '@supabase/supabase-js/cors';
 
 import { createGoogleJWT, getGoogleAccessToken } from "./google_oauth.ts";
-import { AI_MODELS } from "./lib/model-router.ts";
+import { AI_MODELS } from "../../../src/constants/aiModels.ts";
 import { buildPrompt } from "./lib/prompt.ts";
 import { safeParseJSON } from "./lib/json.ts";
 
@@ -17,19 +17,9 @@ import { callOpenAI } from "./lib/llm/openai.ts";
 import { callClaude } from "./lib/llm/claude.ts";
 import { callGemini } from "./lib/llm/gemini.ts";
 
-const serviceAccountJson = Deno.env.get("GCP_SERVICE_ACCOUNT");
-const projectId = Deno.env.get("GCP_PROJECT_ID");
-const location = Deno.env.get("GCP_LOCATION") || "us-central1";
-
-if (!serviceAccountJson) throw new Error("GCP_SERVICE_ACCOUNT not configured");
-if (!projectId) throw new Error("GCP_PROJECT_ID not configured");
-
-const serviceAccount = JSON.parse(serviceAccountJson);
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", {
-      status: 200,
       headers: {
         ...corsHeaders,
         "Content-Type": "application/json",
@@ -38,7 +28,16 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // 1. Supabase client + auth
+    const serviceAccountJson = Deno.env.get("GCP_SERVICE_ACCOUNT");
+    const projectId = Deno.env.get("GCP_PROJECT_ID");
+    const location = Deno.env.get("GCP_LOCATION") || "us-central1";
+
+    if (!serviceAccountJson || !projectId) {
+      throw new Error("GCP configuration missing");
+    }
+
+    const serviceAccount = JSON.parse(serviceAccountJson);
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 
@@ -58,7 +57,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2. Parse request
     const body = await req.json();
     const { career_goal, target_company, timeline, ai_model } = body;
 
@@ -66,14 +64,11 @@ Deno.serve(async (req) => {
       throw new Error("Missing required fields: career_goal, target_company, timeline, ai_model");
     }
 
-    // 3. Model selection
     const modelConfig = AI_MODELS[ai_model];
     if (!modelConfig) throw new Error(`Invalid AI model: ${ai_model}`);
 
-    // 4. Prompt
     const prompt = buildPrompt(career_goal, target_company, timeline);
 
-    // 5. Call LLM
     let content: string;
 
     switch (modelConfig.provider) {
@@ -99,13 +94,11 @@ Deno.serve(async (req) => {
         throw new Error(`Unsupported provider: ${modelConfig.provider}`);
     }
 
-    // 6. Parse JSON
     const parsed = safeParseJSON(content);
     if (!parsed.phases || !parsed.steps || !parsed.resources) {
       throw new Error("Invalid roadmap structure from LLM");
     }
 
-    // 7. DB inserts
     const roadmap = await insertRoadmap(supabase, user.id, {
       career_goal,
       target_company,
@@ -118,17 +111,16 @@ Deno.serve(async (req) => {
     await insertResources(supabase, steps, parsed.resources);
     await insertProgress(supabase, user.id, roadmap.id);
 
-    // 8. Response
     return new Response(
       JSON.stringify({ roadmap, steps, message: "Roadmap generated successfully" }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200, }
     );
   } catch (err: any) {
     console.error("Error in generate-roadmap:", err);
     return new Response(
       JSON.stringify({ error: err.message ?? "Unexpected error" }),
       {
-        status: 500,
+        status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       },
     );
