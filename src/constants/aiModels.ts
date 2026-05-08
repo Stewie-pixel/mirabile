@@ -1,15 +1,47 @@
 export interface AIModel {
   id: string;
   name: string;
-  provider: 'openai' | 'gemini' | 'claude';
+  provider: 'openai' | 'gemini' | 'claude' | 'puter';
   modelId: string;
   isFree: boolean;
   description: string;
   maxTokens: number;
+  requiresApiKey?: boolean;
 }
 
 export const AI_MODELS: AIModel[] = [
-  // OpenAI Models
+  // Puter.js Models (No API Key Required)
+  {
+    id: 'puter-gpt-4o',
+    name: 'GPT-4o',
+    provider: 'puter',
+    modelId: 'gpt-4o',
+    isFree: true,
+    description: 'Powered by Puter.js',
+    maxTokens: 4000,
+    requiresApiKey: false,
+  },
+  {
+    id: 'puter-claude',
+    name: 'Claude Haiku 4.6',
+    provider: 'puter',
+    modelId: 'claude',
+    isFree: true,
+    description: 'Powered by Puter.js',
+    maxTokens: 4000,
+    requiresApiKey: false,
+  },
+  {
+    id: 'puter-claude-sonnet',
+    name: 'Claude Sonnet 4.5',
+    provider: 'puter',
+    modelId: 'claude-sonnet',
+    isFree: true,
+    description: 'Powered by Puter.js',
+    maxTokens: 4000,
+    requiresApiKey: false,
+  },
+  // OpenAI Models (Requires API Key)
   {
     id: 'gpt-4o-mini',
     name: 'ChatGPT 4o Mini',
@@ -18,6 +50,7 @@ export const AI_MODELS: AIModel[] = [
     isFree: false,
     description: 'Fast and affordable GPT-4 model, great balance of quality and cost',
     maxTokens: 4000,
+    requiresApiKey: true,
   },
   {
     id: 'gpt-3.5-turbo',
@@ -27,16 +60,18 @@ export const AI_MODELS: AIModel[] = [
     isFree: false,
     description: 'Reliable and cost-effective model for most tasks',
     maxTokens: 4000,
+    requiresApiKey: true,
   },
-  // Google Gemini Models
+  // Google Gemini Models (Requires API Key)
   {
     id: 'gemini-2.5-flash',
     name: 'Gemini 2.5 Flash',
     provider: 'gemini',
     modelId: 'gemini-2.5-flash',
     isFree: true,
-    description: 'Free, fast, and versatile model for everyday tasks',
+    description: 'Free with your own API key, fast and versatile',
     maxTokens: 4000,
+    requiresApiKey: true,
   },
   {
     id: 'gemini-2.5-pro',
@@ -46,8 +81,9 @@ export const AI_MODELS: AIModel[] = [
     isFree: false,
     description: 'Advanced reasoning and complex task handling',
     maxTokens: 4000,
+    requiresApiKey: true,
   },
-  // Anthropic Claude Models
+  // Anthropic Claude Models (Requires API Key)
   {
     id: 'claude-3-5-sonnet',
     name: 'Claude 3.5 Sonnet',
@@ -56,6 +92,7 @@ export const AI_MODELS: AIModel[] = [
     isFree: false,
     description: 'Excellent for detailed analysis and structured outputs',
     maxTokens: 4000,
+    requiresApiKey: true,
   },
   {
     id: 'claude-3-5-haiku',
@@ -65,16 +102,19 @@ export const AI_MODELS: AIModel[] = [
     isFree: false,
     description: 'Fast and efficient for quick tasks',
     maxTokens: 4000,
+    requiresApiKey: true,
   },
 ];
 
 export const FREE_MODELS = AI_MODELS.filter((model) => model.isFree);
 export const PAID_MODELS = AI_MODELS.filter((model) => !model.isFree);
+export const PUTER_MODELS = AI_MODELS.filter((model) => model.provider === 'puter');
+export const API_KEY_MODELS = AI_MODELS.filter((model) => model.requiresApiKey);
 
 export const getModelById = (id: string): AIModel | undefined => {
   return AI_MODELS.find((model) => model.id === id);
 };
 
-export const getModelsByProvider = (provider: 'openai' | 'gemini' | 'claude'): AIModel[] => {
+export const getModelsByProvider = (provider: 'openai' | 'gemini' | 'claude' | 'puter'): AIModel[] => {
   return AI_MODELS.filter((model) => model.provider === provider);
 };
