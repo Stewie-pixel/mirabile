@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,19 +29,15 @@ export default function RoadmapViewerPage() {
   };
 
   const isStepCompleted = (stepId: string) => {
-    return progress?.completed_steps?.includes(stepId) || false;
+    return progress?.completed_steps?.includes(stepId) ?? false;
   };
 
   const getResourceIcon = (type: string) => {
     switch (type) {
-      case 'video':
-        return <Video className="h-4 w-4" />;
-      case 'practice':
-        return <Code className="h-4 w-4" />;
-      case 'documentation':
-        return <FileText className="h-4 w-4" />;
-      default:
-        return <BookOpen className="h-4 w-4" />;
+      case 'video':         return <Video    className="h-4 w-4" />;
+      case 'practice':      return <Code     className="h-4 w-4" />;
+      case 'documentation': return <FileText className="h-4 w-4" />;
+      default:              return <BookOpen className="h-4 w-4" />;
     }
   };
 
@@ -67,9 +63,7 @@ export default function RoadmapViewerPage() {
 
   const groupedSteps = roadmapSteps.reduce(
     (acc, step) => {
-      if (!acc[step.phase]) {
-        acc[step.phase] = [];
-      }
+      if (!acc[step.phase]) acc[step.phase] = [];
       acc[step.phase].push(step);
       return acc;
     },
@@ -79,7 +73,9 @@ export default function RoadmapViewerPage() {
   return (
     <div className="container mx-auto max-w-5xl py-8 px-4">
       <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">{currentRoadmap.career_goal} Roadmap</h1>
+        <h1 className="text-3xl md:text-4xl font-bold mb-2">
+          {currentRoadmap.career_goal} Roadmap
+        </h1>
         <div className="flex flex-wrap gap-2 mt-4">
           <Badge variant="outline" className="flex items-center gap-1">
             <Target className="h-3 w-3" />
@@ -105,15 +101,19 @@ export default function RoadmapViewerPage() {
             </CardHeader>
             <CardContent>
               <Accordion type="multiple" className="w-full">
-                {steps.map((step, index) => (
+                {steps.map((step) => (
                   <AccordionItem key={step.id} value={step.id}>
-                    <AccordionTrigger className="hover:no-underline">
-                      <div className="flex items-center gap-3 flex-1 text-left">
-                        <Checkbox
-                          checked={isStepCompleted(step.id)}
-                          onCheckedChange={(checked) => handleStepComplete(step.id, checked as boolean)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        checked={isStepCompleted(step.id)}
+                        onCheckedChange={(checked) =>
+                          handleStepComplete(step.id, checked as boolean)
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label={`Mark "${step.title}" as ${isStepCompleted(step.id) ? 'incomplete' : 'complete'}`}
+                      />
+
+                      <AccordionTrigger className="hover:no-underline flex-1 py-4 text-left">
                         <div className="flex-1">
                           <div className="font-medium">{step.title}</div>
                           <div className="flex gap-2 mt-1">
@@ -125,8 +125,9 @@ export default function RoadmapViewerPage() {
                             </Badge>
                           </div>
                         </div>
-                      </div>
-                    </AccordionTrigger>
+                      </AccordionTrigger>
+                    </div>
+
                     <AccordionContent>
                       <div className="pl-9 space-y-4">
                         <p className="text-muted-foreground">{step.description}</p>
@@ -136,12 +137,19 @@ export default function RoadmapViewerPage() {
                             <h4 className="font-semibold mb-2">Resources</h4>
                             <div className="space-y-2">
                               {step.resources.map((resource: Resource) => (
-                                <div key={resource.id} className="flex items-start gap-2 p-3 rounded-lg bg-secondary/50">
-                                  <div className="mt-0.5 text-primary">{getResourceIcon(resource.resource_type)}</div>
+                                <div
+                                  key={resource.id}
+                                  className="flex items-start gap-2 p-3 rounded-lg bg-secondary/50"
+                                >
+                                  <div className="mt-0.5 text-primary">
+                                    {getResourceIcon(resource.resource_type)}
+                                  </div>
                                   <div className="flex-1">
                                     <div className="font-medium">{resource.title}</div>
                                     {resource.description && (
-                                      <p className="text-sm text-muted-foreground mt-1">{resource.description}</p>
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        {resource.description}
+                                      </p>
                                     )}
                                     {resource.url && (
                                       <a

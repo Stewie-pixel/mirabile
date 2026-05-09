@@ -65,6 +65,36 @@ class PuterService {
     return await globalThis.puter.auth.getUser();
   }
 
+  async ensureCorrectUser(supabaseUserId: string): Promise<void> {
+    await this.initialize();
+ 
+    const SESSION_KEY = 'puter_bound_supabase_uid';
+    const boundUid = sessionStorage.getItem(SESSION_KEY);
+ 
+    // If Puter is signed in but bound to a DIFFERENT Supabase user → sign out.
+    if (this.isSignedIn() && boundUid !== supabaseUserId) {
+      console.log('Puter session belongs to a different user — signing out and re-authenticating.');
+      await this.signOut();
+    }
+ 
+    // Now sign in if needed (covers both "was never signed in" and "just signed out").
+    if (!this.isSignedIn()) {
+      await this.signIn();
+      sessionStorage.setItem(SESSION_KEY, supabaseUserId);
+    }
+  }
+ 
+  /**
+   * Call this from your Supabase onAuthStateChange handler on SIGNED_OUT
+   * so the Puter session is cleaned up immediately when the user logs out.
+   */
+  async handleSupabaseSignOut(): Promise<void> {
+    sessionStorage.removeItem('puter_bound_supabase_uid');
+    if (this.isSignedIn()) {
+      await this.signOut();
+    }
+  }
+  
   /**
    * Generate AI response using Puter.js
    */
@@ -189,7 +219,7 @@ Return ONLY valid JSON in this exact format:
   ],
   "resources": [
     {
-      "step_index": 0,
+      "step_id": 1,
       "resource_type": "learning|practice|video|documentation|interview",
       "media_platform": "YouTube|Google|Github|Stack Overflow|Coursera|Books|Blogs|Official Docs|etc.",
       "title": "Resource Title",
@@ -199,7 +229,7 @@ Return ONLY valid JSON in this exact format:
   ]
 }`;
 
-    return await this.chat(prompt, { model, temperature: 0.7, max_tokens: 4000 });
+    return await this.chat(prompt, { model, temperature: 0.7, max_tokens: 8000 });
   }
 }
 
