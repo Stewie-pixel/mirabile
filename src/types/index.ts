@@ -32,10 +32,12 @@ export interface RoadmapPhase {
   order: number;
 }
 
+export type ResourceType = 'learning' | 'practice' | 'video' | 'documentation' | 'interview';
+
 export interface Resource {
   id: string;
   step_id: string;
-  resource_type: 'learning' | 'practice' | 'video' | 'documentation' | 'interview';
+  resource_type: ResourceType;
   title: string;
   url?: string;
   description?: string;

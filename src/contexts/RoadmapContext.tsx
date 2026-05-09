@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
-import type { Roadmap, RoadmapStep } from '@/types';
+import type { Resource, Roadmap, RoadmapStep } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { getModelById } from '@/constants/aiModels';
 import { puterService } from '@/services/puterService';
@@ -130,7 +130,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
                 const errorData = JSON.parse(errorText);
                 errorMsg = errorData.error || errorData.message || errorText;
               }
-            } catch (e) {
+            } catch (_e) {
               errorMsg = funcError.message || errorMsg;
             }
             
@@ -177,7 +177,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           let parsedContent;
           try {
             parsedContent = JSON.parse(cleanContent);
-          } catch (e) {
+          } catch (_e) {
             console.log('Failed to parse as direct JSON, trying to extract...');
             
             // Ensure content is a string before calling .match()
@@ -186,8 +186,8 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
               if (jsonMatch) {
                 try {
                   parsedContent = JSON.parse(jsonMatch[0]);
-                } catch (e2) {
-                  console.error('Failed to parse extracted JSON:', e2);
+                } catch (_e2) {
+                  console.error('Failed to parse extracted JSON:', _e2);
                   console.error('Content:', cleanContent);
                   throw new Error('Failed to parse AI response as JSON');
                 }
@@ -252,8 +252,8 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
 
           // Insert resources
           const resourcesToInsert = parsedContent.resources
-            .map((resource: any) => {
-              const step = steps.find(s => s.step_order === resource.step_index + 1);
+            .map((resource: Resource) => {
+              const step = steps.find(s => s.step_order === resource.step_id + 1);
               if (!step) return null;
               return {
                 step_id: step.id,
