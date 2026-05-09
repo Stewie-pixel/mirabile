@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, CheckCircle2, ExternalLink } from 'lucide-react';
+import { CheckCircle2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SetupGuideProps {
@@ -12,34 +12,38 @@ export function SetupGuide({ onDismiss }: SetupGuideProps) {
     <Card className="border-primary/20 bg-primary/5">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <AlertCircle className="h-5 w-5 text-primary" />
-          First Time Setup Required
+          <CheckCircle2 className="h-5 w-5 text-primary" />
+          Two Ways to Get Started
         </CardTitle>
         <CardDescription>
-          Before generating your first roadmap, please complete the following setup steps
+          Choose the option that works best for you
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>AI Model API Keys Required</AlertTitle>
-          <AlertDescription>
-            The AI roadmap generation supports multiple providers. Configure at least one API key to get started. Free
-            models are available with Gemini.
-          </AlertDescription>
-        </Alert>
-
         <div className="space-y-3">
           <div className="flex items-start gap-3">
             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
               1
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-medium">Choose Your AI Provider</p>
-              <p className="text-sm text-muted-foreground">Select one or more providers to configure:</p>
+              <p className="text-sm font-medium">Option 1: Use default Models</p>
+              <p className="text-sm text-muted-foreground">
+                Select a model from the dropdown (GPT-4o, Claude Haiku 4.6, or Claude Sonnet 4.5). No configuration
+                needed!
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
+              2
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Option 2: Use Your Own API Keys</p>
+              <p className="text-sm text-muted-foreground">If you prefer to use your own API keys:</p>
               <ul className="list-disc list-inside text-sm text-muted-foreground ml-2 space-y-1">
                 <li>
-                  <strong>Google Gemini</strong> - Has free tier (Gemini 2.5 Flash)
+                  <strong>Google Gemini</strong> - Gemini 2.5 Flash/Pro (free tier available)
                 </li>
                 <li>
                   <strong>OpenAI</strong> - ChatGPT models (paid)
@@ -52,11 +56,11 @@ export function SetupGuide({ onDismiss }: SetupGuideProps) {
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-              2
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
+              2a
             </div>
             <div className="space-y-2">
-              <p className="text-sm font-medium">Get API Keys</p>
+              <p className="text-sm font-medium">Get API Keys (for Option 2 only)</p>
               <div className="space-y-2">
                 <div className="rounded-md bg-muted p-3 space-y-1">
                   <p className="text-sm font-medium">Google Gemini (Recommended - Has Free Tier)</p>
@@ -90,11 +94,11 @@ export function SetupGuide({ onDismiss }: SetupGuideProps) {
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-              3
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
+              2b
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-medium">Add API Keys to Supabase</p>
+              <p className="text-sm font-medium">Add API Keys to Supabase (for Option 2 only)</p>
               <p className="text-sm text-muted-foreground">
                 Go to your Supabase Dashboard → Edge Functions → Secrets
               </p>
@@ -119,13 +123,14 @@ export function SetupGuide({ onDismiss }: SetupGuideProps) {
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-              4
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
+              3
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-medium">Select model and generate roadmap</p>
+              <p className="text-sm font-medium">Generate your roadmap!</p>
               <p className="text-sm text-muted-foreground">
-                Choose your preferred AI model from the dropdown and click "Generate Roadmap"
+                Choose your preferred AI model from the dropdown and click "Generate Roadmap". Puter.js models work
+                instantly, no setup required!
               </p>
             </div>
           </div>
@@ -136,7 +141,7 @@ export function SetupGuide({ onDismiss }: SetupGuideProps) {
           <AlertTitle>Need Help?</AlertTitle>
           <AlertDescription>
             For detailed troubleshooting, refer to the{' '}
-            <code className="bg-muted px-1 py-0.5 rounded text-xs">EDGE_FUNCTION_DEBUG.md</code> file in the project
+            <code className="bg-muted px-1 py-0.5 rounded text-xs">README.md</code> file in the project
             root directory.
           </AlertDescription>
         </Alert>

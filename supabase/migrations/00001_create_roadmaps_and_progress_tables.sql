@@ -5,6 +5,8 @@ CREATE TABLE roadmaps (
   career_goal TEXT NOT NULL,
   target_company TEXT NOT NULL,
   timeline TEXT NOT NULL,
+  ai_model TEXT NOT NULL.
+  ai_provider TEXT NOT NULL,
   phases JSONB NOT NULL DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()

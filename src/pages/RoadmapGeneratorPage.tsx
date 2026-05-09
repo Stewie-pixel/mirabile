@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,7 +11,7 @@ import { roadmapGenerationSchema, type RoadmapGenerationInput } from '@/lib/vali
 import { COMPANIES } from '@/constants/companies';
 import { TIMELINE_OPTIONS } from '@/constants/timelines';
 import { CAREER_PATHS } from '@/constants/careerPaths';
-import { AI_MODELS, FREE_MODELS, PAID_MODELS } from '@/constants/aiModels';
+import { AI_MODELS, PUTER_MODELS, API_KEY_MODELS } from '@/constants/aiModels';
 import { useRoadmap } from '@/contexts/RoadmapContext';
 import { SetupGuide } from '@/components/common/SetupGuide';
 import { toast } from 'sonner';
@@ -30,7 +29,7 @@ export default function RoadmapGeneratorPage() {
       career_goal: '',
       target_company: '',
       timeline: '',
-      ai_model: 'gemini-1.5-flash', // Default to free model
+      ai_model: 'puter-gpt-4o', 
     },
   });
 
@@ -52,7 +51,7 @@ export default function RoadmapGeneratorPage() {
       console.error('Roadmap generation error:', errorMessage);
       toast.error(errorMessage, {
         duration: 5000,
-        description: 'Please check the console for more details or refer to EDGE_FUNCTION_DEBUG.md',
+        description: 'Please check the console for more details or refer to README.md',
       });
     }
   };
@@ -180,34 +179,39 @@ export default function RoadmapGeneratorPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Free Models</div>
-                        {FREE_MODELS.map((model) => (
+                        <div className="px-2 py-1.5 text-xs font-semibold text-primary flex items-center gap-1">
+                          <Sparkles className="h-3 w-3" />
+                          No Setup Required (Puter.js)
+                        </div>
+                        {PUTER_MODELS.map((model) => (
                           <SelectItem key={model.id} value={model.id}>
                             <div className="flex items-center gap-2">
                               <span>{model.name}</span>
-                              <Badge variant="secondary" className="text-xs">
-                                Free
+                              <Badge variant="default" className="text-xs">
+                                ✨ Ready
                               </Badge>
                             </div>
                           </SelectItem>
                         ))}
                         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-2">
-                          Paid Models
+                          Requires API Key Setup
                         </div>
-                        {PAID_MODELS.map((model) => (
+                        {API_KEY_MODELS.map((model) => (
                           <SelectItem key={model.id} value={model.id}>
                             <div className="flex items-center gap-2">
                               <span>{model.name}</span>
-                              <Badge variant="outline" className="text-xs">
-                                Paid
-                              </Badge>
+                              {model.isFree && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Free
+                                </Badge>
+                              )}
                             </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormDescription className="text-xs">
-                      {field.value && AI_MODELS.find((m) => m.id === field.value)?.description}
+                    <FormDescription>
+                      {AI_MODELS.find((m) => m.id === field.value)?.description}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
