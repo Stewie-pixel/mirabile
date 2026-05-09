@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, type ReactNode, useEffect } from 'react';
 import type { Resource, Roadmap, RoadmapStep } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { getModelById } from '@/constants/aiModels';
@@ -28,6 +28,16 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        puterService.handleSupabaseSignOut().catch(console.error);
+      }
+    });
+ 
+    return () => subscription.unsubscribe();
+  }, []);
+  
   const fetchRoadmap = useCallback(async (roadmapId: string) => {
     setLoading(true);
     setError(null);
@@ -253,7 +263,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           // Insert resources
           const resourcesToInsert = parsedContent.resources
             .map((resource: Resource) => {
-              const step = steps.find(s => s.step_order === resource.step_id + 1);
+              const step = steps.find(s => s.step_order === resource.step_id);
               if (!step) return null;
               return {
                 step_id: step.id,

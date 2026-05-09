@@ -1,10 +1,5 @@
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
+import { createClient } from '@supabase/supabase-js';
+import { corsHeaders } from '@supabase/supabase-js/cors';
 interface ProgressRequest {
   roadmap_id: string;
   step_id: string;
@@ -12,8 +7,13 @@ interface ProgressRequest {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   try {
@@ -127,8 +127,9 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (err: any) {
+    console.error('Error in save-progress:', err);
+    return new Response(JSON.stringify({ error: err.message ?? 'An unexpected error occurred' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

@@ -36,7 +36,7 @@ export type ResourceType = 'learning' | 'practice' | 'video' | 'documentation' |
 
 export interface Resource {
   id: string;
-  step_id: string;
+  step_id: number;
   resource_type: ResourceType;
   title: string;
   url?: string;
