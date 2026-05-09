@@ -1,6 +1,5 @@
 declare global {
-  interface Window {
-    puter: {
+    var puter: {
       auth: {
         signIn: () => Promise<void>;
         signOut: () => Promise<void>;
@@ -26,6 +25,5 @@ declare global {
       };
     };
   }
-}
 
 export {};

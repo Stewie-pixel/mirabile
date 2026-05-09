@@ -16,7 +16,7 @@ class PuterService {
    * Check if Puter.js is available
    */
   isAvailable(): boolean {
-    return typeof globalThis !== 'undefined' && typeof (globalThis as any).puter !== 'undefined';
+    return typeof globalThis !== 'undefined' && typeof globalThis.puter !== 'undefined';
 }
 
   /**
@@ -38,7 +38,7 @@ class PuterService {
    */
   isSignedIn(): boolean {
     if (!this.isAvailable()) return false;
-    return (globalThis as any).puter.auth.isSignedIn();
+    return globalThis.puter.auth.isSignedIn();
   }
 
   /**
@@ -46,7 +46,7 @@ class PuterService {
    */
   async signIn(): Promise<void> {
     await this.initialize();
-    await (globalThis as any).puter.auth.signIn();
+    await globalThis.puter.auth.signIn();
   }
 
   /**
@@ -54,7 +54,7 @@ class PuterService {
    */
   async signOut(): Promise<void> {
     if (!this.isAvailable()) return;
-    await (globalThis as any).puter.auth.signOut();
+    await globalThis.puter.auth.signOut();
   }
 
   /**
@@ -62,7 +62,7 @@ class PuterService {
    */
   async getUser(): Promise<PuterUser | null> {
     if (!this.isAvailable() || !this.isSignedIn()) return null;
-    return await (globalThis as any).puter.auth.getUser();
+    return await globalThis.puter.auth.getUser();
   }
 
   /**
@@ -77,7 +77,7 @@ class PuterService {
     }
 
     try {
-      const response = await (globalThis as any).puter.ai.chat(prompt, {
+      const response = await globalThis.puter.ai.chat(prompt, {
         model: options.model,
         stream: false,
         temperature: options.temperature || 0.7,

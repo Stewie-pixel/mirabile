@@ -84,6 +84,12 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setError(null);
       try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
+
         // Get model configuration
         const modelConfig = getModelById(aiModel);
         if (!modelConfig) {
@@ -97,7 +103,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
         if ((modelConfig.provider as string) === 'puter') {
           console.log('Using Puter.js for AI generation...');
           aiProvider = 'puter';
-          
+
           // Use Puter.js
           content = await puterService.generateRoadmap(
             careerGoal,
@@ -202,12 +208,6 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           }
 
           console.log('Saving roadmap to database...');
-          
-          // Get current user
-          const { data: { user } } = await supabase.auth.getUser();
-          if (!user) {
-            throw new Error('User not authenticated');
-          }
 
           // Insert roadmap
           const { data: roadmap, error: roadmapError } = await supabase
@@ -253,7 +253,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           // Insert resources
           const resourcesToInsert = parsedContent.resources
             .map((resource: any) => {
-              const step = steps[resource.step_index];
+              const step = steps.find(s => s.step_order === resource.step_index + 1);
               if (!step) return null;
               return {
                 step_id: step.id,
