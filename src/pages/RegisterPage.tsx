@@ -46,7 +46,7 @@ export default function RegisterPage() {
     <div
       className="flex min-h-screen w-full items-center justify-center p-4"
       style={{
-        backgroundImage: 'url(https://miaoda-conversation-file.s3cdn.medo.dev/user-b9n50z51dudc/20260428/file-b9reix1cvyf4.jpg)',
+        backgroundImage: 'url(/images/background.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
@@ -56,7 +56,7 @@ export default function RegisterPage() {
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">
             <img
-              src="https://miaoda-conversation-file.s3cdn.medo.dev/user-b9n50z51dudc/20260428/file-b9ree3en0074.png"
+              src="/images/logo.png"
               alt="Mirabile"
               className="h-16"
             />

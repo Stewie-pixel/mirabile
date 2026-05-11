@@ -9,6 +9,8 @@ export function Navbar() {
   const { user } = useAuth();
   const location = useLocation();
 
+  const isAuthPage = ['/login', '/register'].includes(location.pathname);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
   };
@@ -22,16 +24,18 @@ export function Navbar() {
   ];
 
   return (
-    <nav className="border-b border-border bg-background">
+    <nav className={`${isAuthPage ? 'absolute top-0 left-0 right-0 z-20 bg-transparent border-none' : 'border-b border-border bg-background'}`}>
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <img
-              src="https://miaoda-conversation-file.s3cdn.medo.dev/user-b9n50z51dudc/20260428/file-b9remfbc3gu8.png"
+              src="/images/logo.png"
               alt="Mirabile Logo"
-              className="h-8 w-8"
+              className="h-8 w-auto object-contain"
             />
-            <span className="text-xl font-semibold text-foreground">Mirabile</span>
+            <span className={`text-xl font-semibold ${isAuthPage ? 'text-white' : 'text-foreground'}`}>
+              Mirabile
+            </span>
           </Link>
 
           <div className="hidden items-center gap-6 md:flex">
@@ -85,10 +89,19 @@ export function Navbar() {
               </>
             ) : (
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className={isAuthPage ? 'border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white backdrop-blur-sm' : ''}
+                >
                   <Link to="/login">Sign In</Link>
                 </Button>
-                <Button size="sm" asChild>
+                <Button
+                  size="sm"
+                  asChild
+                  className={isAuthPage ? 'bg-white text-black hover:bg-white/90' : ''}
+                >
                   <Link to="/register">Sign Up</Link>
                 </Button>
               </div>

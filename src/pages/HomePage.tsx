@@ -13,7 +13,7 @@ export default function HomePage() {
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col items-center text-center space-y-8">
             <img
-              src="https://miaoda-conversation-file.s3cdn.medo.dev/user-b9n50z51dudc/20260428/file-b9ree3en0074.png"
+              src="/images/logo.png"
               alt="Mirabile"
               className="h-24 md:h-32"
             />
