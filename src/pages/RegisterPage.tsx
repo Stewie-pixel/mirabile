@@ -43,16 +43,16 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-secondary/30 p-4">
-      <div
-        className="absolute inset-0 z-0 opacity-20"
-        style={{
-          backgroundImage: 'url(https://miaoda-conversation-file.s3cdn.medo.dev/user-b9n50z51dudc/20260428/file-b9reix1cvyf4.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
-      <Card className="relative z-10 w-full max-w-md">
+    <div
+      className="flex min-h-screen w-full items-center justify-center p-4"
+      style={{
+        backgroundImage: 'url(https://miaoda-conversation-file.s3cdn.medo.dev/user-b9n50z51dudc/20260428/file-b9reix1cvyf4.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      <Card className="relative w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">
             <img
