@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, LogOut } from 'lucide-react';
-import { useAuth } from 'miaoda-auth-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
 export function Navbar() {
