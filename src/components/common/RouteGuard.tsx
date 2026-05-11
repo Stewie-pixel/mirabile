@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from 'miaoda-auth-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { routes } from '@/routes';
 
 interface RouteGuardProps {
@@ -27,17 +27,20 @@ function matchPublicRoute(path: string, patterns: string[]) {
 }
 
 export function RouteGuard({ children }: RouteGuardProps) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
+    if (loading) return;
     const isPublic = matchPublicRoute(location.pathname, PUBLIC_ROUTES);
 
     if (!user && !isPublic) {
       navigate('/login', { state: { from: location.pathname }, replace: true });
     }
-  }, [user, location.pathname, navigate]);
+  }, [user, loading, location.pathname, navigate]);
+
+  if (loading) return null;
 
   return <>{children}</>;
 }

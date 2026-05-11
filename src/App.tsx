@@ -2,19 +2,18 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import IntersectObserver from '@/components/common/IntersectObserver';
 import { Toaster } from '@/components/ui/sonner';
-import { AuthProvider } from 'miaoda-auth-react';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { RouteGuard } from '@/components/common/RouteGuard';
 import { RoadmapProvider } from '@/contexts/RoadmapContext';
 import { ProgressProvider } from '@/contexts/ProgressContext';
 import { AppLayout } from '@/components/layouts/AppLayout';
-import { supabase } from '@/lib/supabase';
 
 import { routes } from './routes';
 
 const App: React.FC = () => {
   return (
     <Router>
-      <AuthProvider client={supabase}>
+      <AuthProvider>
         <RoadmapProvider>
           <ProgressProvider>
             <RouteGuard>

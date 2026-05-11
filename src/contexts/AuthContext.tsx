@@ -1,8 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-// @ts-ignore
 import { supabase } from '@/db/supabase';
 import type { User } from '@supabase/supabase-js';
-// @ts-ignore
 import type { Profile } from '@/types/types';
 import { toast } from 'sonner';
 
@@ -14,17 +12,45 @@ export async function getProfile(userId: string): Promise<Profile | null> {
     .maybeSingle();
 
   if (error) {
-    console.error('获取用户信息失败:', error);
+    console.error('Failed to fetch user profile:', error);
     return null;
   }
   return data;
 }
+
+async function ensureProfile(user: User): Promise<Profile | null> {
+  const existing = await getProfile(user.id);
+  if (existing) return existing;
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .upsert(
+      {
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+        avatar_url: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+      },
+      { onConflict: 'id' }
+    )
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.error('Failed to create user profile:', error);
+    return null;
+  }
+  return data;
+}
+
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
   signInWithUsername: (username: string, password: string) => Promise<{ error: Error | null }>;
   signUpWithUsername: (username: string, password: string) => Promise<{ error: Error | null }>;
+  signInWithGoogle: () => Promise<{ error: Error | null }>;
+  signInWithGithub: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -41,7 +67,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(null);
       return;
     }
-
     const profileData = await getProfile(user.id);
     setProfile(profileData);
   };
@@ -50,27 +75,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase
       .auth
       .getSession()
-      // @ts-ignore
       .then(({ data: { session } }) => {
         setUser(session?.user ?? null);
         if (session?.user) {
           getProfile(session.user.id).then(setProfile);
         }
       })
-      // @ts-ignore
       .catch(error => {
-        toast.error(`获取用户信息失败: ${error.message}`);
+        toast.error(`Failed to fetch session: ${error.message}`);
       })
       .finally(() => {
         setLoading(false);
       });
 
-    // @ts-ignore
-    // In this function, do NOT use any await calls. Use `.then()` instead to avoid deadlocks.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+
       if (session?.user) {
-        getProfile(session.user.id).then(setProfile);
+        const isOAuthSignIn =
+          event === 'SIGNED_IN' &&
+          session.user.app_metadata?.provider !== 'email';
+
+        if (isOAuthSignIn) {
+          ensureProfile(session.user).then(setProfile);
+        } else {
+          getProfile(session.user.id).then(setProfile);
+        }
       } else {
         setProfile(null);
       }
@@ -109,6 +139,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${globalThis.location.origin}/dashboard`,
+        },
+      });
+
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  };
+
+  const signInWithGithub = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${globalThis.location.origin}/dashboard`,
+        },
+      });
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -116,7 +177,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signInWithUsername, signUpWithUsername, signOut, refreshProfile }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        profile,
+        loading,
+        signInWithUsername,
+        signUpWithUsername,
+        signInWithGoogle,
+        signInWithGithub,
+        signOut,
+        refreshProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

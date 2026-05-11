@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from 'miaoda-auth-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRoadmap } from '@/contexts/RoadmapContext';
 import { Loader2, User, Mail, Calendar, Target } from 'lucide-react';
 import { formatDate } from '@/lib/formatters';
