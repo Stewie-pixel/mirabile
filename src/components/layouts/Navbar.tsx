@@ -9,7 +9,7 @@ export function Navbar() {
   const { user } = useAuth();
   const location = useLocation();
 
-  const isAuthPage = ['/login', '/register'].includes(location.pathname);
+  const isAuthPage = ['/login', '/register'].some(path => location.pathname.startsWith(path));
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
