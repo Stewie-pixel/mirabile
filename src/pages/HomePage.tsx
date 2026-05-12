@@ -1,133 +1,157 @@
 import { Link } from 'react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, Target, TrendingUp, Award } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { ArrowRight, Target, TrendingUp, Award } from 'lucide-react';
 
-export default function HomePage() {
+import { HeroSection } from '@/components/home/HeroSection';
+import { CompanyMarquee } from '@/components/home/CompanyMarquee';
+import { AIChatMockup } from '@/components/home/AIChatMockup';
+import { FAQSection } from '@/components/home/Faq';
+
+function WhySection() {
+  const cards = [
+    {
+      icon: <Target className="h-7 w-7" style={{ color: '#38bdf8' }} />,
+      title: 'AI-Powered Roadmaps',
+      body: 'Get personalized career roadmaps tailored to your target company and timeline, powered by advanced AI.',
+    },
+    {
+      icon: <TrendingUp className="h-7 w-7" style={{ color: '#38bdf8' }} />,
+      title: 'Curated Resources',
+      body: 'Access high-quality learning materials, practice problems, and company-specific interview prep.',
+    },
+    {
+      icon: <Award className="h-7 w-7" style={{ color: '#38bdf8' }} />,
+      title: 'Progress Tracking',
+      body: 'Track your progress, maintain streaks, and achieve milestones on your journey to success.',
+    },
+  ];
+
+  return (
+    <section
+      className="py-20 px-4"
+      style={{ background: 'linear-gradient(180deg, #020c1b 0%, #030e1c 100%)' }}
+    >
+      <div className="container mx-auto max-w-6xl">
+        <div className="text-center mb-14">
+          <span
+            className="inline-block text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full mb-4"
+            style={{
+              color: '#38bdf8',
+              background: 'rgba(56,189,248,0.1)',
+              border: '1px solid rgba(56,189,248,0.2)',
+              letterSpacing: '0.18em',
+            }}
+          >
+            Why Mirabile
+          </span>
+          <h2
+            className="text-3xl md:text-4xl font-bold text-white"
+            style={{ letterSpacing: '-0.02em' }}
+          >
+            Why Choose Mirabile?
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {cards.map((card, i) => (
+            <div
+              key={i}
+              className="flex flex-col items-center text-center gap-4 p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1"
+              style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(56,189,248,0.1)',
+                backdropFilter: 'blur(12px)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLDivElement).style.border = '1px solid rgba(56,189,248,0.25)';
+                (e.currentTarget as HTMLDivElement).style.background = 'rgba(14,36,64,0.5)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.border = '1px solid rgba(56,189,248,0.1)';
+                (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.02)';
+              }}
+            >
+              <div
+                className="p-4 rounded-2xl"
+                style={{ background: 'rgba(56,189,248,0.08)', border: '1px solid rgba(56,189,248,0.15)' }}
+              >
+                {card.icon}
+              </div>
+              <h3 className="text-lg font-semibold text-white">{card.title}</h3>
+              <p className="text-sm leading-relaxed" style={{ color: 'rgba(148,213,252,0.55)' }}>
+                {card.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CTASection() {
   const { user } = useAuth();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <section className="relative flex items-center justify-center py-20 md:py-32 px-4 bg-gradient-to-b from-secondary/30 to-background">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col items-center text-center space-y-8">
-            <img
-              src="/images/logo.png"
-              alt="Mirabile"
-              className="h-24 md:h-32"
-            />
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground max-w-4xl">
-              Your AI-Powered Career Roadmap to Top Tech Companies
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl">
-              Generate personalized career roadmaps, access curated resources, and track your progress toward landing
-              your dream job at Google, Meta, Amazon, and more.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 mt-8">
-              {user ? (
-                <>
-                  <Button size="lg" asChild>
-                    <Link to="/generator">
-                      Generate Your Roadmap
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
-                  </Button>
-                  <Button size="lg" variant="outline" asChild>
-                    <Link to="/dashboard">View Dashboard</Link>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button size="lg" asChild>
-                    <Link to="/register">
-                      Get Started Free
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
-                  </Button>
-                  <Button size="lg" variant="outline" asChild>
-                    <Link to="/login">Sign In</Link>
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+    <section
+      className="py-20 px-4 relative overflow-hidden"
+      style={{ background: 'linear-gradient(180deg, #020c1b 0%, #020c1b 100%)' }}
+    >
+      {/* Glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(14,116,144,0.12) 0%, transparent 70%)',
+        }}
+      />
 
-      <section className="py-16 px-4 bg-background">
-        <div className="container mx-auto max-w-6xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Choose Mirabile?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-3 rounded-full bg-primary/10">
-                    <Target className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold">AI-Powered Roadmaps</h3>
-                  <p className="text-muted-foreground">
-                    Get personalized career roadmaps tailored to your target company and timeline, powered by advanced
-                    AI.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+      <div className="relative z-10 container mx-auto max-w-3xl text-center">
+        <span
+          className="inline-block text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full mb-6"
+          style={{
+            color: '#38bdf8',
+            background: 'rgba(56,189,248,0.1)',
+            border: '1px solid rgba(56,189,248,0.2)',
+            letterSpacing: '0.18em',
+          }}
+        >
+          Get Started
+        </span>
+        <h2
+          className="text-3xl md:text-4xl font-bold text-white mb-4"
+          style={{ letterSpacing: '-0.02em' }}
+        >
+          Ready to Start Your Journey?
+        </h2>
+        <p className="text-base mb-10" style={{ color: 'rgba(148,213,252,0.55)' }}>
+          Join thousands of professionals who have successfully landed their dream jobs with Mirabile.
+        </p>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-3 rounded-full bg-primary/10">
-                    <TrendingUp className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold">Curated Resources</h3>
-                  <p className="text-muted-foreground">
-                    Access high-quality learning materials, practice problems, and company-specific interview prep.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+        <Link
+          to={user ? '/generator' : '/register'}
+          className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:scale-[1.03] active:scale-[0.98]"
+          style={{
+            background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 60%, #0369a1 100%)',
+            boxShadow: '0 4px 32px rgba(14,165,233,0.4), 0 1px 0 rgba(255,255,255,0.1) inset',
+          }}
+        >
+          {user ? 'Create Your Roadmap' : 'Sign Up Now'}
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+    </section>
+  );
+}
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-3 rounded-full bg-primary/10">
-                    <Award className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold">Progress Tracking</h3>
-                  <p className="text-muted-foreground">
-                    Track your progress, maintain streaks, and achieve milestones on your journey to success.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 px-4 bg-secondary/20">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Start Your Journey?</h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Join thousands of professionals who have successfully landed their dream jobs with Mirabile.
-          </p>
-          {user ? (
-            <Button size="lg" asChild>
-              <Link to="/generator">
-                Create Your Roadmap
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          ) : (
-            <Button size="lg" asChild>
-              <Link to="/register">
-                Sign Up Now
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          )}
-        </div>
-      </section>
+export default function HomePage() {
+  return (
+    <div className="flex min-h-screen flex-col" style={{ background: '#020c1b' }}>
+      <HeroSection />
+      <WhySection />
+      <CompanyMarquee />
+      <AIChatMockup />
+      <CTASection />
+      <FAQSection />
     </div>
   );
 }
