@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import { ArrowRight, LayoutDashboard, Map } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { InteractiveOrb } from '@/components/home/Interactiveorb';
+import { ReactiveOrb } from '@/components/home/Interactiveorb';
 
 const T = {
   bg:      '#000000',
@@ -218,15 +218,24 @@ export function HeroSection() {
           </div>
 
           {/* ── Right: orb */}
-          <div className="flex-1 flex items-center justify-center w-full">
-            <InteractiveOrb />
+          <div className="flex-1 flex items-center justify-center relative float">
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(circle at 60% 50%, rgba(10,255,228,0.08), transparent 60%)',
+              }}
+            />
+            <ReactiveOrb />
           </div>
         </div>
 
-        {/* Bottom fade into next section */}
+        {/* Bottom fade */}
         <div
           className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none"
-          style={{ background: `linear-gradient(to bottom, transparent, ${T.bg})` }}
+          style={{
+            background: `linear-gradient(to bottom, transparent, ${T.bg})`,
+          }}
         />
       </section>
     </>
