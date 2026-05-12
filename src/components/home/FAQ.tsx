@@ -1,6 +1,19 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
+const T = {
+  bg:       '#000000',
+  grad:     'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)',
+  border:   'rgba(10,255,228,0.12)',
+  surface:  'rgba(10,255,228,0.04)',
+  surface2: 'rgba(10,255,228,0.07)',
+  textHigh: '#E8FFFE',
+  textMid:  'rgba(232,255,254,0.55)',
+  textLow:  'rgba(232,255,254,0.35)',
+  teal:     '#0AFFE4',
+  cyan:     '#0EA5E9',
+} as const;
+
 const FAQS = [
   {
     q: 'How does Mirabile generate my career roadmap?',
@@ -8,7 +21,7 @@ const FAQS = [
   },
   {
     q: 'Which companies are supported?',
-    a: 'We currently support roadmaps for Google, Meta, Amazon, Microsoft, Apple, Netflix, Stripe, Airbnb, Uber, Spotify, LinkedIn, and Salesforce — with more being added every month. If your target company isn\'t listed yet, our AI can still generate a general FAANG-style roadmap that prepares you for any top tech role.',
+    a: 'We currently support roadmaps for Google, Meta, Amazon, Microsoft, Apple, Netflix, Stripe, Airbnb, Uber, Spotify, LinkedIn, and Salesforce — with more being added every month. If your target company isn’t listed yet, our AI can still generate a general FAANG-style roadmap that prepares you for any top tech role.',
   },
   {
     q: 'Is Mirabile free to use?',
@@ -26,25 +39,31 @@ export function FAQSection() {
   return (
     <section
       className="py-20 px-4"
-      style={{ background: 'linear-gradient(180deg, #030e1c 0%, #020c1b 100%)' }}
+      style={{
+        background: T.bg,
+      }}
     >
       <div className="container mx-auto max-w-2xl">
+
         {/* Header */}
         <div className="text-center mb-12">
           <span
             className="inline-block text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full mb-4"
             style={{
-              color: '#38bdf8',
-              background: 'rgba(56,189,248,0.1)',
-              border: '1px solid rgba(56,189,248,0.2)',
-              letterSpacing: '0.18em',
+              color: T.teal,
+              background: T.surface,
+              border: `1px solid ${T.border}`,
             }}
           >
             FAQ
           </span>
+
           <h2
-            className="text-3xl md:text-4xl font-bold text-white"
-            style={{ letterSpacing: '-0.02em' }}
+            className="text-3xl md:text-4xl font-bold"
+            style={{
+              color: T.textHigh,
+              letterSpacing: '-0.02em',
+            }}
           >
             Frequently asked questions
           </h2>
@@ -54,16 +73,17 @@ export function FAQSection() {
         <div className="flex flex-col gap-3">
           {FAQS.map((faq, i) => {
             const isOpen = open === i;
+
             return (
               <div
                 key={i}
                 className="rounded-2xl overflow-hidden transition-all duration-300"
                 style={{
-                  background: isOpen ? 'rgba(14,36,64,0.7)' : 'rgba(255,255,255,0.02)',
+                  background: isOpen ? T.surface2 : T.surface,
                   border: isOpen
-                    ? '1px solid rgba(56,189,248,0.2)'
-                    : '1px solid rgba(255,255,255,0.06)',
-                  backdropFilter: 'blur(12px)',
+                    ? `1px solid ${T.cyan}`
+                    : `1px solid ${T.border}`,
+                  backdropFilter: 'blur(14px)',
                 }}
               >
                 <button
@@ -71,15 +91,18 @@ export function FAQSection() {
                   onClick={() => setOpen(isOpen ? null : i)}
                 >
                   <span
-                    className="text-sm md:text-base font-semibold"
-                    style={{ color: isOpen ? '#7dd3fc' : 'rgba(186,230,255,0.85)' }}
+                    className="text-sm md:text-base font-semibold transition-colors"
+                    style={{
+                      color: isOpen ? T.teal : T.textHigh,
+                    }}
                   >
                     {faq.q}
                   </span>
+
                   <ChevronDown
                     className="w-5 h-5 flex-shrink-0 transition-transform duration-300"
                     style={{
-                      color: isOpen ? '#38bdf8' : 'rgba(148,213,252,0.4)',
+                      color: isOpen ? T.teal : T.textLow,
                       transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                     }}
                   />
@@ -87,11 +110,15 @@ export function FAQSection() {
 
                 <div
                   className="overflow-hidden transition-all duration-300"
-                  style={{ maxHeight: isOpen ? 300 : 0 }}
+                  style={{
+                    maxHeight: isOpen ? 300 : 0,
+                  }}
                 >
                   <p
                     className="px-6 pb-5 text-sm leading-relaxed"
-                    style={{ color: 'rgba(148,213,252,0.6)' }}
+                    style={{
+                      color: T.textMid,
+                    }}
                   >
                     {faq.a}
                   </p>
