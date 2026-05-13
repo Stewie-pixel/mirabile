@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, LogOut, Github } from 'lucide-react';
@@ -5,40 +6,86 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
 const T = {
-  bg:           '#080C10',
-  gradBtn:      'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)',
-  border:       'rgba(10,255,228,0.12)',
-  borderHover:  'rgba(10,255,228,0.32)',
-  surface:      'rgba(10,255,228,0.04)',
-  textHigh:     '#E8FFFE',
-  textMid:      'rgb(232, 255, 254)',
-  teal:         '#0AFFE4',
-  cyan:         '#0EA5E9',
+  border: 'rgba(10,255,228,0.12)',
+  surface: 'rgba(10,255,228,0.04)',
+  textMid: 'rgb(232, 255, 254)',
+  teal: '#0AFFE4',
+  gradBtn: 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)',
 } as const;
 
-export function Navbar() {
-  const { user }   = useAuth();
-  const { signInWithGithub } = useAuth();
-  const location   = useLocation();
-  const isAuthPage = ['/login', '/register'].some(p => location.pathname.startsWith(p));
+/* ✅ LOCAL GLOW HOOK (per element) */
+function useCursorGlow() {
+  const ref = useRef<HTMLDivElement | null>(null);
 
-  const handleSignOut = async () => { await supabase.auth.signOut(); };
+  const [pos, setPos] = useState({
+    x: 0,
+    y: 0,
+    active: false,
+  });
+
+  const onMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    setPos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      active: true,
+    });
+  };
+
+  const onMouseLeave = () => {
+    setPos(prev => ({ ...prev, active: false }));
+  };
+
+  const Glow = () => (
+    <div
+      ref={ref}
+      className="pointer-events-none absolute inset-0 transition-opacity duration-200"
+      style={{
+        opacity: pos.active ? 1 : 0,
+        background: `radial-gradient(
+          140px circle at ${pos.x}px ${pos.y}px,
+          rgba(10,255,228,0.25),
+          transparent 60%
+        )`,
+      }}
+    />
+  );
+
+  return { onMouseMove, onMouseLeave, Glow };
+}
+
+export function Navbar() {
+  const { user, signInWithGithub } = useAuth();
+  const location = useLocation();
+
+  const isAuthPage = ['/login', '/register'].some(p =>
+    location.pathname.startsWith(p)
+  );
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
 
   const handleGithub = async () => {
     if (user) {
-      globalThis.open('https://github.com/Stewie-pixel/mirabile.git', '_blank', 'noopener,noreferrer');
+      globalThis.open(
+        'https://github.com/Stewie-pixel/mirabile.git',
+        '_blank',
+        'noopener,noreferrer'
+      );
     } else {
       const { error } = await signInWithGithub();
-      if (error) console.error('Github sign-in error:', error.message);
+      if (error) console.error(error.message);
     }
   };
 
   const navItems = [
-    { path: '/',           label: 'Home'            },
-    { path: '/dashboard',  label: 'Dashboard'       },
-    { path: '/generator',  label: 'Generate Roadmap'},
-    { path: '/progress',   label: 'Progress'        },
-    { path: '/profile',    label: 'Profile'         },
+    { path: '/', label: 'Home' },
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/generator', label: 'Generate Roadmap' },
+    { path: '/progress', label: 'Progress' },
+    { path: '/profile', label: 'Profile' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -46,200 +93,203 @@ export function Navbar() {
   return (
     <nav
       style={{
-        background:    isAuthPage ? 'transparent' : 'rgb(0, 0, 0)',
-        borderBottom:  isAuthPage ? 'none' : `1px solid ${T.border}`,
+        background: isAuthPage ? 'transparent' : 'black',
+        borderBottom: isAuthPage ? 'none' : `1px solid ${T.border}`,
         backdropFilter: isAuthPage ? 'none' : 'blur(16px)',
-        position:      isAuthPage ? 'absolute' : 'sticky',
-        top: 0, left: 0, right: 0,
+        position: isAuthPage ? 'absolute' : 'sticky',
+        top: 0,
         zIndex: 50,
       }}
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 select-none">
-            <img
-              src="/images/logo.png"
-              alt="Mirabile Logo"
-              className="h-8 w-auto object-contain"
-            />
-            <span
-              className="text-xl font-bold"
-              style={{
-                background: T.gradBtn,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              Mirabile
-            </span>
-          </Link>
+          {/* LOGO */}
+          {(() => {
+            const glow = useCursorGlow();
 
-          {/* Desktop nav links */}
-          <div className="hidden items-center gap-1 md:flex">
-            {user && navItems.map((item) => (
+            return (
               <Link
-                key={item.path}
-                to={item.path}
-                className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200"
-                style={{
-                  color:      isActive(item.path) ? T.teal : T.textMid,
-                  background: isActive(item.path) ? 'rgba(10,255,228,0.06)' : 'transparent',
-                  border:     isActive(item.path) ? `1px solid ${T.border}` : '1px solid transparent',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive(item.path)) {
-                    (e.currentTarget as HTMLAnchorElement).style.color = T.textHigh;
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive(item.path)) {
-                    (e.currentTarget as HTMLAnchorElement).style.color = T.textMid;
-                  }
-                }}
+                to="/"
+                className="relative overflow-hidden flex items-center gap-2.5"
               >
-                {item.label}
+                <glow.Glow />
+
+                <img src="/images/logo.png" className="h-8" />
+
+                <span
+                  style={{
+                    background: T.gradBtn,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                  className="text-xl font-bold"
+                >
+                  Mirabile
+                </span>
               </Link>
-            ))}
+            );
+          })()}
+
+          {/* NAV */}
+          <div className="hidden md:flex items-center gap-1">
+            {user &&
+              navItems.map(item => {
+                const glow = useCursorGlow();
+
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onMouseMove={glow.onMouseMove}
+                    onMouseLeave={glow.onMouseLeave}
+                    className="relative overflow-hidden px-4 py-1.5 rounded-lg text-sm font-medium"
+                    style={{
+                      color: isActive(item.path)
+                        ? T.teal
+                        : T.textMid,
+                      background: isActive(item.path)
+                        ? 'rgba(10,255,228,0.06)'
+                        : 'transparent',
+                      border: isActive(item.path)
+                        ? `1px solid ${T.border}`
+                        : '1px solid transparent',
+                    }}
+                  >
+                    <glow.Glow />
+                    {item.label}
+                  </Link>
+                );
+              })}
           </div>
 
-          {/* Actions */}
+          {/* ACTIONS */}
           <div className="flex items-center gap-3">
-            <button 
-              type="button"
-              onClick={handleGithub}
-              className="inline-flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200"
-              style={{
-                border: `1px solid ${T.border}`,
-                background: T.surface,
-                color: T.textMid,
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLButtonElement;
-                el.style.color = T.teal;
-                el.style.borderColor = T.borderHover;
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLButtonElement;
-                el.style.color = T.textMid;
-                el.style.borderColor = T.border;
-              }}
-            >
-              <Github className="h-5 w-5" />
-            </button>
-            {user ? (
-              <>
-                {/* Desktop sign-out */}
+
+            {/* GITHUB */}
+            {(() => {
+              const glow = useCursorGlow();
+
+              return (
                 <button
                   type="button"
-                  onClick={handleSignOut}
-                  className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                  onClick={handleGithub}
+                  onMouseMove={glow.onMouseMove}
+                  onMouseLeave={glow.onMouseLeave}
+                  className="relative overflow-hidden w-9 h-9 rounded-lg flex items-center justify-center"
                   style={{
-                    color:   T.textMid,
-                    border:  `1px solid ${T.border}`,
-                    background: T.surface,
-                  }}
-                  onMouseEnter={(e) => {
-                    const el = e.currentTarget as HTMLButtonElement;
-                    el.style.color = T.teal;
-                    el.style.borderColor = T.borderHover;
-                  }}
-                  onMouseLeave={(e) => {
-                    const el = e.currentTarget as HTMLButtonElement;
-                    el.style.color = T.textMid;
-                    el.style.borderColor = T.border;
+                    border: `1px solid ${T.border}`,
+                    background: 'rgba(10,255,228,0.04)',
+                    color: T.textMid,
                   }}
                 >
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
+                  <glow.Glow />
+                  <Github className="h-5 w-5" />
                 </button>
+              );
+            })()}
 
-                {/* Mobile hamburger */}
+            {user ? (
+              <>
+                {(() => {
+                  const glow = useCursorGlow();
+
+                  return (
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      onMouseMove={glow.onMouseMove}
+                      onMouseLeave={glow.onMouseLeave}
+                      className="hidden md:flex relative overflow-hidden items-center gap-2 px-4 py-2 rounded-lg text-sm"
+                      style={{
+                        border: `1px solid ${T.border}`,
+                        background: T.surface,
+                        color: T.textMid,
+                      }}
+                    >
+                      <glow.Glow />
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  );
+                })()}
+
+                {/* MOBILE MENU */}
                 <Sheet>
                   <SheetTrigger asChild>
-                    <button 
-                      type="button"
-                      className="inline-flex md:hidden items-center justify-center w-9 h-9 rounded-lg transition-all duration-200"
-                      style={{ border: `1px solid ${T.border}`, background: T.surface, color: T.textMid }}
+                    <button type="button" className="md:hidden w-9 h-9 rounded-lg flex items-center justify-center"
+                      style={{
+                        border: `1px solid ${T.border}`,
+                        background: T.surface,
+                        color: T.textMid,
+                      }}
                     >
-                      <Menu className="h-5 w-5" />
+                      <Menu />
                     </button>
                   </SheetTrigger>
+
                   <SheetContent
                     side="right"
-                    style={{ background: '#0A0F15', borderLeft: `1px solid ${T.border}` }}
+                    style={{
+                      background: '#0A0F15',
+                      borderLeft: `1px solid ${T.border}`,
+                    }}
                   >
                     <div className="flex flex-col gap-2 mt-8">
-                      {navItems.map((item) => (
-                        <Link
-                          key={item.path}
-                          to={item.path}
-                          className="px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
-                          style={{
-                            color:      isActive(item.path) ? T.teal : T.textMid,
-                            background: isActive(item.path) ? 'rgba(10,255,228,0.06)' : 'transparent',
-                          }}
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={handleSignOut}
-                        className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium"
-                        style={{ color: T.textMid, border: `1px solid ${T.border}`, background: T.surface }}
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Sign Out
-                      </button>
+                      {navItems.map(item => {
+                        const glow = useCursorGlow();
+
+                        return (
+                          <Link
+                            key={item.path}
+                            to={item.path}
+                            onMouseMove={glow.onMouseMove}
+                            onMouseLeave={glow.onMouseLeave}
+                            className="relative overflow-hidden px-4 py-2.5 rounded-lg text-sm"
+                            style={{
+                              color: isActive(item.path)
+                                ? T.teal
+                                : T.textMid,
+                            }}
+                          >
+                            <glow.Glow />
+                            {item.label}
+                          </Link>
+                        );
+                      })}
                     </div>
                   </SheetContent>
                 </Sheet>
               </>
             ) : (
-              <div className="flex items-center gap-2">
-                {/* Sign In — ghost */}
+              <div className="flex gap-2">
+
                 <Link
                   to="/login"
-                  className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                  className="px-4 py-2 rounded-lg text-sm"
                   style={{
-                    color:      T.textMid,
-                    border:     `1px solid ${T.border}`,
+                    border: `1px solid ${T.border}`,
                     background: T.surface,
-                  }}
-                  onMouseEnter={(e) => {
-                    const el = e.currentTarget as HTMLAnchorElement;
-                    el.style.color = T.textHigh;
-                    el.style.borderColor = T.borderHover;
-                  }}
-                  onMouseLeave={(e) => {
-                    const el = e.currentTarget as HTMLAnchorElement;
-                    el.style.color = T.textMid;
-                    el.style.borderColor = T.border;
+                    color: T.textMid,
                   }}
                 >
                   Sign In
                 </Link>
 
-                {/* Sign Up — gradient */}
                 <Link
                   to="/register"
-                  className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+                  className="px-4 py-2 rounded-lg text-sm font-bold"
                   style={{
                     background: T.gradBtn,
                     color: '#040810',
-                    boxShadow: '0 0 20px rgba(10,255,228,0.2)',
                   }}
                 >
                   Sign Up
                 </Link>
+
               </div>
             )}
           </div>
-
         </div>
       </div>
     </nav>
