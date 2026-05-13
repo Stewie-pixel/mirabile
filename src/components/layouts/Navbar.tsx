@@ -36,7 +36,7 @@ export function Navbar() {
   return (
     <nav
       style={{
-        background:    isAuthPage ? 'transparent' : 'rgba(8,12,16,0.85)',
+        background:    isAuthPage ? 'transparent' : 'rgb(0, 0, 0)',
         borderBottom:  isAuthPage ? 'none' : `1px solid ${T.border}`,
         backdropFilter: isAuthPage ? 'none' : 'blur(16px)',
         position:      isAuthPage ? 'absolute' : 'sticky',
