@@ -418,7 +418,6 @@ export function ReactiveOrb() {
         maxWidth: "480px",
         aspectRatio: "1 / 1",
         position: "relative",
-        cursor: "crosshair",
       }}
     >
       <div
