@@ -65,20 +65,10 @@ export function HeroSection() {
             <div className="hf1 flex items-center gap-3">
               <img src="/images/logo.png" alt="Mirabile" className="h-20 w-20 object-contain" />
               <span
-                className="text-sm font-semibold uppercase"
+                className="text-base font-semibold uppercase"
                 style={{ color: T.teal, letterSpacing: '0.18em', fontFamily: "'DM Mono', monospace" }}
               >
                 Mirabile
-              </span>
-              <span
-                className="text-xs px-2.5 py-0.5 rounded-full font-semibold"
-                style={{
-                  color: T.teal,
-                  background: 'rgba(10,255,228,0.08)',
-                  border: `1px solid rgba(10,255,228,0.2)`,
-                }}
-              >
-                AI-Powered
               </span>
             </div>
 
