@@ -1,18 +1,83 @@
+import { useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, LogOut } from 'lucide-react';
+import { Menu, LogOut, Github } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
+const T = {
+  border: 'rgba(10,255,228,0.12)',
+  surface: 'rgba(10,255,228,0.04)',
+  textMid: 'rgb(232, 255, 254)',
+  teal: '#0AFFE4',
+  gradBtn: 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)',
+} as const;
+
+/* ✅ LOCAL GLOW HOOK (per element) */
+function useCursorGlow() {
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  const [pos, setPos] = useState({
+    x: 0,
+    y: 0,
+    active: false,
+  });
+
+  const onMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    setPos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      active: true,
+    });
+  };
+
+  const onMouseLeave = () => {
+    setPos(prev => ({ ...prev, active: false }));
+  };
+
+  const Glow = () => (
+    <div
+      ref={ref}
+      className="pointer-events-none absolute inset-0 transition-opacity duration-200"
+      style={{
+        opacity: pos.active ? 1 : 0,
+        background: `radial-gradient(
+          140px circle at ${pos.x}px ${pos.y}px,
+          rgba(10,255,228,0.25),
+          transparent 60%
+        )`,
+      }}
+    />
+  );
+
+  return { onMouseMove, onMouseLeave, Glow };
+}
+
 export function Navbar() {
-  const { user } = useAuth();
+  const { user, signInWithGithub } = useAuth();
   const location = useLocation();
 
-  const isAuthPage = ['/login', '/register'].some(path => location.pathname.startsWith(path));
+  const isAuthPage = ['/login', '/register'].some(p =>
+    location.pathname.startsWith(p)
+  );
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+  };
+
+  const handleGithub = async () => {
+    if (user) {
+      globalThis.open(
+        'https://github.com/Stewie-pixel/mirabile.git',
+        '_blank',
+        'noopener,noreferrer'
+      );
+    } else {
+      const { error } = await signInWithGithub();
+      if (error) console.error(error.message);
+    }
   };
 
   const navItems = [
@@ -23,87 +88,205 @@ export function Navbar() {
     { path: '/profile', label: 'Profile' },
   ];
 
+  const isActive = (path: string) => location.pathname === path;
+
   return (
-    <nav className={`${isAuthPage ? 'absolute top-0 left-0 right-0 z-20 bg-transparent border-none' : 'border-b border-border bg-background'}`}>
+    <nav
+      style={{
+        background: isAuthPage ? 'transparent' : 'black',
+        borderBottom: isAuthPage ? 'none' : `1px solid ${T.border}`,
+        backdropFilter: isAuthPage ? 'none' : 'blur(16px)',
+        position: isAuthPage ? 'absolute' : 'sticky',
+        top: 0,
+        zIndex: 50,
+      }}
+    >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <img
-              src="/images/logo.png"
-              alt="Mirabile Logo"
-              className="h-8 w-auto object-contain"
-            />
-            <span className={`text-xl font-semibold ${isAuthPage ? 'text-white' : 'text-foreground'}`}>
-              Mirabile
-            </span>
-          </Link>
 
-          <div className="hidden items-center gap-6 md:flex">
-            {user &&
-              navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`text-sm transition-colors hover:text-primary ${
-                    location.pathname === item.path ? 'text-primary font-medium' : 'text-muted-foreground'
-                  }`}
+          {/* LOGO */}
+          {(() => {
+            const glow = useCursorGlow();
+
+            return (
+              <Link
+                to="/"
+                className="relative overflow-hidden flex items-center gap-2.5"
+              >
+                <glow.Glow />
+
+                <img src="/images/logo.png" className="h-8" />
+
+                <span
+                  style={{
+                    background: T.gradBtn,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                  className="text-xl font-bold"
                 >
-                  {item.label}
-                </Link>
-              ))}
+                  Mirabile
+                </span>
+              </Link>
+            );
+          })()}
+
+          {/* NAV */}
+          <div className="hidden md:flex items-center gap-1">
+            {user &&
+              navItems.map(item => {
+                const glow = useCursorGlow();
+
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onMouseMove={glow.onMouseMove}
+                    onMouseLeave={glow.onMouseLeave}
+                    className="relative overflow-hidden px-4 py-1.5 rounded-lg text-sm font-medium"
+                    style={{
+                      color: isActive(item.path)
+                        ? T.teal
+                        : T.textMid,
+                      background: isActive(item.path)
+                        ? 'rgba(10,255,228,0.06)'
+                        : 'transparent',
+                      border: isActive(item.path)
+                        ? `1px solid ${T.border}`
+                        : '1px solid transparent',
+                    }}
+                  >
+                    <glow.Glow />
+                    {item.label}
+                  </Link>
+                );
+              })}
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* ACTIONS */}
+          <div className="flex items-center gap-3">
+
+            {/* GITHUB */}
+            {(() => {
+              const glow = useCursorGlow();
+
+              return (
+                <button
+                  type="button"
+                  onClick={handleGithub}
+                  onMouseMove={glow.onMouseMove}
+                  onMouseLeave={glow.onMouseLeave}
+                  className="relative overflow-hidden w-9 h-9 rounded-lg flex items-center justify-center"
+                  style={{
+                    border: `1px solid ${T.border}`,
+                    background: 'rgba(10,255,228,0.04)',
+                    color: T.textMid,
+                  }}
+                >
+                  <glow.Glow />
+                  <Github className="h-5 w-5" />
+                </button>
+              );
+            })()}
+
             {user ? (
               <>
-                <Button variant="outline" size="sm" onClick={handleSignOut} className="hidden md:flex">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </Button>
+                {(() => {
+                  const glow = useCursorGlow();
+
+                  return (
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      onMouseMove={glow.onMouseMove}
+                      onMouseLeave={glow.onMouseLeave}
+                      className="hidden md:flex relative overflow-hidden items-center gap-2 px-4 py-2 rounded-lg text-sm"
+                      style={{
+                        border: `1px solid ${T.border}`,
+                        background: T.surface,
+                        color: T.textMid,
+                      }}
+                    >
+                      <glow.Glow />
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  );
+                })()}
+
+                {/* MOBILE MENU */}
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="outline" size="icon" className="md:hidden">
-                      <Menu className="h-5 w-5" />
-                    </Button>
+                    <button type="button" className="md:hidden w-9 h-9 rounded-lg flex items-center justify-center"
+                      style={{
+                        border: `1px solid ${T.border}`,
+                        background: T.surface,
+                        color: T.textMid,
+                      }}
+                    >
+                      <Menu />
+                    </button>
                   </SheetTrigger>
-                  <SheetContent side="right">
-                    <div className="flex flex-col gap-4 mt-8">
-                      {navItems.map((item) => (
-                        <Link
-                          key={item.path}
-                          to={item.path}
-                          className={`text-sm transition-colors hover:text-primary ${
-                            location.pathname === item.path ? 'text-primary font-medium' : 'text-muted-foreground'
-                          }`}
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                      <Button variant="outline" onClick={handleSignOut} className="mt-4">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Sign Out
-                      </Button>
+
+                  <SheetContent
+                    side="right"
+                    style={{
+                      background: '#0A0F15',
+                      borderLeft: `1px solid ${T.border}`,
+                    }}
+                  >
+                    <div className="flex flex-col gap-2 mt-8">
+                      {navItems.map(item => {
+                        const glow = useCursorGlow();
+
+                        return (
+                          <Link
+                            key={item.path}
+                            to={item.path}
+                            onMouseMove={glow.onMouseMove}
+                            onMouseLeave={glow.onMouseLeave}
+                            className="relative overflow-hidden px-4 py-2.5 rounded-lg text-sm"
+                            style={{
+                              color: isActive(item.path)
+                                ? T.teal
+                                : T.textMid,
+                            }}
+                          >
+                            <glow.Glow />
+                            {item.label}
+                          </Link>
+                        );
+                      })}
                     </div>
                   </SheetContent>
                 </Sheet>
               </>
             ) : (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  className={isAuthPage ? 'border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white backdrop-blur-sm' : ''}
+              <div className="flex gap-2">
+
+                <Link
+                  to="/login"
+                  className="px-4 py-2 rounded-lg text-sm"
+                  style={{
+                    border: `1px solid ${T.border}`,
+                    background: T.surface,
+                    color: T.textMid,
+                  }}
                 >
-                  <Link to="/login">Sign In</Link>
-                </Button>
-                <Button
-                  size="sm"
-                  asChild
-                  className={isAuthPage ? 'bg-white text-black hover:bg-white/90' : ''}
+                  Sign In
+                </Link>
+
+                <Link
+                  to="/register"
+                  className="px-4 py-2 rounded-lg text-sm font-bold"
+                  style={{
+                    background: T.gradBtn,
+                    color: '#040810',
+                  }}
                 >
-                  <Link to="/register">Sign Up</Link>
-                </Button>
+                  Sign Up
+                </Link>
+
               </div>
             )}
           </div>
