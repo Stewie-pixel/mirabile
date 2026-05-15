@@ -36,12 +36,10 @@ function useCursorGlow() {
 }
 
 function LogoLink() {
-  const { onMouseMove, onMouseLeave, glow } = useCursorGlow();
+  const { glow } = useCursorGlow();
   return (
     <Link
       to="/"
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
       className="relative overflow-hidden flex items-center gap-2.5"
     >
       {glow}

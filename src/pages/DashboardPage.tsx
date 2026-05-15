@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useRoadmap } from '@/contexts/RoadmapContext';
-import { useProgress } from '@/contexts/ProgressContext';
 import { Loader2, TrendingUp, Target, Flame, Award, ArrowRight } from 'lucide-react';
 import type { Roadmap } from '@/types';
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, Link } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,6 @@ import { TIMELINE_OPTIONS } from '@/constants/timelines';
 import { CAREER_PATHS } from '@/constants/careerPaths';
 import { AI_MODELS, PUTER_MODELS, API_KEY_MODELS } from '@/constants/aiModels';
 import { useRoadmap } from '@/contexts/RoadmapContext';
-import { SetupGuide } from '@/components/common/SetupGuide';
 import { toast } from 'sonner';
 import { Loader2, Sparkles } from 'lucide-react';
 
@@ -21,7 +20,6 @@ export default function RoadmapGeneratorPage() {
   const navigate = useNavigate();
   const { generateRoadmap, loading, error: contextError } = useRoadmap();
   const [generatedRoadmapId, setGeneratedRoadmapId] = useState<string | null>(null);
-  const [showSetupGuide, setShowSetupGuide] = useState(true);
 
   const form = useForm<RoadmapGenerationInput>({
     resolver: zodResolver(roadmapGenerationSchema),
@@ -71,11 +69,15 @@ export default function RoadmapGeneratorPage() {
         </p>
       </div>
 
-      {showSetupGuide && (
-        <div className="mb-6">
-          <SetupGuide onDismiss={() => setShowSetupGuide(false)} />
-        </div>
-      )}
+      <div className="mb-6 flex justify-center">
+        <Link 
+          to="/instructions" 
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium transition-colors"
+          style={{ background: 'rgba(10,255,228,0.1)', color: '#0AFFE4', border: '1px solid rgba(10,255,228,0.2)' }}
+        >
+          Read model usage instructions here →
+        </Link>
+      </div>
 
       <Card>
         <CardHeader>
