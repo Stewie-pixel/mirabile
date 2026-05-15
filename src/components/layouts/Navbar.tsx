@@ -1,9 +1,8 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, LogOut, Github } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
 
 const T = {
   border: 'rgba(10,255,228,0.12)',
@@ -14,7 +13,6 @@ const T = {
 } as const;
 
 function useCursorGlow() {
-  const ref = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState({ x: 0, y: 0, active: false });
 
   const onMouseMove = (e: React.MouseEvent<HTMLElement>) => {
@@ -24,9 +22,8 @@ function useCursorGlow() {
 
   const onMouseLeave = () => setPos(prev => ({ ...prev, active: false }));
 
-  const Glow = () => (
+  const glow = (
     <div
-      ref={ref}
       className="pointer-events-none absolute inset-0 transition-opacity duration-200"
       style={{
         opacity: pos.active ? 1 : 0,
@@ -35,17 +32,19 @@ function useCursorGlow() {
     />
   );
 
-  return { onMouseMove, onMouseLeave, Glow };
+  return { onMouseMove, onMouseLeave, glow };
 }
 
 function LogoLink() {
-  const { Glow } = useCursorGlow();
+  const { onMouseMove, onMouseLeave, glow } = useCursorGlow();
   return (
     <Link
       to="/"
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
       className="relative overflow-hidden flex items-center gap-2.5"
     >
-      <Glow />
+      {glow}
       <img src="/images/logo.png" className="h-8" alt="logo" />
       <span
         style={{ background: T.gradBtn, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
@@ -58,7 +57,7 @@ function LogoLink() {
 }
 
 function NavLink({ path, label, active }: { path: string; label: string; active: boolean }) {
-  const { onMouseMove, onMouseLeave, Glow } = useCursorGlow();
+  const { onMouseMove, onMouseLeave, glow } = useCursorGlow();
   return (
     <Link
       to={path}
@@ -71,14 +70,14 @@ function NavLink({ path, label, active }: { path: string; label: string; active:
         border: active ? `1px solid ${T.border}` : '1px solid transparent',
       }}
     >
-      <Glow />
+      {glow}
       {label}
     </Link>
   );
 }
 
 function MobileNavLink({ path, label, active }: { path: string; label: string; active: boolean }) {
-  const { onMouseMove, onMouseLeave, Glow } = useCursorGlow();
+  const { onMouseMove, onMouseLeave, glow } = useCursorGlow();
   return (
     <Link
       to={path}
@@ -87,14 +86,14 @@ function MobileNavLink({ path, label, active }: { path: string; label: string; a
       className="relative overflow-hidden px-4 py-2.5 rounded-lg text-sm"
       style={{ color: active ? T.teal : T.textMid }}
     >
-      <Glow />
+      {glow}
       {label}
     </Link>
   );
 }
 
 function GithubButton({ onClick }: { onClick: () => void }) {
-  const { onMouseMove, onMouseLeave, Glow } = useCursorGlow();
+  const { onMouseMove, onMouseLeave, glow } = useCursorGlow();
   return (
     <button
       type="button"
@@ -104,14 +103,14 @@ function GithubButton({ onClick }: { onClick: () => void }) {
       className="relative overflow-hidden w-9 h-9 rounded-lg flex items-center justify-center"
       style={{ border: `1px solid ${T.border}`, background: 'rgba(10,255,228,0.04)', color: T.textMid }}
     >
-      <Glow />
+      {glow}
       <Github className="h-5 w-5" />
     </button>
   );
 }
 
 function SignOutButton({ onClick }: { onClick: () => void }) {
-  const { onMouseMove, onMouseLeave, Glow } = useCursorGlow();
+  const { onMouseMove, onMouseLeave, glow } = useCursorGlow();
   return (
     <button
       type="button"
@@ -121,7 +120,7 @@ function SignOutButton({ onClick }: { onClick: () => void }) {
       className="hidden md:flex relative overflow-hidden items-center gap-2 px-4 py-2 rounded-lg text-sm"
       style={{ border: `1px solid ${T.border}`, background: T.surface, color: T.textMid }}
     >
-      <Glow />
+      {glow}
       <LogOut className="h-4 w-4" />
       Sign Out
     </button>
@@ -129,7 +128,7 @@ function SignOutButton({ onClick }: { onClick: () => void }) {
 }
 
 function SignInLink() {
-  const { onMouseMove, onMouseLeave, Glow } = useCursorGlow();
+  const { onMouseMove, onMouseLeave, glow } = useCursorGlow();
   return (
     <Link
       to="/login"
@@ -138,14 +137,14 @@ function SignInLink() {
       className="relative overflow-hidden px-4 py-2 rounded-lg text-sm"
       style={{ border: `1px solid ${T.border}`, background: T.surface, color: T.textMid }}
     >
-      <Glow />
+      {glow}
       Sign In
     </Link>
   );
 }
 
 function SignUpLink() {
-  const { onMouseMove, onMouseLeave, Glow } = useCursorGlow();
+  const { onMouseMove, onMouseLeave, glow } = useCursorGlow();
   return (
     <Link
       to="/register"
@@ -154,20 +153,20 @@ function SignUpLink() {
       className="relative overflow-hidden px-4 py-2 rounded-lg text-sm font-bold"
       style={{ background: T.gradBtn, color: '#040810' }}
     >
-      <Glow />
+      {glow}
       Sign Up
     </Link>
   );
 }
 
 export function Navbar() {
-  const { user, signInWithGithub } = useAuth();
+  const { user, signInWithGithub, signOut } = useAuth();
   const location = useLocation();
 
   const isAuthPage = ['/login', '/register'].some(p => location.pathname.startsWith(p));
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOut();
   };
 
   const handleGithub = async () => {
@@ -217,7 +216,7 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* RIGHT — Actions (ml-auto pushes to far right on mobile when center is empty) */}
+          {/* RIGHT — Actions */}
           <div className="flex items-center gap-3 ml-auto md:ml-0">
 
             <GithubButton onClick={handleGithub} />
