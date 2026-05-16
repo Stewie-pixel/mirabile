@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useRoadmap } from '@/contexts/RoadmapContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { puterService } from '@/services/puterService';
@@ -145,19 +146,19 @@ Assistant:`;
               key={index}
               className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
             >
-              <Avatar className="h-8 w-8 shrink-0">
+              <Avatar className="h-10 w-10 shrink-0">
                 {message.role === 'user' ? (
                   <>
                     <AvatarImage src={profile?.avatar_url || ''} />
                     <AvatarFallback className="bg-white/10 text-[#0AFFE4]">
-                      <User className="h-4 w-4" />
+                      <User className="h-5 w-5" />
                     </AvatarFallback>
                   </>
                 ) : (
                   <>
                     <AvatarImage src="/images/logo.png" className="object-contain" />
                     <AvatarFallback className="bg-transparent">
-                      <Bot className="h-4 w-4 text-[#0AFFE4]" />
+                      <Bot className="h-5 w-5 text-[#0AFFE4]" />
                     </AvatarFallback>
                   </>
                 )}
@@ -165,16 +166,42 @@ Assistant:`;
 
               <div className={`flex flex-col max-w-[80%] ${message.role === 'user' ? 'items-end' : ''}`}>
                 <div
-                  className={`rounded-2xl px-3 py-2 text-xs leading-relaxed shadow-sm ${message.role === 'user'
-                      ? 'text-black rounded-tr-none font-medium'
-                      : 'text-white/90 rounded-tl-none border border-white/10'
+                  className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${message.role === 'user'
+                    ? 'text-black rounded-tr-none font-medium'
+                    : 'text-white rounded-tl-none border border-white/10'
                     }`}
                   style={{
-                    background: message.role === 'user' ? 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)' : 'rgba(255, 255, 255, 0.06)',
+                    background: message.role === 'user' ? 'linear-gradient(135deg, #0affe2dc 0%, #0EA5E9 100%)' : 'rgba(255, 255, 255, 0.06)',
                     backdropFilter: message.role !== 'user' ? 'blur(12px)' : 'none'
                   }}
                 >
-                  {message.content}
+                  {message.role === 'user' ? (
+                    message.content
+                  ) : (
+                    <ReactMarkdown
+                      components={{
+                        p: ({ node: _node, ...props }) => <p className="mb-2 last:mb-0 text-white" {...props} />,
+                        ul: ({ node: _node, ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1 text-white" {...props} />,
+                        ol: ({ node: _node, ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1 text-white" {...props} />,
+                        li: ({ node: _node, ...props }) => <li className="leading-relaxed text-white" {...props} />,
+                        strong: ({ node: _node, ...props }) => <strong className="font-bold text-[#ffffff]" {...props} />,
+                        code: ({ node: _node, className, children, ...props }) => {
+                          const isInline = !className;
+                          return isInline ? (
+                            <code className="bg-black/30 text-white rounded px-1.5 py-0.5 text-xs font-mono" {...props}>
+                              {children}
+                            </code>
+                          ) : (
+                            <code className="block bg-black/40 text-white p-3 rounded mb-2 overflow-x-auto text-xs font-mono" {...props}>
+                              {children}
+                            </code>
+                          );
+                        }
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  )}
                 </div>
                 <span className="text-[10px] text-white/40 mt-1 px-1 font-medium">
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -185,10 +212,10 @@ Assistant:`;
 
           {isLoading && (
             <div className="flex gap-3">
-              <Avatar className="h-8 w-8 shrink-0">
+              <Avatar className="h-10 w-10 shrink-0">
                 <AvatarImage src="/images/logo.png" className="object-contain" />
                 <AvatarFallback className="bg-transparent">
-                  <Bot className="h-4 w-4 text-[#0AFFE4]" />
+                  <Bot className="h-5 w-5 text-[#0AFFE4]" />
                 </AvatarFallback>
               </Avatar>
               <div className="rounded-2xl rounded-tl-none px-3 py-2 border border-white/10 flex items-center justify-center"

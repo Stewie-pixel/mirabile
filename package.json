@@ -61,6 +61,7 @@
     "react-dropzone": "^14.3.8",
     "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.66.0",
+    "react-markdown": "^10.1.0",
     "react-resizable-panels": "^2.1.8",
     "react-router": "^7.9.5",
     "react-router-dom": "^7.9.5",
