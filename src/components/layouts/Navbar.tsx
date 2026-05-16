@@ -40,10 +40,10 @@ function useCursorGlow() {
 
   const glow = (
     <div
-      className="pointer-events-none absolute inset-0 transition-opacity duration-200"
+      className="pointer-events-none absolute inset-0 transition-opacity"
       style={{
         opacity: pos.active ? 1 : 0,
-        background: `radial-gradient(140px circle at ${pos.x}px ${pos.y}px, rgba(10,255,228,0.25), transparent 60%)`,
+        background: `radial-gradient(140px circle at ${pos.x}px ${pos.y}px, rgba(10, 255, 226, 0.8), transparent 60%)`,
       }}
     />
   );

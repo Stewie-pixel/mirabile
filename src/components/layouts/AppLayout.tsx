@@ -7,6 +7,8 @@ interface AppLayoutProps {
   children: ReactNode;
 }
 
+const PAGE_GRADIENT = 'linear-gradient(135deg, #000000 0%, #0a1628 50%, #062a2a 100%)';
+
 const SIDEBAR_ROUTES = ['/dashboard', '/generator', '/progress', '/profile', '/instructions', '/chat', '/roadmap'];
 
 export function AppLayout({ children }: AppLayoutProps) {
@@ -17,7 +19,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   if (isSidebarRoute) {
     return (
-      <div className="flex min-h-screen w-full flex-col" style={{ background: '#080D12' }}>
+      <div className="flex min-h-screen w-full flex-col" style={{ background: PAGE_GRADIENT }}>
         <Navbar />
         <div className="flex flex-1 min-h-0">
           <Sidebar />
@@ -30,7 +32,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
+    <div className="flex min-h-screen w-full flex-col" style={{ background: PAGE_GRADIENT }}>
       <Navbar />
       <main className="flex-1">{children}</main>
     </div>

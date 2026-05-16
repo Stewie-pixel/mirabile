@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { roadmapGenerationSchema, type RoadmapGenerationInput } from '@/lib/validators';
 import { COMPANIES } from '@/constants/companies';
 import { TIMELINE_OPTIONS } from '@/constants/timelines';
@@ -74,8 +73,8 @@ export default function RoadmapGeneratorPage() {
       <div className="mb-6 flex justify-center">
         <Link 
           to="/instructions" 
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium transition-colors"
-          style={{ background: 'rgba(10,255,228,0.1)', color: '#0AFFE4', border: '1px solid rgba(10,255,228,0.2)' }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium transition-colors hover:bg-primary/80 hover:text-white"
+          style={{ background: 'rgba(10, 255, 226, 0.5)', color: '#ffffff', border: '1px solid rgba(10,255,228,0.2)' }}
         >
           Read model usage instructions here →
         </Link>
@@ -97,10 +96,10 @@ export default function RoadmapGeneratorPage() {
                 name="career_goal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Career Goal</FormLabel>
+                    <FormLabel style={{ color: '#0AFFE4' }}>Career Goal</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger style={{ color: '#ffffff' }}>
                           <SelectValue placeholder="Select your career goal" />
                         </SelectTrigger>
                       </FormControl>
@@ -122,10 +121,10 @@ export default function RoadmapGeneratorPage() {
                 name="target_company"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Target Company</FormLabel>
+                    <FormLabel style={{ color: '#0AFFE4' }}>Target Company</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger style={{ color: '#ffffff' }}>
                           <SelectValue placeholder="Select your target company" />
                         </SelectTrigger>
                       </FormControl>
@@ -150,10 +149,10 @@ export default function RoadmapGeneratorPage() {
                 name="timeline"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Timeline</FormLabel>
+                    <FormLabel style={{ color: '#0AFFE4' }}>Timeline</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger style={{ color: '#ffffff' }}>
                           <SelectValue placeholder="Select your timeline" />
                         </SelectTrigger>
                       </FormControl>
@@ -175,25 +174,22 @@ export default function RoadmapGeneratorPage() {
                 name="ai_model"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>AI Model</FormLabel>
+                    <FormLabel style={{ color: '#0AFFE4' }}>AI Model</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger style={{ color: '#ffffff' }}>
                           <SelectValue placeholder="Select AI model" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <div className="px-2 py-1.5 text-xs font-semibold text-primary flex items-center gap-1">
                           <Sparkles className="h-3 w-3" />
-                          No Setup Required (Puter.js)
+                          No Setup Required
                         </div>
                         {PUTER_MODELS.map((model) => (
                           <SelectItem key={model.id} value={model.id}>
                             <div className="flex items-center gap-2">
                               <span>{model.name}</span>
-                              <Badge variant="default" className="text-xs">
-                                ✨ Ready
-                              </Badge>
                             </div>
                           </SelectItem>
                         ))}
@@ -204,11 +200,7 @@ export default function RoadmapGeneratorPage() {
                           <SelectItem key={model.id} value={model.id}>
                             <div className="flex items-center gap-2">
                               <span>{model.name}</span>
-                              {model.isFree && (
-                                <Badge variant="secondary" className="text-xs">
-                                  Free
-                                </Badge>
-                              )}
+                              {model.isFree}
                             </div>
                           </SelectItem>
                         ))}
@@ -222,22 +214,17 @@ export default function RoadmapGeneratorPage() {
                 )}
               />
 
-              <div className="flex gap-4">
-                <Button type="submit" className="flex-1" disabled={loading}>
+              <div className="flex justify-center pt-2">
+                <Button variant="gradient" size="sm" type="submit" disabled={loading}>
                   {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" />Generating...</>
                   ) : (
-                    <>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Generate Roadmap
-                    </>
+                    <><Sparkles className="h-3.5 w-3.5" />Generate Roadmap</>
                   )}
                 </Button>
+              
                 {generatedRoadmapId && (
-                  <Button type="button" variant="outline" onClick={handleViewRoadmap}>
+                  <Button variant="outline" size="sm" type="button" onClick={handleViewRoadmap} className="ml-3">
                     View Roadmap
                   </Button>
                 )}
@@ -276,7 +263,7 @@ export default function RoadmapGeneratorPage() {
                   <li>Ensure you have configured the LLM_API_KEY in Supabase Dashboard → Edge Functions → Secrets</li>
                   <li>Verify your OpenAI API key is valid and has sufficient credits</li>
                   <li>Check your internet connection and try again</li>
-                  <li>If the issue persists, refer to EDGE_FUNCTION_DEBUG.md in the project root</li>
+                  <li>If the issue persists, refer to README.md in the project root</li>
                 </ul>
               </div>
             </div>
