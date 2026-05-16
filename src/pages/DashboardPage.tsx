@@ -4,36 +4,24 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useRoadmap } from '@/contexts/RoadmapContext';
-import { Loader2, TrendingUp, Target, Flame, Award, ArrowRight } from 'lucide-react';
+import { TrendingUp, Target, Flame, Award, ArrowRight } from 'lucide-react';
 import type { Roadmap } from '@/types';
 
 export default function DashboardPage() {
-  const { fetchUserRoadmaps } = useRoadmap();
-  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
-  const [activeRoadmap, setActiveRoadmap] = useState<Roadmap | null>(null);
-  const [localLoading, setLocalLoading] = useState(true);
+  const { fetchUserRoadmaps, userRoadmaps } = useRoadmap();
+  const [activeRoadmap, setActiveRoadmap] = useState<Roadmap | null>(userRoadmaps[0] ?? null);
 
   useEffect(() => {
-    const loadRoadmaps = async () => {
-      const data = await fetchUserRoadmaps();
-      setRoadmaps(data);
-      if (data.length > 0) {
-        setActiveRoadmap(data[0]);
-      }
-      setLocalLoading(false);
-    };
-    loadRoadmaps();
+    fetchUserRoadmaps();
   }, [fetchUserRoadmaps]);
 
-  if (localLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-12 w-12 animate-spin" style={{ color: '#0AFFE4' }} />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (userRoadmaps.length > 0) {
+      setActiveRoadmap(userRoadmaps[0]);
+    }
+  }, [userRoadmaps]);
 
-  if (roadmaps.length === 0) {
+  if (userRoadmaps.length === 0) {
     return (
       <div className="container mx-auto max-w-4xl py-8 px-4">
         <div className="glass-strong rounded-2xl p-8">
@@ -68,7 +56,7 @@ export default function DashboardPage() {
             <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Active Roadmaps</span>
             <Target className="h-4 w-4" style={{ color: 'rgba(255,255,255,0.4)' }} />
           </div>
-          <div className="text-2xl font-bold text-gradient">{roadmaps.length}</div>
+          <div className="text-2xl font-bold text-gradient">{userRoadmaps.length}</div>
           <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Career paths in progress</p>
         </div>
 
