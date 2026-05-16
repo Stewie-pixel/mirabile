@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
 
     const totalSteps = allSteps?.length || 0;
     const completedCount = updatedCompletedSteps.length;
-    const progressPercentage = totalSteps > 0 ? (completedCount / totalSteps) * 100 : 0;
+    const progressPercentage = totalSteps > 0 ? Math.round((completedCount / totalSteps) * 100) : 0;
 
     const now = new Date().toISOString();
     const lastActivity = progress.last_activity ? new Date(progress.last_activity) : null;

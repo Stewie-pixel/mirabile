@@ -6,6 +6,8 @@ import RoadmapGeneratorPage from './pages/RoadmapGeneratorPage';
 import RoadmapViewerPage from './pages/RoadmapViewerPage';
 import ProgressTrackingPage from './pages/ProgressTrackingPage';
 import ProfilePage from './pages/ProfilePage';
+import InstructionsPage from './pages/InstructionsPage';
+import ChatPage from './pages/ChatPage';
 import type { ReactNode } from 'react';
 
 export interface RouteConfig {
@@ -60,5 +62,15 @@ export const routes: RouteConfig[] = [
     name: 'Profile',
     path: '/profile',
     element: <ProfilePage />,
+  },
+  {
+    name: 'Instructions',
+    path: '/instructions',
+    element: <InstructionsPage />,
+  },
+  {
+    name: 'Chat',
+    path: '/chat',
+    element: <ChatPage />,
   },
 ];

@@ -1,19 +1,17 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, Link } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { roadmapGenerationSchema, type RoadmapGenerationInput } from '@/lib/validators';
 import { COMPANIES } from '@/constants/companies';
 import { TIMELINE_OPTIONS } from '@/constants/timelines';
 import { CAREER_PATHS } from '@/constants/careerPaths';
 import { AI_MODELS, PUTER_MODELS, API_KEY_MODELS } from '@/constants/aiModels';
 import { useRoadmap } from '@/contexts/RoadmapContext';
-import { SetupGuide } from '@/components/common/SetupGuide';
 import { toast } from 'sonner';
 import { Loader2, Sparkles } from 'lucide-react';
 
@@ -21,7 +19,6 @@ export default function RoadmapGeneratorPage() {
   const navigate = useNavigate();
   const { generateRoadmap, loading, error: contextError } = useRoadmap();
   const [generatedRoadmapId, setGeneratedRoadmapId] = useState<string | null>(null);
-  const [showSetupGuide, setShowSetupGuide] = useState(true);
 
   const form = useForm<RoadmapGenerationInput>({
     resolver: zodResolver(roadmapGenerationSchema),
@@ -65,25 +62,31 @@ export default function RoadmapGeneratorPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">Generate Your Career Roadmap</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: '#ffffff' }}>
+          Generate Your <span className="text-gradient">Career Roadmap</span>
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.5)' }}>
           Tell us about your career goals, and our AI will create a personalized roadmap for you.
         </p>
       </div>
 
-      {showSetupGuide && (
-        <div className="mb-6">
-          <SetupGuide onDismiss={() => setShowSetupGuide(false)} />
-        </div>
-      )}
+      <div className="mb-6 flex justify-center">
+        <Link 
+          to="/instructions" 
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium transition-colors hover:bg-primary/80 hover:text-white"
+          style={{ background: 'rgba(10, 255, 226, 0.5)', color: '#ffffff', border: '1px solid rgba(10,255,228,0.2)' }}
+        >
+          Read model usage instructions here →
+        </Link>
+      </div>
 
-      <Card>
+      <Card className="glass-strong rounded-2xl border-0">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
+          <CardTitle className="flex items-center gap-2" style={{ color: '#ffffff' }}>
+            <Sparkles className="h-5 w-5" style={{ color: '#0AFFE4' }} />
             AI-Powered Roadmap Generation
           </CardTitle>
-          <CardDescription>Fill in the details below to generate your personalized career roadmap</CardDescription>
+          <CardDescription style={{ color: 'rgba(255,255,255,0.5)' }}>Fill in the details below to generate your personalized career roadmap</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -93,10 +96,10 @@ export default function RoadmapGeneratorPage() {
                 name="career_goal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Career Goal</FormLabel>
+                    <FormLabel style={{ color: '#0AFFE4' }}>Career Goal</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger style={{ color: '#ffffff' }}>
                           <SelectValue placeholder="Select your career goal" />
                         </SelectTrigger>
                       </FormControl>
@@ -118,10 +121,10 @@ export default function RoadmapGeneratorPage() {
                 name="target_company"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Target Company</FormLabel>
+                    <FormLabel style={{ color: '#0AFFE4' }}>Target Company</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger style={{ color: '#ffffff' }}>
                           <SelectValue placeholder="Select your target company" />
                         </SelectTrigger>
                       </FormControl>
@@ -146,10 +149,10 @@ export default function RoadmapGeneratorPage() {
                 name="timeline"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Timeline</FormLabel>
+                    <FormLabel style={{ color: '#0AFFE4' }}>Timeline</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger style={{ color: '#ffffff' }}>
                           <SelectValue placeholder="Select your timeline" />
                         </SelectTrigger>
                       </FormControl>
@@ -171,25 +174,22 @@ export default function RoadmapGeneratorPage() {
                 name="ai_model"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>AI Model</FormLabel>
+                    <FormLabel style={{ color: '#0AFFE4' }}>AI Model</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger style={{ color: '#ffffff' }}>
                           <SelectValue placeholder="Select AI model" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <div className="px-2 py-1.5 text-xs font-semibold text-primary flex items-center gap-1">
                           <Sparkles className="h-3 w-3" />
-                          No Setup Required (Puter.js)
+                          No Setup Required
                         </div>
                         {PUTER_MODELS.map((model) => (
                           <SelectItem key={model.id} value={model.id}>
                             <div className="flex items-center gap-2">
                               <span>{model.name}</span>
-                              <Badge variant="default" className="text-xs">
-                                ✨ Ready
-                              </Badge>
                             </div>
                           </SelectItem>
                         ))}
@@ -200,11 +200,7 @@ export default function RoadmapGeneratorPage() {
                           <SelectItem key={model.id} value={model.id}>
                             <div className="flex items-center gap-2">
                               <span>{model.name}</span>
-                              {model.isFree && (
-                                <Badge variant="secondary" className="text-xs">
-                                  Free
-                                </Badge>
-                              )}
+                              {model.isFree}
                             </div>
                           </SelectItem>
                         ))}
@@ -218,22 +214,17 @@ export default function RoadmapGeneratorPage() {
                 )}
               />
 
-              <div className="flex gap-4">
-                <Button type="submit" className="flex-1" disabled={loading}>
+              <div className="flex justify-center pt-2">
+                <Button variant="gradient" size="sm" type="submit" disabled={loading}>
                   {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" />Generating...</>
                   ) : (
-                    <>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Generate Roadmap
-                    </>
+                    <><Sparkles className="h-3.5 w-3.5" />Generate Roadmap</>
                   )}
                 </Button>
+              
                 {generatedRoadmapId && (
-                  <Button type="button" variant="outline" onClick={handleViewRoadmap}>
+                  <Button variant="outline" size="sm" type="button" onClick={handleViewRoadmap} className="ml-3">
                     View Roadmap
                   </Button>
                 )}
@@ -244,7 +235,7 @@ export default function RoadmapGeneratorPage() {
       </Card>
 
       {loading && (
-        <Card className="mt-6">
+        <Card className="mt-6 glass-strong rounded-2xl border-0">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center space-y-4 py-8">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -256,7 +247,7 @@ export default function RoadmapGeneratorPage() {
       )}
 
       {contextError && !loading && (
-        <Card className="mt-6 border-destructive">
+        <Card className="mt-6 border-destructive glass-strong rounded-2xl">
           <CardHeader>
             <CardTitle className="text-destructive">Error Generating Roadmap</CardTitle>
             <CardDescription>Please check the details below and try again</CardDescription>
@@ -272,7 +263,7 @@ export default function RoadmapGeneratorPage() {
                   <li>Ensure you have configured the LLM_API_KEY in Supabase Dashboard → Edge Functions → Secrets</li>
                   <li>Verify your OpenAI API key is valid and has sufficient credits</li>
                   <li>Check your internet connection and try again</li>
-                  <li>If the issue persists, refer to EDGE_FUNCTION_DEBUG.md in the project root</li>
+                  <li>If the issue persists, refer to README.md in the project root</li>
                 </ul>
               </div>
             </div>
