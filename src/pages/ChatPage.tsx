@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { Components } from 'react-markdown';
 import { useRoadmap } from '@/contexts/RoadmapContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { puterService } from '@/services/puterService';
@@ -16,6 +16,26 @@ interface Message {
   content: string;
   timestamp: Date;
 }
+
+const markdownComponents: Components = {
+  p: ({ node: _node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+  ul: ({ node: _node, ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1" {...props} />,
+  ol: ({ node: _node, ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1" {...props} />,
+  li: ({ node: _node, ...props }) => <li className="leading-relaxed" {...props} />,
+  strong: ({ node: _node, ...props }) => <strong className="font-bold" {...props} />,
+  code: ({ node: _node, className, children, ...props }) => {
+    const isInline = !className;
+    return isInline ? (
+      <code className="bg-black/30 text-white rounded px-1.5 py-0.5 text-xs font-mono" {...props}>
+        {children}
+      </code>
+    ) : (
+      <code className="block bg-black/40 text-white p-3 rounded mb-2 overflow-x-auto text-xs font-mono" {...props}>
+        {children}
+      </code>
+    );
+  }
+};
 
 export default function ChatPage() {
   const { currentRoadmap, roadmapSteps } = useRoadmap();
@@ -178,27 +198,7 @@ Assistant:`;
                   {message.role === 'user' ? (
                     message.content
                   ) : (
-                    <ReactMarkdown
-                      components={{
-                        p: ({ node: _node, ...props }) => <p className="mb-2 last:mb-0 text-white" {...props} />,
-                        ul: ({ node: _node, ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1 text-white" {...props} />,
-                        ol: ({ node: _node, ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1 text-white" {...props} />,
-                        li: ({ node: _node, ...props }) => <li className="leading-relaxed text-white" {...props} />,
-                        strong: ({ node: _node, ...props }) => <strong className="font-bold text-[#ffffff]" {...props} />,
-                        code: ({ node: _node, className, children, ...props }) => {
-                          const isInline = !className;
-                          return isInline ? (
-                            <code className="bg-black/30 text-white rounded px-1.5 py-0.5 text-xs font-mono" {...props}>
-                              {children}
-                            </code>
-                          ) : (
-                            <code className="block bg-black/40 text-white p-3 rounded mb-2 overflow-x-auto text-xs font-mono" {...props}>
-                              {children}
-                            </code>
-                          );
-                        }
-                      }}
-                    >
+                    <ReactMarkdown components={markdownComponents}>
                       {message.content}
                     </ReactMarkdown>
                   )}
