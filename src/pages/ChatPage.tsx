@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import ReactMarkdown, { Components } from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
+import { useParams, useNavigate } from 'react-router';
+import type { Components } from 'react-markdown';
 import { useRoadmap } from '@/contexts/RoadmapContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { puterService } from '@/services/puterService';
+import { chatService } from '@/services/chatService';
 import { AI_MODELS, getModelById } from '@/constants/aiModels';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +42,9 @@ const markdownComponents: Components = {
 
 export default function ChatPage() {
   const { currentRoadmap, roadmapSteps } = useRoadmap();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
+  const { sessionId } = useParams();
+  const navigate = useNavigate();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -47,6 +52,21 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Fetch messages when session changes
+  useEffect(() => {
+    if (sessionId) {
+      chatService.getMessages(sessionId).then(data => {
+        setMessages(data.map(m => ({
+          role: m.role,
+          content: m.content,
+          timestamp: new Date(m.created_at)
+        })));
+      }).catch(err => console.error(err));
+    } else {
+      setMessages([]);
+    }
+  }, [sessionId]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -58,17 +78,32 @@ export default function ChatPage() {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    const content = input.trim();
+    setInput('');
+    setIsLoading(true);
+
     const userMessage: Message = {
       role: 'user',
-      content: input,
+      content: content,
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
 
     try {
+      let currentSessionId = sessionId;
+
+      if (!currentSessionId && user) {
+        const title = content.length > 50 ? content.substring(0, 47) + '...' : content;
+        const newSession = await chatService.createSession(user.id, title);
+        currentSessionId = newSession.id;
+        navigate(`/chat/${currentSessionId}`, { replace: true });
+      }
+
+      if (currentSessionId) {
+        await chatService.saveMessage(currentSessionId, 'user', content);
+      }
+
       const modelConfig = getModelById(selectedModel);
       if (!modelConfig) throw new Error('Invalid model selected');
 
@@ -95,16 +130,13 @@ ${contextPrompt}
 Answer the user's questions based on this context if applicable. If no roadmap exists, encourage them to generate one, but still answer their career-related questions.
 `;
 
-      // Build history for API call
-      // Note: puterService.chat currently takes a single prompt. 
-      // For multi-turn, we concatenate history into the prompt for now.
       const fullPrompt = `
 System: ${systemPrompt}
 
 History:
 ${messages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n')}
 
-User: ${input}
+User: ${content}
 Assistant:`;
 
       const response = await puterService.chat(fullPrompt, {
@@ -118,6 +150,10 @@ Assistant:`;
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+
+      if (currentSessionId) {
+        await chatService.saveMessage(currentSessionId, 'assistant', response);
+      }
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessage: Message = {
