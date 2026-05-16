@@ -73,4 +73,9 @@ export const routes: RouteConfig[] = [
     path: '/chat',
     element: <ChatPage />,
   },
+  {
+    name: 'Chat Session',
+    path: '/chat/:sessionId',
+    element: <ChatPage />,
+  }
 ];

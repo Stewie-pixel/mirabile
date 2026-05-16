@@ -7,6 +7,7 @@ import { puterService } from '@/services/puterService';
 interface RoadmapContextType {
   currentRoadmap: Roadmap | null;
   roadmapSteps: RoadmapStep[];
+  userRoadmaps: Roadmap[];
   loading: boolean;
   error: string | null;
   setCurrentRoadmap: (roadmap: Roadmap | null) => void;
@@ -25,6 +26,7 @@ const RoadmapContext = createContext<RoadmapContextType | undefined>(undefined);
 export function RoadmapProvider({ children }: { children: ReactNode }) {
   const [currentRoadmap, setCurrentRoadmap] = useState<Roadmap | null>(null);
   const [roadmapSteps, setRoadmapSteps] = useState<RoadmapStep[]>([]);
+  const [userRoadmaps, setUserRoadmaps] = useState<Roadmap[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,10 +36,10 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
         puterService.handleSupabaseSignOut().catch(console.error);
       }
     });
- 
+
     return () => subscription.unsubscribe();
   }, []);
-  
+
   const fetchRoadmap = useCallback(async (roadmapId: string) => {
     setLoading(true);
     setError(null);
@@ -77,7 +79,9 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
-      return data || [];
+      const roadmaps = data || [];
+      setUserRoadmaps(roadmaps);
+      return roadmaps;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch roadmaps');
       return [];
@@ -94,27 +98,19 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setError(null);
       try {
-        // Get current user
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          throw new Error('User not authenticated');
-        }
+        if (!user) throw new Error('User not authenticated');
 
-        // Get model configuration
         const modelConfig = getModelById(aiModel);
-        if (!modelConfig) {
-          throw new Error(`Invalid AI model: ${aiModel}`);
-        }
+        if (!modelConfig) throw new Error(`Invalid AI model: ${aiModel}`);
 
         let content: string;
         let aiProvider: string;
 
-        // Route to appropriate service based on provider
         if ((modelConfig.provider as string) === 'puter') {
           console.log('Using Puter.js for AI generation...');
           aiProvider = 'puter';
 
-          // Use Puter.js
           content = await puterService.generateRoadmap(
             careerGoal,
             targetCompany,
@@ -124,8 +120,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
         } else {
           console.log('Using Edge Function for AI generation...');
           aiProvider = modelConfig.provider;
-          
-          // Use Edge Function
+
           const { data, error: funcError } = await supabase.functions.invoke('generate-roadmap', {
             body: { career_goal: careerGoal, target_company: targetCompany, timeline, ai_model: aiModel },
           });
@@ -133,7 +128,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           if (funcError) {
             console.error('Edge Function error:', funcError);
             let errorMsg = 'Failed to generate roadmap';
-            
+
             try {
               const errorText = await funcError?.context?.text();
               if (errorText) {
@@ -143,7 +138,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
             } catch (_e) {
               errorMsg = funcError.message || errorMsg;
             }
-            
+
             throw new Error(errorMsg);
           }
 
@@ -155,71 +150,59 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           if (data?.roadmap) {
             setCurrentRoadmap(data.roadmap);
             setRoadmapSteps(data.steps || []);
+            setUserRoadmaps(prev => [data.roadmap, ...prev]);
             return data.roadmap;
           }
-          
+
           throw new Error('No roadmap data returned from API');
         }
 
-        // For Puter.js, we need to parse the response and save to database
         if ((modelConfig.provider as string) === 'puter') {
           console.log('Parsing Puter.js response...');
-          
-          // Ensure content is a string
+
           if (typeof content !== 'string') {
-            console.error('Invalid content type from Puter.js:', typeof content, content);
             throw new Error('Invalid response type from Puter.js AI. Expected string, got ' + typeof content);
           }
 
           if (!content || content.trim().length === 0) {
-            console.error('Empty content from Puter.js');
             throw new Error('Empty response from Puter.js AI');
           }
 
-          // Remove markdown code blocks if present
           let cleanContent = content.trim();
           if (cleanContent.startsWith('```json')) {
             cleanContent = cleanContent.replace(/^```json\s*\n/, '').replace(/\n```\s*$/, '');
           } else if (cleanContent.startsWith('```')) {
             cleanContent = cleanContent.replace(/^```\s*\n/, '').replace(/\n```\s*$/, '');
           }
-          
+
           let parsedContent;
           try {
             parsedContent = JSON.parse(cleanContent);
           } catch (_e) {
             console.log('Failed to parse as direct JSON, trying to extract...');
-            
-            // Ensure content is a string before calling .match()
+
             if (typeof cleanContent === 'string') {
               const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
               if (jsonMatch) {
                 try {
                   parsedContent = JSON.parse(jsonMatch[0]);
                 } catch (_e2) {
-                  console.error('Failed to parse extracted JSON:', _e2);
-                  console.error('Content:', cleanContent);
                   throw new Error('Failed to parse AI response as JSON');
                 }
               } else {
-                console.error('No JSON found in content:', cleanContent);
                 throw new Error('Failed to parse AI response as JSON');
               }
             } else {
-              console.error('Content is not a string:', typeof cleanContent);
               throw new Error('Invalid response format from AI');
             }
           }
 
-          // Validate structure
           if (!parsedContent.phases || !parsedContent.steps || !parsedContent.resources) {
-            console.error('Invalid content structure:', parsedContent);
             throw new Error('Invalid roadmap structure from AI');
           }
 
           console.log('Saving roadmap to database...');
 
-          // Insert roadmap
           const { data: roadmap, error: roadmapError } = await supabase
             .from('roadmaps')
             .insert({
@@ -234,12 +217,8 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
             .select()
             .single();
 
-          if (roadmapError) {
-            console.error('Roadmap insert error:', roadmapError);
-            throw new Error(`Failed to insert roadmap: ${roadmapError.message}`);
-          }
+          if (roadmapError) throw new Error(`Failed to insert roadmap: ${roadmapError.message}`);
 
-          // Insert steps
           const stepsToInsert = parsedContent.steps.map((step: any, index: number) => ({
             roadmap_id: roadmap.id,
             phase: step.phase,
@@ -255,12 +234,8 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
             .insert(stepsToInsert)
             .select();
 
-          if (stepsError) {
-            console.error('Steps insert error:', stepsError);
-            throw new Error(`Failed to insert steps: ${stepsError.message}`);
-          }
+          if (stepsError) throw new Error(`Failed to insert steps: ${stepsError.message}`);
 
-          // Insert resources
           const resourcesToInsert = parsedContent.resources
             .map((resource: Resource) => {
               const step = steps.find(s => s.step_order === resource.step_id);
@@ -277,13 +252,9 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
 
           if (resourcesToInsert.length > 0) {
             const { error: resourcesError } = await supabase.from('resources').insert(resourcesToInsert);
-            if (resourcesError) {
-              console.error('Resources insert error:', resourcesError);
-              throw new Error(`Failed to insert resources: ${resourcesError.message}`);
-            }
+            if (resourcesError) throw new Error(`Failed to insert resources: ${resourcesError.message}`);
           }
 
-          // Create user progress
           const { error: progressError } = await supabase.from('user_progress').insert({
             user_id: user.id,
             roadmap_id: roadmap.id,
@@ -293,14 +264,12 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
             milestones: [],
           });
 
-          if (progressError) {
-            console.error('Progress insert error:', progressError);
-            throw new Error(`Failed to create progress record: ${progressError.message}`);
-          }
+          if (progressError) throw new Error(`Failed to create progress record: ${progressError.message}`);
 
           console.log('Roadmap saved successfully');
           setCurrentRoadmap(roadmap);
           setRoadmapSteps(steps || []);
+          setUserRoadmaps(prev => [roadmap, ...prev]);
           return roadmap;
         }
 
@@ -322,6 +291,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
       value={{
         currentRoadmap,
         roadmapSteps,
+        userRoadmaps,
         loading,
         error,
         setCurrentRoadmap,
