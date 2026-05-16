@@ -8,9 +8,10 @@ import { Loader2, TrendingUp, Target, Flame, Award, ArrowRight } from 'lucide-re
 import type { Roadmap } from '@/types';
 
 export default function DashboardPage() {
-  const { fetchUserRoadmaps, loading } = useRoadmap();
+  const { fetchUserRoadmaps } = useRoadmap();
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
   const [activeRoadmap, setActiveRoadmap] = useState<Roadmap | null>(null);
+  const [localLoading, setLocalLoading] = useState(true);
 
   useEffect(() => {
     const loadRoadmaps = async () => {
@@ -19,11 +20,12 @@ export default function DashboardPage() {
       if (data.length > 0) {
         setActiveRoadmap(data[0]);
       }
+      setLocalLoading(false);
     };
     loadRoadmaps();
   }, [fetchUserRoadmaps]);
 
-  if (loading) {
+  if (localLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-12 w-12 animate-spin" style={{ color: '#0AFFE4' }} />
