@@ -201,10 +201,15 @@ export function Sidebar() {
       {/* ── collapse toggle (desktop only) ── */}
       {!mobile && (
         <div className="flex items-center justify-end px-3 pt-3 pb-1">
+          {!collapsed && (
+            <span className="flex-1 text-xs font-semibold uppercase tracking-wider" style={{ color: T.textDim }}>
+              Overview
+            </span>
+          )}
           <button
             type="button"
             onClick={() => setCollapsed(c => !c)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-white/10"
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-white/10 mx-auto"
             style={{ color: T.textDim }}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
@@ -230,7 +235,9 @@ export function Sidebar() {
                 Roadmap History
               </span>
             )}
-            <div className="relative ml-auto" ref={historyMenuRef}>
+            <div className="relative ${collapsed && !mobile ? 'mx-auto' : 'ml-auto'}" 
+              ref={historyMenuRef} 
+            >
               <button
                 type="button"
                 onClick={() => setHistoryMenuOpen(o => !o)}

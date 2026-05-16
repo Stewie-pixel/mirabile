@@ -63,8 +63,10 @@ export default function RoadmapGeneratorPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">Generate Your Career Roadmap</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: '#ffffff' }}>
+          Generate Your <span className="text-gradient">Career Roadmap</span>
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.5)' }}>
           Tell us about your career goals, and our AI will create a personalized roadmap for you.
         </p>
       </div>
@@ -79,13 +81,13 @@ export default function RoadmapGeneratorPage() {
         </Link>
       </div>
 
-      <Card>
+      <Card className="glass-strong rounded-2xl border-0">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
+          <CardTitle className="flex items-center gap-2" style={{ color: '#ffffff' }}>
+            <Sparkles className="h-5 w-5" style={{ color: '#0AFFE4' }} />
             AI-Powered Roadmap Generation
           </CardTitle>
-          <CardDescription>Fill in the details below to generate your personalized career roadmap</CardDescription>
+          <CardDescription style={{ color: 'rgba(255,255,255,0.5)' }}>Fill in the details below to generate your personalized career roadmap</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -246,7 +248,7 @@ export default function RoadmapGeneratorPage() {
       </Card>
 
       {loading && (
-        <Card className="mt-6">
+        <Card className="mt-6 glass-strong rounded-2xl border-0">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center space-y-4 py-8">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -258,7 +260,7 @@ export default function RoadmapGeneratorPage() {
       )}
 
       {contextError && !loading && (
-        <Card className="mt-6 border-destructive">
+        <Card className="mt-6 border-destructive glass-strong rounded-2xl">
           <CardHeader>
             <CardTitle className="text-destructive">Error Generating Roadmap</CardTitle>
             <CardDescription>Please check the details below and try again</CardDescription>

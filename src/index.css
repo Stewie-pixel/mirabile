@@ -41,17 +41,17 @@
 
   .dark {
     --background: 210 25% 8%;
-    --foreground: 210 15% 95%;
+    --foreground: 0 0% 100%;
     --card: 210 25% 10%;
-    --card-foreground: 210 15% 95%;
+    --card-foreground: 0 0% 100%;
     --popover: 210 25% 10%;
-    --popover-foreground: 210 15% 95%;
+    --popover-foreground: 0 0% 100%;
     --primary: 195 85% 55%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 20% 15%;
-    --secondary-foreground: 210 15% 95%;
+    --secondary-foreground: 0 0% 100%;
     --muted: 210 20% 15%;
-    --muted-foreground: 210 12% 60%;
+    --muted-foreground: 210 12% 70%;
     --accent: 195 85% 15%;
     --accent-foreground: 195 85% 85%;
     --destructive: 0 62.8% 50%;
@@ -82,5 +82,45 @@
 
   body {
     @apply bg-background text-foreground;
+    color: #ffffff;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .glass:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.03);
+  }
+
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .glass-strong:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.04);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .page-gradient {
+    background: linear-gradient(135deg, #000000 0%, #0a1628 50%, #062a2a 100%);
   }
 }
