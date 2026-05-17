@@ -102,7 +102,7 @@ export default function DashboardPage() {
       const ids: number[] = await idsRes.json();
       const topIds = ids.slice(0, 4);
 
-      const unsplashKey = import.meta.env.UNSPLASH_ACCESS_KEY;
+      const unsplashKey = import.meta.env.VITE_UNSPLASH_ACCESS_KEY;
       let photos: UnsplashPhoto[] = [];
       try {
         const imgRes = await fetch(`https://api.unsplash.com/photos/random?count=4&query=technology&client_id=${unsplashKey}&_=${Date.now()}`);
