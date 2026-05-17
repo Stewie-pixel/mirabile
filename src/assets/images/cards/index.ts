@@ -1,0 +1,9 @@
+export { default as Google } from './Google.jpg';
+export { default as Meta } from './Meta.jpg';
+export { default as Apple } from './Apple.jpg';
+export { default as Microsoft } from './Microsoft.avif';
+export { default as Amazon } from './Amazon.jpg';
+export { default as Netflix } from './Netflix.jpg';
+export { default as Nvidia } from './Nvidia.webp';
+export { default as Oracle } from './Oracle.jpg';
+export { default as Stripe } from './Stripe.png';

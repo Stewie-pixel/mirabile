@@ -17,17 +17,18 @@ import {
 } from 'lucide-react';
 import type { Roadmap } from '@/types';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Google, Meta, Apple, Microsoft, Amazon, Netflix, Nvidia, Oracle } from '@/assets/images/cards';
+import { getBrandColors } from '../constants/companyBranding.ts';
 
 const COMPANY_CONFIG: Record<string, { color: string, logoUrl: string, coverUrl: string }> = {
-  'Google': { color: '#4285F4', logoUrl: '/icons/google.png', coverUrl: '/src/assets/images/cards/Google.jpg' },
-  'Meta': { color: '#0668E1', logoUrl: '/icons/meta.png', coverUrl: '/src/assets/images/cards/Meta.jpg' },
-  'Apple': { color: '#A2AAAD', logoUrl: '/icons/apple.png', coverUrl: '/src/assets/images/cards/Apple.jpg' },
-  'Microsoft': { color: '#00A4EF', logoUrl: '/icons/microsoft.png', coverUrl: '/src/assets/images/cards/Microsoft.avif' },
-  'Amazon': { color: '#FF9900', logoUrl: '/icons/amazon.png', coverUrl: '/src/assets/images/cards/Amazon.jpg' },
-  'Netflix': { color: '#E50914', logoUrl: '/icons/netflix.png', coverUrl: '/src/assets/images/cards/Netflix.jpg' },
-  'Nvidia': { color: '#76B900', logoUrl: '/icons/nvidia.png', coverUrl: '/src/assets/images/cards/Nvidia.webp' },
-  'Oracle': { color: '#F80000', logoUrl: '/icons/oracle.png', coverUrl: '/src/assets/images/cards/Oracle.jpg' },
-  'Stripe': { color: '#635BFF', logoUrl: '/icons/stripe.png', coverUrl: '/src/assets/images/cards/Stripe.png' },
+  'Google': { color: getBrandColors('Google').primary, logoUrl: '/icons/google.png', coverUrl: Google },
+  'Meta': { color: getBrandColors('Meta').primary, logoUrl: '/icons/meta.png', coverUrl: Meta },
+  'Apple': { color: getBrandColors('Apple').primary, logoUrl: '/icons/apple.png', coverUrl: Apple },
+  'Microsoft': { color: getBrandColors('Microsoft').primary, logoUrl: '/icons/microsoft.png', coverUrl: Microsoft },
+  'Amazon': { color: getBrandColors('Amazon').primary, logoUrl: '/icons/amazon.png', coverUrl: Amazon },
+  'Netflix': { color: getBrandColors('Netflix').primary, logoUrl: '/icons/netflix.png', coverUrl: Netflix },
+  'Nvidia': { color: getBrandColors('Nvidia').primary, logoUrl: '/icons/nvidia.png', coverUrl: Nvidia },
+  'Oracle': { color: getBrandColors('Oracle').primary, logoUrl: '/icons/oracle.png', coverUrl: Oracle },
 };
 
 const getCompanyConfig = (name: string) => {
