@@ -4,9 +4,11 @@ import { supabase } from '@/lib/supabase';
 
 interface ProgressContextType {
   progress: UserProgress | null;
+  progressMap: Record<string, UserProgress>;
   loading: boolean;
   error: string | null;
   fetchProgress: (roadmapId: string) => Promise<void>;
+  fetchAllProgress: (roadmapIds: string[]) => Promise<void>;
   updateProgress: (roadmapId: string, stepId: string, completed: boolean) => Promise<void>;
   calculateStreak: () => number;
 }
@@ -15,10 +17,12 @@ const ProgressContext = createContext<ProgressContextType | undefined>(undefined
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
   const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [progressMap, setProgressMap] = useState<Record<string, UserProgress>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchProgress = useCallback(async (roadmapId: string) => {
+    if (!roadmapId) return;
     setLoading(true);
     setError(null);
     try {
@@ -30,12 +34,47 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
       if (fetchError) throw fetchError;
       setProgress(data);
+
+      if (data) {
+        setProgressMap(prev => ({ ...prev, [roadmapId]: data }));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch progress');
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const fetchAllProgress = useCallback(async (roadmapIds: string[]) => {
+    if (!roadmapIds.length) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('user_progress')
+        .select('*')
+        .in('roadmap_id', roadmapIds);
+
+      if (fetchError) throw fetchError;
+
+      if (data) {
+        const map: Record<string, UserProgress> = {};
+        data.forEach((p: UserProgress) => {
+          map[p.roadmap_id] = p;
+        });
+        setProgressMap(map);
+
+        // Keep single progress in sync with the first result
+        if (data.length > 0 && !progress) {
+          setProgress(data[0]);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch progress');
+    } finally {
+      setLoading(false);
+    }
+  }, [progress]);
 
   const updateProgress = useCallback(
     async (roadmapId: string, stepId: string, completed: boolean) => {
@@ -53,6 +92,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
         if (data?.progress) {
           setProgress(data.progress);
+          setProgressMap(prev => ({ ...prev, [roadmapId]: data.progress }));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to update progress');
@@ -71,9 +111,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     <ProgressContext.Provider
       value={{
         progress,
+        progressMap,
         loading,
         error,
         fetchProgress,
+        fetchAllProgress,
         updateProgress,
         calculateStreak,
       }}
