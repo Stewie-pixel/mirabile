@@ -62,7 +62,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         data.forEach((p: UserProgress) => {
           map[p.roadmap_id] = p;
         });
-        setProgressMap(map);
+        setProgressMap(prev => ({ ...prev, ...map }));
 
         // Keep single progress in sync with the first result
         if (data.length > 0 && !progress) {
