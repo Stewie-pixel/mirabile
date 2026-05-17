@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import type { Roadmap } from '@/types';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Google, Meta, Apple, Microsoft, Amazon, Netflix, Nvidia, Oracle } from '@/assets/images/cards';
+import { Google, Meta, Apple, Microsoft, Amazon, Netflix, Nvidia, Oracle, Tesla, Adobe, Salesforce } from '@/assets/images/cards';
 import { getBrandColors } from '../constants/companyBranding.ts';
 
 const COMPANY_CONFIG: Record<string, { color: string, logoUrl: string, coverUrl: string }> = {
@@ -29,6 +29,9 @@ const COMPANY_CONFIG: Record<string, { color: string, logoUrl: string, coverUrl:
   'Netflix': { color: getBrandColors('Netflix').primary, logoUrl: '/icons/netflix.png', coverUrl: Netflix },
   'Nvidia': { color: getBrandColors('Nvidia').primary, logoUrl: '/icons/nvidia.png', coverUrl: Nvidia },
   'Oracle': { color: getBrandColors('Oracle').primary, logoUrl: '/icons/oracle.png', coverUrl: Oracle },
+  'Tesla': { color: getBrandColors('Tesla').primary, logoUrl: '/icons/tesla.png', coverUrl: Tesla },
+  'Adobe': { color: getBrandColors('Adobe').primary, logoUrl: '/icons/adobe.png', coverUrl: Adobe },
+  'Salesforce': { color: getBrandColors('Salesforce').primary, logoUrl: '/icons/salesforce.png', coverUrl: Salesforce },
 };
 
 const getCompanyConfig = (name: string) => {

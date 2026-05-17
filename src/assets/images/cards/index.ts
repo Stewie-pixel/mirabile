@@ -6,4 +6,6 @@ export { default as Amazon } from './Amazon.jpg';
 export { default as Netflix } from './Netflix.jpg';
 export { default as Nvidia } from './Nvidia.webp';
 export { default as Oracle } from './Oracle.jpg';
-export { default as Stripe } from './Stripe.png';
+export { default as Adobe } from './Adobe.jpeg';
+export { default as Salesforce } from './Salesforce.jpeg';
+export { default as Tesla } from './Tesla.png';
