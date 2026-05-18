@@ -76,7 +76,21 @@ ${stepsSummary}
 - Resources must not be older than 5 years unless timeless (e.g., CLRS, official RFCs)
 - Return ONLY valid JSON, no markdown, no explanation
 
+## CRITICAL RESOURCE DIVERSITY RULES — READ BEFORE GENERATING ANYTHING
+These rules are mandatory. Violating any of them makes the output invalid.
+
+1. PLATFORM UNIQUENESS PER STEP: For each step, all 3 resources must come from 3 completely different platforms. Never use the same platform twice in the same step (e.g. two YouTube videos, or two Coursera courses = invalid).
+
+2. GLOBAL PLATFORM SPREAD: Across all 54 resources, no single platform may appear more than 2 times total. Count as you go. If a platform has hit its limit, skip it and pick another.
+
+3. TYPE UNIQUENESS PER STEP: Each step's 3 resources must have 3 different resource_type values. No two resources in the same step may share the same type.
+
+4. NO FALLBACK REPEATING: If a URL or resource cannot be confirmed, do NOT reuse a resource from a previous step as a substitute. Pick a completely different platform and source instead.
+
+5. COMPANY CHANNEL PRIORITY: If ${targetCompany} has an official YouTube channel or engineering blog, it must appear at least once across the full roadmap. Do not use it more than 3 times.
+
 ## APPROVED SOURCES ONLY
+Only use sources from this list. If a source doesn't have what you need, move to the next one — never fabricate.
 
 ### Practice & Algorithms
 - https://leetcode.com
@@ -280,7 +294,7 @@ ${stepsSummary}
     {
       "step_id": 1,
       "resource_type": "article|course|documentation|video",
-      "media_platform": "YouTube|Coursera|Official Docs|LeetCode|etc.",
+      "media_platform": "YouTube|Learning Platform|Official Docs|LeetCode|etc.",
       "title": "Specific Resource Title",
       "url": "https://approved-source.com/specific-path",
       "description": "2 sentences: what this covers and exactly how it helps with this step at ${targetCompany}."
