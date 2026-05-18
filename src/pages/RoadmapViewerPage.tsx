@@ -6,8 +6,7 @@ import { useRoadmap } from '@/contexts/RoadmapContext';
 import { useProgress } from '@/contexts/ProgressContext';
 import {
   Loader2, Clock, Target, BookOpen, Video, FileText, Code,
-  ExternalLink, Info, Layers, TrendingUp, Rocket, Crown, Star, Zap,
-  Computer,
+  ExternalLink, Info, Layers, TrendingUp, Rocket, Crown, Star, Computer,
 } from 'lucide-react';
 import { formatDifficulty } from '@/lib/formatters';
 import type { RoadmapStep, Resource } from '@/types';
@@ -40,9 +39,8 @@ const PHASE_CONFIGS: Record<string, { color: string; icon: React.ElementType }> 
   foundation: { color: '#22c55e', icon: Layers },
   intermediate: { color: '#3b82f6', icon: TrendingUp },
   advanced: { color: '#a855f7', icon: Rocket },
-  expert: { color: '#ef4444', icon: Crown },
-  mastery: { color: '#f59e0b', icon: Star },
-  specialization: { color: '#ec4899', icon: Zap },
+  data: { color: '#ef4444', icon: Crown },
+  systemarchitecture: { color: '#ec4899', icon: Star },
   interview: { color: '#eab308', icon: Computer },
 };
 

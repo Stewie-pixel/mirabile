@@ -224,7 +224,13 @@ export default function RoadmapGeneratorPage() {
                 </Button>
               
                 {generatedRoadmapId && (
-                  <Button variant="outline" size="sm" type="button" onClick={handleViewRoadmap} className="ml-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    type="button" 
+                    onClick={handleViewRoadmap} 
+                    className="ml-3 text-white border-white/20 hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-500 hover:text-white hover:border-transparent transition-all duration-300"
+                  >
                     View Roadmap
                   </Button>
                 )}
@@ -239,8 +245,8 @@ export default function RoadmapGeneratorPage() {
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center space-y-4 py-8">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
-              <p className="text-lg font-medium">Generating your personalized roadmap...</p>
-              <p className="text-sm text-muted-foreground">This may take 10-30 seconds</p>
+              <p className="text-lg font-medium text-white">Generating your personalized roadmap...</p>
+              <p className="text-sm text-white">This may take 10-30 seconds</p>
             </div>
           </CardContent>
         </Card>
@@ -257,7 +263,7 @@ export default function RoadmapGeneratorPage() {
               <div className="rounded-md bg-destructive/10 p-4">
                 <p className="text-sm font-medium text-destructive">{contextError}</p>
               </div>
-              <div className="text-sm text-muted-foreground space-y-2">
+              <div className="text-sm text-white space-y-2">
                 <p className="font-medium">Common solutions:</p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
                   <li>Ensure you have configured the LLM_API_KEY in Supabase Dashboard → Edge Functions → Secrets</li>
