@@ -17,7 +17,7 @@ export class PuterChatService {
       const response = await this.puter.ai.chat(prompt, {
         model: options.model,
         stream: false,
-        temperature: options.temperature ?? 0.3,
+        temperature: options.temperature ?? 0.7,
         max_tokens: options.max_tokens ?? 4000,
       });
 
