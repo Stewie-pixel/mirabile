@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router';
 import type { Components } from 'react-markdown';
 import { useRoadmap } from '@/contexts/RoadmapContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { puterService } from '@/services/puterService';
+import { puterService } from '~/puter/index.ts';
 import { chatService } from '@/services/chatService';
 import { AI_MODELS, getModelById } from '@/constants/aiModels';
 import { Button } from '@/components/ui/button';

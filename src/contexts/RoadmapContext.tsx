@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback, type ReactNode, useEf
 import type { Resource, Roadmap, RoadmapStep } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { getModelById } from '@/constants/aiModels';
-import { puterService } from '@/services/puterService';
+import { puterService } from '~/puter/index.ts';
 
 interface RoadmapContextType {
   currentRoadmap: Roadmap | null;
