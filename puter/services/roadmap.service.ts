@@ -47,7 +47,7 @@ export class RoadmapService {
     model: AIModel
   ) {
     const stepsSummary = structure.steps
-      .map((s, i) => `step_id ${i + 1}: "${s.title}" (phase: ${s.phase}, difficulty: ${s.difficulty})`)
+      .map((s) => `step_id ${s.step_order}: "${s.title}" (phase: ${s.phase}, difficulty: ${s.difficulty})`)
       .join('\n');
 
     const prompt = buildResourcesPrompt(careerGoal, targetCompany, stepsSummary);
