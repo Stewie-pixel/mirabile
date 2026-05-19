@@ -1,151 +1,702 @@
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { format, subDays, eachDayOfInterval } from 'date-fns';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { GripVertical, CheckCircle2, Flame, Calendar, Plus, LogIn, Award } from 'lucide-react';
 import { useRoadmap } from '@/contexts/RoadmapContext';
 import { useProgress } from '@/contexts/ProgressContext';
-import { Loader2, Flame, Award, CheckCircle2, Circle, TrendingUp } from 'lucide-react';
-import type { Roadmap } from '@/types';
+import { supabase } from '@/lib/supabase';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import type { Milestone, Roadmap, UserProgress } from '@/types';
+import { getBrandColors } from '@/constants/companyBranding';
+
+type EventType = 'sign_in' | 'roadmap_created' | 'roadmap_completed' | 'step_completed' | 'milestone_achieved';
+
+interface ActivityEvent {
+  id: string;
+  type: EventType;
+  title: string;
+  description: string;
+  timestamp: string;
+}
 
 export default function ProgressTrackingPage() {
-  const { fetchUserRoadmaps, loading } = useRoadmap();
-  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
+  const { userRoadmaps } = useRoadmap();
+  const { progressMap, fetchAllProgress } = useProgress();
+  const [events, setEvents] = useState<ActivityEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
 
   useEffect(() => {
-    const loadRoadmaps = async () => {
-      const data = await fetchUserRoadmaps();
-      setRoadmaps(data);
+    if (userRoadmaps.length > 0) {
+      fetchAllProgress(userRoadmaps.map(r => r.id));
+    }
+  }, [userRoadmaps, fetchAllProgress]);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('user_events')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (data) {
+          const parseEventData = (raw: unknown): Record<string, unknown> => {
+            if (!raw) return {};
+            if (typeof raw === 'string') {
+              try { return JSON.parse(raw); } catch { return {}; }
+            }
+            return raw as Record<string, unknown>;
+          };
+
+          setEvents(
+            data.map(d => {
+              const eventData = parseEventData(d.event_data);
+              return {
+                id: d.id,
+                type: (d.event_type ?? d.type) as EventType,
+                title: (eventData.title as string) ?? d.title ?? d.event_type ?? 'Activity',
+                description: (eventData.description as string) ?? d.description ?? '',
+                timestamp: d.created_at ?? d.timestamp,
+              };
+            })
+          );
+        }
+      } catch (err) {
+        console.error('Failed to fetch user events:', err);
+        setEvents([]);
+      } finally {
+        setEventsLoading(false);
+      }
     };
-    loadRoadmaps();
-  }, [fetchUserRoadmaps]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  const milestones = [
-    { name: 'First Step', percentage: 25, achieved: false },
-    { name: 'Halfway There', percentage: 50, achieved: false },
-    { name: 'Almost Done', percentage: 75, achieved: false },
-    { name: 'Completed', percentage: 100, achieved: false },
-  ];
+    loadEvents();
+  }, []);
 
   return (
-    <div className="container mx-auto max-w-6xl py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">Progress Tracking</h1>
-        <p className="text-muted-foreground">Monitor your learning journey and celebrate your achievements</p>
+    <div className="container mx-auto max-w-5xl py-12 px-4 space-y-10">
+      <div className="mb-2">
+        <h1 className="text-4xl font-bold text-white mb-2">Progress & Activity</h1>
+        <p className="text-white/60">Monitor your learning journey and celebrate your achievements.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overall Progress</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0%</div>
-            <Progress value={0} className="mt-2 h-2" />
-            <p className="text-xs text-muted-foreground mt-2">0 of 0 steps completed</p>
-          </CardContent>
-        </Card>
+      <ContributionGraph events={events} />
+      <PinnedRoadmaps roadmaps={userRoadmaps} progressMap={progressMap} />
+      <RecentActivityFeed events={events} loading={eventsLoading} />
+    </div>
+  );
+}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
-            <Flame className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0 days</div>
-            <p className="text-xs text-muted-foreground mt-2">Keep the momentum going!</p>
-          </CardContent>
-        </Card>
+function ContributionGraph({ events }: { events: ActivityEvent[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [cellSize, setCellSize] = useState(13);
+  const GAP = 3;
+  const LABEL_WIDTH = 36;
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Milestones</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0 / 4</div>
-            <p className="text-xs text-muted-foreground mt-2">Achievements unlocked</p>
-          </CardContent>
-        </Card>
-      </div>
+  const { columns, monthLabels, totalTasks, activeDays, maxStreak } = useMemo(() => {
+    const today = new Date();
+    const start = subDays(today, 364);
+    const days = eachDayOfInterval({ start, end: today });
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Milestones</CardTitle>
-            <CardDescription>Track your major achievements</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {milestones.map((milestone) => (
-                <div key={milestone.name} className="flex items-center gap-3">
-                  {milestone.achieved ? (
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
-                  ) : (
-                    <Circle className="h-5 w-5 text-muted-foreground" />
-                  )}
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className={milestone.achieved ? 'font-medium' : 'text-muted-foreground'}>
-                        {milestone.name}
-                      </span>
-                      <Badge variant={milestone.achieved ? 'default' : 'outline'}>{milestone.percentage}%</Badge>
-                    </div>
-                  </div>
+    const countMap = new Map<string, number>();
+    events.forEach(e => {
+      const dStr = format(new Date(e.timestamp), 'yyyy-MM-dd');
+      countMap.set(dStr, (countMap.get(dStr) || 0) + 1);
+    });
+
+    const contributions = days.map(date => ({
+      date,
+      count: countMap.get(format(date, 'yyyy-MM-dd')) || 0,
+    }));
+
+    const totalTasks = contributions.reduce((a, c) => a + c.count, 0);
+    const activeDays = contributions.filter(c => c.count > 0).length;
+
+    let maxStreak = 0, streak = 0;
+    contributions.forEach(c => {
+      if (c.count > 0) { streak++; maxStreak = Math.max(maxStreak, streak); }
+      else { streak = 0; }
+    });
+
+    type Cell = { date: Date; count: number } | null;
+    const startOffset = (contributions[0].date.getDay() + 6) % 7;
+    const padded: Cell[] = [...Array(startOffset).fill(null), ...contributions];
+    const columns: Cell[][] = [];
+    for (let i = 0; i < padded.length; i += 7) columns.push(padded.slice(i, i + 7));
+
+    const monthLabels: (string | null)[] = columns.map((col, ci) => {
+      const first = col.find(c => c !== null);
+      if (!first) return null;
+      const prev = columns[ci - 1]?.find(c => c !== null);
+      return (!prev || prev.date.getMonth() !== first.date.getMonth())
+        ? format(first.date, 'MMM') : null;
+    });
+
+    return { columns, monthLabels, totalTasks, activeDays, maxStreak };
+  }, [events]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const compute = () => {
+      const available = el.clientWidth - LABEL_WIDTH;
+      const size = Math.floor((available - (columns.length - 1) * GAP) / columns.length);
+      setCellSize(Math.max(8, Math.min(size, 18)));
+    };
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [columns.length]);
+
+  const getIntensityColor = (count: number) => {
+    if (count === 0) return '#3d34343e';
+    if (count <= 2) return '#166534';
+    if (count <= 5) return '#16a34a';
+    return '#00ff5eff';
+  };
+
+  return (
+    <Card className="border border-cyan-500/20 bg-cyan-950/10 backdrop-blur-md rounded-2xl overflow-hidden hover:border-cyan-500/40 hover:shadow-[0_8px_32px_rgba(6,182,212,0.15)] transition-all duration-200">
+      <CardContent className="p-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+          <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-cyan-400" />
+            Activity Graph
+          </h2>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-white/70">
+            <div className="flex items-center gap-1">
+              <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+              <span className="text-white font-medium">{totalTasks}</span> activities
+            </div>
+            <div className="w-1 h-1 rounded-full bg-white/30" />
+            <div><span className="text-white font-medium">{activeDays}</span> active days</div>
+            <div className="w-1 h-1 rounded-full bg-white/30" />
+            <div className="flex items-center gap-1">
+              <Flame className="w-4 h-4 text-orange-400" />
+              Max streak: <span className="text-white font-medium">{maxStreak}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Graph — measured via ref, cells fill width exactly */}
+        <div ref={containerRef} className="w-full">
+          <div className="flex items-start w-full">
+
+            {/* Day-of-week labels */}
+            <div
+              className="flex flex-col shrink-0 text-[10px] text-white text-bold"
+              style={{ width: LABEL_WIDTH, gap: GAP }}
+            >
+              {['Mon', '', 'Wed', '', 'Fri', '', ''].map((label, i) => (
+                <div key={i} className="flex items-center" style={{ height: cellSize }}>
+                  {label}
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Active Roadmaps</CardTitle>
-            <CardDescription>Your current learning paths</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {roadmaps.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">No active roadmaps</p>
-            ) : (
-              <div className="space-y-4">
-                {roadmaps.map((roadmap) => (
-                  <div key={roadmap.id} className="p-4 rounded-lg border border-border">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="font-medium">{roadmap.career_goal}</h3>
-                        <p className="text-sm text-muted-foreground">{roadmap.target_company}</p>
-                      </div>
-                      <Badge variant="outline">{roadmap.timeline}</Badge>
-                    </div>
-                    <Progress value={0} className="h-2 mt-2" />
-                    <p className="text-xs text-muted-foreground mt-2">0% complete</p>
+            {/* Week columns — flex-1 distributes width equally across all columns */}
+            <div className="flex flex-col flex-1" style={{ gap: GAP }}>
+              <div className="flex w-full" style={{ gap: GAP }}>
+                {columns.map((col, ci) => (
+                  <div key={ci} className="flex flex-col flex-1" style={{ gap: GAP }}>
+                    {col.map((day, di) =>
+                      day === null ? (
+                        <div key={di} style={{ height: cellSize }} />
+                      ) : (
+                        <div
+                          key={di}
+                          title={`${format(day.date, 'MMM d, yyyy')}: ${day.count} activit${day.count === 1 ? 'y' : 'ies'}`}
+                          className="w-full rounded-[2px] transition-all duration-150 hover:scale-110 cursor-pointer"
+                          style={{
+                            height: cellSize,
+                            backgroundColor: getIntensityColor(day.count),
+                            border: `1px solid ${day.count === 0 ? 'rgba(255,255,255,0.08)' : getIntensityColor(day.count)}`,
+                            opacity: day.count === 0 ? 1 : undefined,
+                          }}
+                        />
+                      )
+                    )}
                   </div>
                 ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              {/* Month labels — each sits under its column via flex-1 */}
+              <div className="flex w-full" style={{ gap: GAP }}>
+                {monthLabels.map((label, ci) => (
+                  <div key={ci} className="flex-1 relative overflow-visible" style={{ height: 16 }}>
+                    {label && (
+                      <span className="absolute left-0 top-0 text-xs font-bold text-white whitespace-nowrap">
+                        {label}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+
+function CompanyIcon({ company, color }: { company: string; color: string }) {
+  const [error, setError] = useState(false);
+  if (error) {
+    return (
+      <div
+        className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg shrink-0"
+        style={{ backgroundColor: `${color}20`, color }}
+      >
+        {company[0]?.toUpperCase()}
+      </div>
+    );
+  }
+  return (
+    <img
+      src={`/icons/${company.toLowerCase().replace(/\s+/g, '')}.png`}
+      alt={company}
+      className="w-10 h-10 rounded-lg object-contain bg-white/5 p-1 shrink-0"
+      onError={() => setError(true)}
+    />
+  );
+}
+
+function PinnedRoadmapCard({
+  roadmap,
+  progress,
+  index,
+  dragSourceIndex,
+  dragOverIndex,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+}: {
+  roadmap: Roadmap;
+  progress: UserProgress | undefined;
+  index: number;
+  dragSourceIndex: number | null;
+  dragOverIndex: number | null;
+  onDragStart: (e: React.DragEvent, idx: number) => void;
+  onDragOver: (e: React.DragEvent, idx: number) => void;
+  onDrop: (e: React.DragEvent, idx: number) => void;
+  onDragEnd: () => void;
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+  const brand = getBrandColors(roadmap.target_company);
+  const color = brand.primary;
+
+  const milestones = progress?.milestones || [];
+  const achievedMilestones = milestones.filter((m: Milestone) => m.achieved).length;
+  const totalMilestones = milestones.length > 0 ? milestones.length : 4;
+  const percentage = progress?.progress_percentage || 0;
+
+  const isSource = dragSourceIndex === index;
+  const isTarget = dragOverIndex === index && dragSourceIndex !== null && dragSourceIndex !== index;
+
+  return (
+    <div
+      draggable
+      onDragStart={e => onDragStart(e, index)}
+      onDragOver={e => onDragOver(e, index)}
+      onDrop={e => onDrop(e, index)}
+      onDragEnd={onDragEnd}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="relative border bg-cyan-900/10 backdrop-blur-md rounded-2xl p-4 flex flex-col justify-between h-[120px] transition-all duration-200"
+      style={{
+        borderColor: isTarget ? color : isHovered ? color : 'rgba(6,182,212,0.2)',
+        boxShadow: isTarget
+          ? `inset 0 0 0 2px ${color}, 0 8px 32px ${color}40`
+          : isHovered
+            ? `0 8px 32px ${color}30`
+            : 'none',
+        opacity: isSource ? 0.4 : 1,
+        transform: isSource
+          ? 'scale(0.95)'
+          : isTarget
+            ? 'scale(1.03)'
+            : isHovered
+              ? 'translateY(-2px)'
+              : 'none',
+        cursor: 'grab',
+      }}
+    >
+      <div className="flex justify-between items-start">
+        <div className="flex gap-3">
+          <CompanyIcon company={roadmap.target_company} color={color} />
+          <div>
+            <Link to={`/roadmap/${roadmap.id}`} className="font-medium text-white hover:underline line-clamp-1">
+              {roadmap.career_goal}
+            </Link>
+            <p className="text-xs text-white/50 line-clamp-1 mt-0.5">{roadmap.timeline} • AI generated</p>
+          </div>
+        </div>
+        <div className="text-white/20 hover:text-white/60 cursor-grab active:cursor-grabbing px-1 transition-colors">
+          <GripVertical className="w-5 h-5" />
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Your latest learning activities</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <p>No activity yet. Start completing tasks to see your progress here!</p>
+      <div className="flex items-end justify-between mt-auto">
+        <div className="flex items-center gap-2">
+          <span
+            className="text-[10px] text bold font-medium px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: `${color}20`, color }}
+          >
+            {roadmap.target_company}
+          </span>
+          <span className="text-[12px] text-white text-bold">
+            {achievedMilestones} / {totalMilestones} milestones
+          </span>
+        </div>
+
+        <div className="w-1/3">
+          <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${percentage}%`,
+                background: `linear-gradient(90deg, ${color}99, ${color})`,
+              }}
+            />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PinnedRoadmaps({ roadmaps, progressMap }: { roadmaps: Roadmap[]; progressMap: Record<string, UserProgress> }) {
+  const [pinnedIds, setPinnedIds] = useState<string[]>([]);
+  const [dragSourceIndex, setDragSourceIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (pinnedIds.length === 0 && roadmaps.length > 0) {
+      setPinnedIds(roadmaps.slice(0, 6).map(r => r.id));
+    }
+  }, [roadmaps]);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+    setDragSourceIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) setDragOverIndex(index);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    const sourceIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+    if (isNaN(sourceIndex) || sourceIndex === targetIndex) {
+      setDragSourceIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const next = [...pinnedIds];
+    const temp = next[sourceIndex];
+    next[sourceIndex] = next[targetIndex];
+    next[targetIndex] = temp;
+    setPinnedIds(next);
+    setDragSourceIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragSourceIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const previewIds = useMemo(() => {
+    if (dragSourceIndex === null || dragOverIndex === null || dragSourceIndex === dragOverIndex) {
+      return pinnedIds;
+    }
+    const next = [...pinnedIds];
+    const temp = next[dragSourceIndex];
+    next[dragSourceIndex] = next[dragOverIndex];
+    next[dragOverIndex] = temp;
+    return next;
+  }, [pinnedIds, dragSourceIndex, dragOverIndex]);
+
+  const pinnedRoadmaps = previewIds
+    .map(id => roadmaps.find(r => r.id === id))
+    .filter(Boolean) as Roadmap[];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h4 className="text-xl font-semibold text-white">Pinned</h4>
+        <CustomizePinsModal roadmaps={roadmaps} pinnedIds={pinnedIds} setPinnedIds={setPinnedIds} />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => {
+          const roadmap = pinnedRoadmaps[i];
+          if (!roadmap) {
+            return (
+              <div
+                key={`empty-${i}`}
+                className="border-2 border-dashed border-cyan-500/20 rounded-2xl h-[120px] flex items-center justify-center bg-cyan-950/5"
+              >
+                <span className="text-white/30 text-sm flex items-center gap-2">
+                  <Plus className="w-4 h-4" /> Pin a roadmap
+                </span>
+              </div>
+            );
+          }
+          return (
+            <PinnedRoadmapCard
+              key={roadmap.id}
+              roadmap={roadmap}
+              progress={progressMap[roadmap.id]}
+              index={i}
+              dragSourceIndex={dragSourceIndex}
+              dragOverIndex={dragOverIndex}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onDragEnd={handleDragEnd}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CustomizePinsModal({
+  roadmaps,
+  pinnedIds,
+  setPinnedIds,
+}: {
+  roadmaps: Roadmap[];
+  pinnedIds: string[];
+  setPinnedIds: (ids: string[]) => void;
+}) {
+  const [tempPinned, setTempPinned] = useState<string[]>(pinnedIds);
+  const [open, setOpen] = useState(false);
+
+  const togglePin = (id: string) => {
+    if (tempPinned.includes(id)) {
+      setTempPinned(tempPinned.filter(p => p !== id));
+    } else if (tempPinned.length < 6) {
+      setTempPinned([...tempPinned, id]);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={o => { setOpen(o); if (o) setTempPinned(pinnedIds); }}>
+      <DialogTrigger asChild>
+        <Button variant="link" className="text-cyan-400 hover:text-cyan-300 px-0">
+          Customize your pins
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-slate-900 border-cyan-500/20 text-white max-w-md">
+        <DialogHeader>
+          <DialogTitle>Customize Pinned Roadmaps</DialogTitle>
+          <DialogDescription className="text-white/60">
+            Select up to 6 roadmaps to pin to your progress dashboard.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 mt-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+          {roadmaps.length === 0 ? (
+            <p className="text-white/40 text-sm">No roadmaps available.</p>
+          ) : (
+            roadmaps.map(roadmap => {
+              const isPinned = tempPinned.includes(roadmap.id);
+              const disabled = !isPinned && tempPinned.length >= 6;
+              return (
+                <div
+                  key={roadmap.id}
+                  className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
+                >
+                  <Checkbox
+                    id={`pin-${roadmap.id}`}
+                    checked={isPinned}
+                    disabled={disabled}
+                    onCheckedChange={() => togglePin(roadmap.id)}
+                    className="border-white/30 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+                  />
+                  <label
+                    htmlFor={`pin-${roadmap.id}`}
+                    className={`text-sm font-medium leading-none flex-1 cursor-pointer ${disabled ? 'opacity-50' : ''}`}
+                  >
+                    {roadmap.career_goal} @ {roadmap.target_company}
+                  </label>
+                </div>
+              );
+            })
+          )}
+        </div>
+        <div className="flex justify-end gap-3 mt-6">
+          <Button variant="ghost" onClick={() => setOpen(false)} className="hover:bg-white/10 hover:text-white">
+            Cancel
+          </Button>
+          <Button onClick={() => { setPinnedIds(tempPinned); setOpen(false); }} className="bg-cyan-600 hover:bg-cyan-500 text-white">
+            Save Pins
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function RecentActivityFeed({ events, loading }: { events: ActivityEvent[]; loading: boolean }) {
+  const [displayCount, setDisplayCount] = useState(5);
+
+  const formatTimeAgo = (dateStr: string) => {
+    const diffMs = Date.now() - new Date(dateStr).getTime();
+    const diffMin = Math.floor(diffMs / 60_000);
+    if (diffMin < 1) return 'Just now';
+    if (diffMin < 60) return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays === 1) return 'Yesterday';
+    return `${diffDays} days ago`;
+  };
+
+  const getEventColor = (type: EventType) => {
+    switch (type) {
+      case 'sign_in': return '#ef4444';
+      case 'roadmap_created': return '#f97316';
+      case 'roadmap_completed': return '#f97316';
+      case 'milestone_achieved': return '#a855f7';
+      case 'step_completed': return '#06b6d4';
+      default: return '#06b6d4';
+    }
+  };
+
+  const getEventIcon = (type: EventType) => {
+    switch (type) {
+      case 'sign_in': return <LogIn className="w-4 h-4" />;
+      case 'roadmap_created': return <Plus className="w-4 h-4" />;
+      case 'roadmap_completed': return <Award className="w-4 h-4" />;
+      case 'step_completed': return <CheckCircle2 className="w-4 h-4" />;
+      case 'milestone_achieved': return <Flame className="w-4 h-4" />;
+      default: return <Calendar className="w-4 h-4" />;
+    }
+  };
+
+  const resolveTitle = (e: ActivityEvent) => {
+    if (e.title && e.title !== e.type) return e.title;
+    switch (e.type) {
+      case 'sign_in': return 'Signed in';
+      case 'roadmap_created': return 'Created a new roadmap';
+      case 'roadmap_completed': return 'Completed a roadmap';
+      case 'step_completed': return 'Completed a step';
+      case 'milestone_achieved': return 'Achieved a milestone';
+      default: return 'Activity';
+    }
+  };
+
+  const visibleEvents = events.slice(0, displayCount);
+
+  return (
+    <div className="space-y-4">
+      <h4 className="text-xl font-semibold text-white">Recent Activity</h4>
+
+      {loading ? (
+        <div className="flex justify-center p-8 text-white/50">Loading activity…</div>
+      ) : events.length === 0 ? (
+        <Card className="border border-cyan-500/20 bg-cyan-950/10 backdrop-blur-md rounded-2xl p-8 text-center">
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-cyan-500/10 flex items-center justify-center mb-4">
+              <Calendar className="w-8 h-8 text-cyan-500/50" />
+            </div>
+            <p className="text-white/60">No activity yet. Start a roadmap to get going!</p>
+          </div>
+        </Card>
+      ) : (
+        <div className="space-y-3 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-cyan-500/20 before:via-cyan-500/10 before:to-transparent">
+          {visibleEvents.map(event => {
+            const color = getEventColor(event.type);
+            return (
+              <div
+                key={event.id}
+                className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group transition-all"
+              >
+                {/* Timeline marker */}
+                <div
+                  className="flex items-center justify-center w-10 h-10 rounded-full border bg-slate-900 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors"
+                  style={{ borderColor: `${color}50`, color }}
+                >
+                  {getEventIcon(event.type)}
+                </div>
+
+                {/* Card */}
+                <Card
+                  className="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] border bg-cyan-950/10 backdrop-blur-md rounded-xl p-4 transition-all group-hover:-translate-y-0.5"
+                  style={{ borderColor: `${color}30` }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = `${color}80`;
+                    (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 32px ${color}20`;
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = `${color}30`;
+                    (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+                  }}
+                >
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between items-center">
+                      <h5 className="font-medium text-white/90 text-sm">{resolveTitle(event)}</h5>
+                      <span
+                        className="text-xs text-white/40 transition-colors cursor-default"
+                        title={new Date(event.timestamp).toLocaleString()}
+                        onMouseEnter={e => (e.currentTarget.style.color = color)}
+                        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+                      >
+                        {formatTimeAgo(event.timestamp)}
+                      </span>
+                    </div>
+                    {event.description && (
+                      <p className="text-sm text-white/60">{event.description}</p>
+                    )}
+                  </div>
+                </Card>
+              </div>
+            );
+          })}
+
+          {/* FIX 3: Gradient cyan→blue load more button with glow hover */}
+          {displayCount < events.length && (
+            <div className="flex justify-center pt-6">
+              <Button
+                className="relative rounded-full px-8 py-2 text-sm font-semibold text-white border-0
+                  bg-gradient-to-r from-cyan-500 to-blue-500
+                  shadow-[0_0_16px_rgba(6,182,212,0.3)]
+                  hover:from-cyan-400 hover:to-blue-400
+                  hover:shadow-[0_0_28px_rgba(6,182,212,0.55)]
+                  transition-all duration-200"
+                onClick={() => setDisplayCount(prev => prev + 5)}
+              >
+                Load more
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

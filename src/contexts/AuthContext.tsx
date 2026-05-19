@@ -3,6 +3,7 @@ import { supabase } from '@/db/supabase';
 import type { User } from '@supabase/supabase-js';
 import type { Profile } from '@/types/index';
 import { toast } from 'sonner';
+import { track } from '@/lib/trackEvent';
 
 export async function getProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
@@ -100,6 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ensureProfile(session.user).then(setProfile);
         } else {
           getProfile(session.user.id).then(setProfile);
+        }
+        if (event === 'SIGNED_IN') {
+          track.signIn();
         }
       } else {
         setProfile(null);

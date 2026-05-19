@@ -3,6 +3,7 @@ import type { Resource, Roadmap, RoadmapStep } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { getModelById } from '@/constants/aiModels';
 import { puterService } from '~/puter/index.ts';
+import { track } from '@/lib/trackEvent';
 
 interface RoadmapContextType {
   currentRoadmap: Roadmap | null;
@@ -151,6 +152,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
             setCurrentRoadmap(data.roadmap);
             setRoadmapSteps(data.steps || []);
             setUserRoadmaps(prev => [data.roadmap, ...prev]);
+            await track.roadmapCreated(data.roadmap);
             return data.roadmap;
           }
 
@@ -270,6 +272,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           setCurrentRoadmap(roadmap);
           setRoadmapSteps(steps || []);
           setUserRoadmaps(prev => [roadmap, ...prev]);
+          await track.roadmapCreated(roadmap);
           return roadmap;
         }
 
