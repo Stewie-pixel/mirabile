@@ -98,10 +98,15 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           setProgressMap(prev => ({ ...prev, [roadmapId]: updatedProgress }));
 
           if (completed) {
-            const roadmap = userRoadmaps.find(r => r.id === roadmapId);
-            const step = roadmap?.steps?.find(s => s.id === stepId);
+            const { data: stepData} = await supabase 
+              .from('roadmap_steps')
+              .select('title')
+              .eq('id', stepId)
+              .maybeSingle();
 
-            const stepRef = { id: stepId, title: step?.title ?? '' };
+            const roadmap = userRoadmaps.find(r => r.id === roadmapId);
+
+            const stepRef = { id: stepId, title: stepData?.title ?? '' };
             const roadmapRef = {
               id: roadmapId,
               career_goal: roadmap?.career_goal ?? '',
