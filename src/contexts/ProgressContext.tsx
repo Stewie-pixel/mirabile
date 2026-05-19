@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import type { UserProgress } from '@/types';
 import { supabase } from '@/lib/supabase';
-
+import { track } from '@/lib/trackEvent';
+import { useRoadmap } from './RoadmapContext';
 interface ProgressContextType {
   progress: UserProgress | null;
   progressMap: Record<string, UserProgress>;
@@ -20,6 +21,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const [progressMap, setProgressMap] = useState<Record<string, UserProgress>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { userRoadmaps } = useRoadmap();
 
   const fetchProgress = useCallback(async (roadmapId: string) => {
     if (!roadmapId) return;
@@ -64,7 +66,6 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         });
         setProgressMap(prev => ({ ...prev, ...map }));
 
-        // Keep single progress in sync with the first result
         if (data.length > 0 && !progress) {
           setProgress(data[0]);
         }
@@ -91,8 +92,35 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         }
 
         if (data?.progress) {
-          setProgress(data.progress);
-          setProgressMap(prev => ({ ...prev, [roadmapId]: data.progress }));
+          const updatedProgress: UserProgress = data.progress;
+
+          setProgress(updatedProgress);
+          setProgressMap(prev => ({ ...prev, [roadmapId]: updatedProgress }));
+
+          if (completed) {
+            const roadmap = userRoadmaps.find(r => r.id === roadmapId);
+            const step = roadmap?.steps?.find(s => s.id === stepId);
+
+            const stepRef = { id: stepId, title: step?.title ?? '' };
+            const roadmapRef = {
+              id: roadmapId,
+              career_goal: roadmap?.career_goal ?? '',
+              target_company: roadmap?.target_company ?? '',
+            };
+
+            await track.stepCompleted(stepRef, roadmapRef);
+
+            const newMilestones: { name: string }[] =
+              data.new_milestones ?? data.newly_achieved_milestones ?? [];
+
+            for (const milestone of newMilestones) {
+              await track.milestoneAchieved({ title: milestone.name }, roadmapRef);
+            }
+
+            if (updatedProgress.progress_percentage === 100) {
+              await track.roadmapCompleted(roadmapRef);
+            }
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to update progress');
@@ -100,7 +128,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     },
-    []
+    [userRoadmaps]
   );
 
   const calculateStreak = useCallback(() => {
