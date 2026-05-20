@@ -6,6 +6,10 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/mirabile/',
+  build: {
+    outDir: 'dist',
+  },
   plugins: [
     react(),
     miaodaDevPlugin(),
@@ -17,6 +21,7 @@ export default defineConfig({
       },
     }),
   ],
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
