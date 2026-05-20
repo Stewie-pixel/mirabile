@@ -15,11 +15,11 @@
 ## Demo
 
 https://github.com/user-attachments/assets/1596a4be-87d6-4c78-8636-006bce7be2ce
- 
+
 ---
- 
+
 ## Table of Contents
- 
+
 - [Overview](#overview)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
@@ -32,46 +32,58 @@ https://github.com/user-attachments/assets/1596a4be-87d6-4c78-8636-006bce7be2ce
 - [YouTube Integration](#youtube-integration)
 - [Achievements System](#achievements-system)
 - [Contributing](#contributing)
+
 ---
- 
+
 ## Overview
- 
-Mirabile is an AI agent lives in the Mirabile ecosystem that takes three inputs: a career goal, a target company, and a timeline to generate a complete roadmap tailored to that exact combination, broken into 6 phases: Foundation, Intermediate, Advanced, Data Structures & Algorithms, System Architecture, and Interview Preparation
- 
+
+Mirabile is an AI agent lives in the Mirabile ecosystem that takes three inputs:
+a career goal, a target company, and a timeline to generate a complete roadmap
+tailored to that exact combination, broken into 6 phases: Foundation,
+Intermediate, Advanced, Data Structures & Algorithms, System Architecture, and
+Interview Preparation
+
 ---
- 
+
 ## Features
- 
-- **Multi-model AI generation** — generate roadmaps with OpenAI, Claude, or Gemini
-- **Company-specific roadmaps** — content tailored to a target company's tech stack, culture, and interview format
-- **Real YouTube resources** — videos fetched server-side via YouTube Data API v3, scoped by role and phase to curated channels
-- **Progress tracking** — track completed steps, streaks, and milestones per roadmap
+
+- **Multi-model AI generation** — generate roadmaps with OpenAI, Claude, or
+  Gemini
+- **Company-specific roadmaps** — content tailored to a target company's tech
+  stack, culture, and interview format
+- **Real YouTube resources** — videos fetched server-side via YouTube Data API
+  v3, scoped by role and phase to curated channels
+- **Progress tracking** — track completed steps, streaks, and milestones per
+  roadmap
 - **Achievements system** — 10 unlockable achievements based on real activity
-- **Activity dashboard** — daily progress chart, trending tech news, active roadmap cards
-- **Hacker News feed** — top tech stories cached daily via the HN API with Unsplash cover images
+- **Activity dashboard** — daily progress chart, trending tech news, active
+  roadmap cards
+- **Hacker News feed** — top tech stories cached daily via the HN API with
+  Unsplash cover images
 - **Dark mode UI** — custom glass-morphism design system
+
 ---
- 
+
 ## Tech Stack
- 
-| Layer | Technology |
-|---|---|
-| Frontend | React, TypeScript, Tailwind CSS, Vite |
-| Routing | React Router |
-| Backend | Supabase Edge Functions (Deno) |
-| Database | Supabase (PostgreSQL) |
-| Auth | Supabase Auth |
-| AI — OpenAI | GPT via OpenAI API |
-| AI — Anthropic | Claude via Anthropic API |
-| AI — Google | Gemini via Google Vertex AI |
-| Video resources | YouTube Data API v3 |
-| Charts | Recharts |
-| Icons | Lucide React |
- 
+
+| Layer           | Technology                            |
+| --------------- | ------------------------------------- |
+| Frontend        | React, TypeScript, Tailwind CSS, Vite |
+| Routing         | React Router                          |
+| Backend         | Supabase Edge Functions (Deno)        |
+| Database        | Supabase (PostgreSQL)                 |
+| Auth            | Supabase Auth                         |
+| AI — OpenAI     | GPT via OpenAI API                    |
+| AI — Anthropic  | Claude via Anthropic API              |
+| AI — Google     | Gemini via Google Vertex AI           |
+| Video resources | YouTube Data API v3                   |
+| Charts          | Recharts                              |
+| Icons           | Lucide React                          |
+
 ---
- 
+
 ## Project Structure
- 
+
 ```
 mirabile/
 ├── src/
@@ -113,27 +125,28 @@ mirabile/
 └── public/
     └── icons/                     # Company logo icons
 ```
- 
+
 ---
- 
+
 ## Getting Started
- 
+
 ### Prerequisites
- 
+
 - Node.js 18+
 - [Supabase CLI](https://supabase.com/docs/guides/cli)
 - A Supabase project
 - API keys for at least one AI provider
+
 ### Installation
- 
+
 ```bash
 git clone https://github.com/Stewie-pixel/mirabile.git
 cd mirabile
 npm install
 ```
- 
+
 ### Local development
- 
+
 ```bash
 # Start the frontend
 npm run dev
@@ -141,21 +154,21 @@ npm run dev
 # Serve edge functions locally
 supabase functions serve generate-roadmap --env-file .env.local
 ```
- 
+
 ---
- 
+
 ## Environment Variables
- 
+
 ### Frontend — `.env`
- 
+
 ```env
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_ANON_KEY=your_anon_key
 VITE_UNSPLASH_ACCESS_KEY=your_unsplash_key
 ```
- 
+
 ### Edge functions — `.env.local`
- 
+
 ```env
 SUPABASE_URL=https://your-project-ref.supabase.co
 SUPABASE_ANON_KEY=your_anon_key
@@ -172,9 +185,9 @@ GCP_LOCATION=us-central1
 # YouTube Data API v3
 YOUTUBE_API_KEY=your_youtube_key
 ```
- 
+
 ### Setting secrets on Supabase
- 
+
 ```bash
 supabase secrets set LLM_API_KEY=your_key
 supabase secrets set CLAUDE_API_KEY=your_key
@@ -185,13 +198,13 @@ supabase secrets set GCP_PROJECT_ID=your_project_id
 # Verify
 supabase secrets list
 ```
- 
+
 ---
- 
+
 ## Supabase Setup
- 
+
 ### Required tables
- 
+
 ```sql
 -- Roadmaps
 create table roadmaps (
@@ -267,20 +280,21 @@ create table chat_messages (
   created_at timestamptz default now()
 );
 ```
- 
+
 ---
- 
+
 ## Edge Functions
- 
+
 ### `generate-roadmap`
- 
+
 The main function that handles the full roadmap generation pipeline:
- 
+
 1. Authenticates the user via Supabase Auth
 2. Routes the request to the selected AI provider (OpenAI, Claude, or Gemini)
 3. Runs a two-stage prompt — structure first, resources second
 4. Inserts roadmap, steps, resources, and progress into the database
 5. Fetches a real YouTube video per step via the YouTube Data API v3
+
 ```bash
 # Deploy
 supabase functions deploy generate-roadmap
@@ -288,75 +302,92 @@ supabase functions deploy generate-roadmap
 # Logs
 supabase functions logs generate-roadmap --tail
 ```
- 
+
 ---
- 
+
 ## AI Models
- 
-Models are registered in `src/constants/aiModels.ts`. Each model has a `provider` and `modelId`:
- 
-| Key | Provider | Model |
-|---|---|---|
-| `gpt-4o` | openai | gpt-4o |
-| `gpt-4o-mini` | openai | gpt-4o-mini |
-| `claude-3-5-sonnet` | claude | claude-3-5-sonnet-20241022 |
-| `gemini-1.5-pro` | gemini | gemini-1.5-pro |
- 
+
+Models are registered in `src/constants/aiModels.ts`. Each model has a
+`provider` and `modelId`:
+
+| Key                 | Provider | Model                      |
+| ------------------- | -------- | -------------------------- |
+| `gpt-4o`            | openai   | gpt-4o                     |
+| `gpt-4o-mini`       | openai   | gpt-4o-mini                |
+| `claude-3-5-sonnet` | claude   | claude-3-5-sonnet-20241022 |
+| `gemini-1.5-pro`    | gemini   | gemini-1.5-pro             |
+
 The prompt pipeline is split into two stages:
+
 - `buildStructurePrompt` — generates 6 phases and 18 steps
-- `buildResourcesPrompt` — generates articles, courses, and documentation per step (videos handled separately)
+- `buildResourcesPrompt` — generates articles, courses, and documentation per
+  step (videos handled separately)
+
 ---
- 
+
 ## YouTube Integration
- 
-Videos are fetched server-side after AI generation using the YouTube Data API v3. Each step gets one video scoped to a curated channel list based on the career role and roadmap phase.
- 
-**Quota usage:** 100 units per search × 18 steps = **1,800 units per roadmap**. The free tier allows 10,000 units/day (~5 roadmaps/day). A caching layer is recommended before scaling.
- 
+
+Videos are fetched server-side after AI generation using the YouTube Data API
+v3. Each step gets one video scoped to a curated channel list based on the
+career role and roadmap phase.
+
+**Quota usage:** 100 units per search × 18 steps = **1,800 units per roadmap**.
+The free tier allows 10,000 units/day (~5 roadmaps/day). A caching layer is
+recommended before scaling.
+
 **Channel mapping by role:**
- 
-| Role | Channels |
-|---|---|
-| Frontend | WebDevSimplified, Fireship, VercelHQ, ChromeDevelopers |
-| Backend | husseinalnasser, TechWithTim, Fireship |
-| ML | Statquest, TensorFlow, googledeepmind |
-| DevOps | GoogleCloudTech, AzureDevOps, awsdevelopers |
-| Mobile | Android, AppleDeveloper |
-| DSA phases | NeetCode, CSDojo, ByteByteGo |
-| System Design phases | ByteByteGo, husseinalnasser, GoogleDevelopers |
-| Interview phases | NeetCode, TechLead, ByteByteGo |
- 
+
+| Role                 | Channels                                               |
+| -------------------- | ------------------------------------------------------ |
+| Frontend             | WebDevSimplified, Fireship, VercelHQ, ChromeDevelopers |
+| Backend              | husseinalnasser, TechWithTim, Fireship                 |
+| ML                   | Statquest, TensorFlow, googledeepmind                  |
+| DevOps               | GoogleCloudTech, AzureDevOps, awsdevelopers            |
+| Mobile               | Android, AppleDeveloper                                |
+| DSA phases           | NeetCode, CSDojo, ByteByteGo                           |
+| System Design phases | ByteByteGo, husseinalnasser, GoogleDevelopers          |
+| Interview phases     | NeetCode, TechLead, ByteByteGo                         |
+
 To get a YouTube API key:
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
 2. Enable **YouTube Data API v3**
 3. Create an API key under Credentials
 4. Run `supabase secrets set YOUTUBE_API_KEY=your_key`
+
 ---
- 
+
 ## Achievements System
- 
-Achievements are checked and unlocked by calling `checkAndUnlockAchievements(userId)` after qualifying actions. All date calculations use UTC to avoid timezone bugs.
- 
-| Key | Name | Condition |
-|---|---|---|
-| `first_spark` | First Spark 🔥 | Complete your first step |
-| `pathfinder` | Pathfinder 🗺️ | Create your first roadmap |
-| `summit_reached` | Summit Reached 🏔️ | Complete an entire roadmap |
-| `on_a_roll` | On a Roll ⚡ | 7-day activity streak |
-| `overachiever` | Overachiever 🏆 | Complete 3 roadmaps |
-| `ai_collaborator` | AI Collaborator 💬 | Ask 5 questions to the AI assistant |
-| `fast_learner` | Fast Learner ⚡ | Complete 5 steps in a single day |
-| `explorer` | Explorer 🚀 | Generate 5 roadmaps for unique career goals |
-| `perseverance` | Perseverance 💪 | Complete 10 steps total |
-| `night_owl` | Night Owl 🦉 | Complete a step between 11 PM and 4 AM UTC |
- 
+
+Achievements are checked and unlocked by calling
+`checkAndUnlockAchievements(userId)` after qualifying actions. All date
+calculations use UTC to avoid timezone bugs.
+
+| Key               | Name               | Condition                                   |
+| ----------------- | ------------------ | ------------------------------------------- |
+| `first_spark`     | First Spark 🔥     | Complete your first step                    |
+| `pathfinder`      | Pathfinder 🗺️      | Create your first roadmap                   |
+| `summit_reached`  | Summit Reached 🏔️  | Complete an entire roadmap                  |
+| `on_a_roll`       | On a Roll ⚡       | 7-day activity streak                       |
+| `overachiever`    | Overachiever 🏆    | Complete 3 roadmaps                         |
+| `ai_collaborator` | AI Collaborator 💬 | Ask 5 questions to the AI assistant         |
+| `fast_learner`    | Fast Learner ⚡    | Complete 5 steps in a single day            |
+| `explorer`        | Explorer 🚀        | Generate 5 roadmaps for unique career goals |
+| `perseverance`    | Perseverance 💪    | Complete 10 steps total                     |
+| `night_owl`       | Night Owl 🦉       | Complete a step between 11 PM and 4 AM UTC  |
+
 ---
- 
+
 ## Contributing
- 
+
 1. Fork the repo
 2. Create a feature branch: `git checkout -b feat/your-feature`
 3. Commit your changes: `git commit -m 'feat: add your feature'`
 4. Push to the branch: `git push origin feat/your-feature`
 5. Open a pull request
+
 ---
+
+## License
+
+MIT @ Stewie-pixel 2026 All rights reserved.
