@@ -1,16 +1,5 @@
-/**
- * Video Player Component
- * 
- * Video player based on video-react wrapper, supports custom poster, autoplay, mute and other features
- * 
- * Usage example:
- * <Video
- *   src="" // Video resource URL, defaults to empty string
- *   poster="https://internal-amis-res.cdn.bcebos.com/images/2019-12/1577157239810/da6376bf988c.png" // Video poster image
- * />
- */
-
 import {
+    Player,
     BigPlayButton,
     ControlBar,
     PlayToggle,
@@ -24,14 +13,13 @@ import {
 import 'video-react/dist/video-react.css';
 
 interface VideoProps {
-    /** Video resource URL */
 src: string;
-poster?: string; /** Video poster image URL */
-className?: string; /** Custom class name */
-autoPlay?: boolean; /** Whether to autoplay, defaults to false */
-muted?: boolean; /** Whether to mute, defaults to false */
-controls?: boolean; /** Whether to show controls, defaults to true */
-aspectRatio?: string | 'auto' | '16:9' | '4:3'; /** Video aspect ratio, defaults to 'auto' */
+poster?: string;
+className?: string;
+autoPlay?: boolean;
+muted?: boolean;
+controls?: boolean;
+aspectRatio?: string | 'auto' | '16:9' | '4:3';
 }
 
 export default function Video({
@@ -102,6 +90,7 @@ display: block;
         <TimeDivider key="time-divider" />
         <DurationDisplay key="duration-display" />
         <ProgressControl key="progress-control" />
+        {/* @ts-expect-error - video-react ControlBar injects actions prop */}
         <FullscreenToggle key="fullscreen-toggle" />
         </ControlBar>
         <BigPlayButton position="center" />

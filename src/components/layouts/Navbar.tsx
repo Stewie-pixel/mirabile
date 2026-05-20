@@ -1,10 +1,42 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useLocation } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, LogOut, Github, ChevronDown, BookOpen, Sparkles, MessageSquare, Clock, Building2 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Menu, Github, ChevronDown, BookOpen, Sparkles, MessageSquare, Clock, Building2 } from 'lucide-react';
+import { NotificationMailbox } from '@/components/notifications/NotificationMailbox';
+import { ProfilePanel } from '@/components/profile/ProfilePanel';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRoadmap } from '@/contexts/RoadmapContext';
-import type { Roadmap } from '@/types';
+import type { Profile, Roadmap } from '@/types';
+
+const GITHUB_URL =
+  import.meta.env.VITE_GITHUB_URL ?? 'https://github.com/Stewie-pixel/mirabile';
+
+const SEARCH_ROUTES = [
+  { keywords: ['dashboard', 'dash'], path: '/dashboard' },
+  { keywords: ['roadmap', 'road', 'generator'], path: '/generator' },
+  { keywords: ['progress', 'tracking'], path: '/progress' },
+  { keywords: ['profile', 'account'], path: '/profile' },
+] as const;
+
+function matchSearchRoute(query: string): string | null {
+  const q = query.trim().toLowerCase();
+  if (!q) return null;
+  for (const route of SEARCH_ROUTES) {
+    if (route.keywords.some(kw => q.includes(kw) || kw.includes(q))) {
+      return route.path;
+    }
+  }
+  return null;
+}
+
+function initials(name: string | null, email: string | null): string {
+  const src = name || email || '?';
+  const parts = src.split(/[\s@]+/).filter(Boolean);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 const T = {
   border: 'rgba(10,255,228,0.12)',
@@ -265,37 +297,68 @@ function RoadmapNavItem({ active }: { active: boolean }) {
   );
 }
 
-function GithubButton({ onClick }: { onClick: () => void }) {
-  const { onMouseMove, onMouseLeave, glow } = useCursorGlow();
+function GithubLink() {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      className="relative overflow-hidden w-9 h-9 rounded-lg flex items-center justify-center"
-      style={{ border: `1px solid ${T.border}`, background: 'rgba(10,255,228,0.04)', color: T.textMid }}
+    <a
+      href={GITHUB_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="GitHub"
+      className="flex items-center justify-center"
     >
-      {glow}
-      <Github className="h-5 w-5" />
-    </button>
+      <Github className="w-5 h-5 text-white/70 hover:text-white transition-colors" />
+    </a>
   );
 }
 
-function SignOutButton({ onClick }: { onClick: () => void }) {
-  const { onMouseMove, onMouseLeave, glow } = useCursorGlow();
+function NavbarSearch() {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  const [noResults, setNoResults] = useState(false);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') return;
+    const path = matchSearchRoute(query);
+    if (path) {
+      navigate(path);
+      setQuery('');
+      setNoResults(false);
+    } else if (query.trim()) {
+      setNoResults(true);
+    }
+  };
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      className="hidden md:flex relative overflow-hidden items-center gap-2 px-4 py-2 rounded-lg text-sm"
-      style={{ border: `1px solid ${T.border}`, background: T.surface, color: T.textMid }}
-    >
-      {glow}
-      <LogOut className="h-4 w-4" />
-      Sign Out
+    <TooltipProvider>
+      <Tooltip open={noResults} onOpenChange={setNoResults}>
+        <TooltipTrigger asChild>
+          <input
+            type="text"
+            placeholder="Search..."
+            value={query}
+            onChange={e => {
+              setQuery(e.target.value);
+              setNoResults(false);
+            }}
+            onKeyDown={handleKeyDown}
+            className="hidden md:block rounded-full bg-white/5 border border-white/10 focus:border-cyan-500/40 placeholder:text-white/40 text-white/90 text-sm px-4 py-1.5 w-40 focus:w-64 transition-all outline-none"
+          />
+        </TooltipTrigger>
+        <TooltipContent>No results</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+function NavbarAvatar({ profile, onClick }: { profile: Profile | null; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="flex items-center justify-center rounded-full">
+      <Avatar className="h-9 w-9 border border-cyan-500/40">
+        <AvatarImage src={profile?.avatar_url ?? undefined} alt="" />
+        <AvatarFallback className="bg-cyan-900 text-cyan-100 text-xs font-medium">
+          {initials(profile?.full_name ?? null, profile?.email ?? null)}
+        </AvatarFallback>
+      </Avatar>
     </button>
   );
 }
@@ -333,23 +396,12 @@ function SignUpLink() {
 }
 
 export function Navbar() {
-  const { user, signInWithGithub, signOut } = useAuth();
+  const { user, profile } = useAuth();
   const location = useLocation();
+  const avatarAnchorRef = useRef<HTMLDivElement>(null);
+  const [profilePanelOpen, setProfilePanelOpen] = useState(false);
 
   const isAuthPage = ['/login', '/register'].some(p => location.pathname.startsWith(p));
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
-
-  const handleGithub = async () => {
-    if (user) {
-      globalThis.open('https://github.com/Stewie-pixel/mirabile.git', '_blank', 'noopener,noreferrer');
-    } else {
-      const { error } = await signInWithGithub();
-      if (error) console.error(error.message);
-    }
-  };
 
   const navItemsBefore = [
     { path: '/', label: 'Home' },
@@ -403,11 +455,22 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-3 ml-auto md:ml-0">
-            <GithubButton onClick={handleGithub} />
-
             {user ? (
               <>
-                <SignOutButton onClick={handleSignOut} />
+                <NavbarSearch />
+                <NotificationMailbox />
+                <GithubLink />
+                <div ref={avatarAnchorRef}>
+                  <NavbarAvatar
+                    profile={profile}
+                    onClick={() => setProfilePanelOpen(prev => !prev)}
+                  />
+                </div>
+                <ProfilePanel
+                  open={profilePanelOpen}
+                  onClose={() => setProfilePanelOpen(false)}
+                  anchorRef={avatarAnchorRef}
+                />
                 <Sheet>
                   <SheetTrigger asChild>
                     <button
@@ -436,7 +499,8 @@ export function Navbar() {
                 </Sheet>
               </>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
+                <GithubLink />
                 <SignInLink />
                 <SignUpLink />
               </div>

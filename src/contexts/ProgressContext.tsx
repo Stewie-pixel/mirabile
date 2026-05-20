@@ -3,6 +3,7 @@ import type { UserProgress } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { track } from '@/lib/trackEvent';
 import { useRoadmap } from './RoadmapContext';
+import { checkAndUnlockAchievements } from '@/services/achievementService';
 interface ProgressContextType {
   progress: UserProgress | null;
   progressMap: Record<string, UserProgress>;
@@ -125,6 +126,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             if (updatedProgress.progress_percentage === 100) {
               await track.roadmapCompleted(roadmapRef);
             }
+          }
+
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await checkAndUnlockAchievements(user.id);
           }
         }
       } catch (err) {
