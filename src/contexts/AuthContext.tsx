@@ -148,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `https://stewie-pixel.github.io/mirabile/dashboard`,
+          redirectTo: `https://stewie-pixel.github.io/mirabile/auth/callback`,
         },
       });
 
@@ -164,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: `https://stewie-pixel.github.io/mirabile/dashboard`,
+          redirectTo: `https://stewie-pixel.github.io/mirabile/auth/callback`,
         },
       });
       if (error) throw error;
