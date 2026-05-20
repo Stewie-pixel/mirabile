@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Award, Bell, Calendar, Mail, Megaphone } from 'lucide-react';
-import { supabase } from '@/db/supabase';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatRelativeTime } from '@/lib/formatters';
 import type { NotificationType, UserNotification } from '@/types';
