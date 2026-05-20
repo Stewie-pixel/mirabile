@@ -32,7 +32,7 @@
  
 ## Overview
  
-Mirabile takes three inputs — a **career goal**, a **target company**, and a **timeline** — and generates a complete, structured 18-step learning roadmap tailored to that exact combination. Every roadmap is broken into 6 phases with real, verified learning resources fetched from trusted platforms and YouTube via the YouTube Data API v3.
+Mirabile is an AI agent lives in the Mirabile ecosystem that takes three inputs: a career goal, a target company, and a timeline to generate a complete roadmap tailored to that exact combination, broken into 6 phases: Foundation, Intermediate, Advanced, Data Structures & Algorithms, System Architecture, and Interview Preparation
  
 ---
  
