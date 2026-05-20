@@ -14,9 +14,7 @@
 
 ## Demo
 
-<p align="center">
-  <img src="docs/demo.gif" alt="Mirabile Demo" width="100%" />
-</p>
+https://github.com/user-attachments/assets/1596a4be-87d6-4c78-8636-006bce7be2ce
  
 ---
  
