@@ -89,10 +89,7 @@ function LogoLink() {
     <Link to="/" className="relative overflow-hidden flex items-center gap-2.5">
       {glow}
       <img src="/images/logo.png" className="h-8" alt="logo" />
-      <span
-        style={{ background: T.gradBtn, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-        className="text-xl font-bold"
-      >
+      <span className="text-xl font-bold text-white">
         Mirabile
       </span>
     </Link>

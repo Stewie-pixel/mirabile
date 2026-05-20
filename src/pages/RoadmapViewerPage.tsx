@@ -49,7 +49,7 @@ function getPhaseConfig(phaseName: string) {
   for (const [k, v] of Object.entries(PHASE_CONFIGS)) {
     if (key.includes(k)) return v;
   }
-  return { color: '#00F0FF', icon: Layers };
+  return { color: '#0AFFE4', icon: Layers };
 }
 
 /* ── GlassCard wrapper component ── */
@@ -133,7 +133,7 @@ export default function RoadmapViewerPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-12 w-12 animate-spin" style={{ color: '#00F0FF' }} />
+        <Loader2 className="h-12 w-12 animate-spin" style={{ color: '#0AFFE4' }} />
       </div>
     );
   }
@@ -188,7 +188,7 @@ export default function RoadmapViewerPage() {
             className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-full glass"
             style={{ color: '#ffffff' }}
           >
-            <Target className="h-4 w-4" style={{ color: '#00F0FF' }} />
+            <Target className="h-4 w-4" style={{ color: '#0AFFE4' }} />
             {currentRoadmap.target_company}
           </Badge>
           <Badge
@@ -202,7 +202,7 @@ export default function RoadmapViewerPage() {
           {progress && (
             <Badge
               className="px-4 py-1.5 text-sm rounded-full shadow-md font-semibold"
-              style={{ background: 'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)', color: '#000' }}
+              style={{ background: 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)', color: '#000' }}
             >
               Progress: {Math.round(progress.progress_percentage)}%
             </Badge>
@@ -260,7 +260,7 @@ export default function RoadmapViewerPage() {
           <GlassCard className="mb-10 p-4 flex gap-4 items-start">
             <div
               className="p-2 rounded-xl shrink-0 shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)' }}
             >
               <Info className="h-5 w-6 text-black" />
             </div>
@@ -277,7 +277,7 @@ export default function RoadmapViewerPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs hover:underline flex items-center gap-1"
-                  style={{ color: '#00F0FF' }}
+                  style={{ color: '#0AFFE4' }}
                 >
                   {hiringStat.source}
                   <ExternalLink className="h-3 w-3" />
@@ -452,7 +452,7 @@ export default function RoadmapViewerPage() {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-xs font-bold mt-1.5 flex items-center gap-1 hover:underline"
-                                        style={{ color: '#00F0FF' }}
+                                        style={{ color: '#0AFFE4' }}
                                         onClick={(e) => e.stopPropagation()}
                                       >
                                         Visit Resource

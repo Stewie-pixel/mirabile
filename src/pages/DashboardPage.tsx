@@ -39,7 +39,7 @@ const COMPANY_CONFIG: Record<string, { color: string, logoUrl: string, coverUrl:
 const getCompanyConfig = (name: string) => {
   const key = Object.keys(COMPANY_CONFIG).find(k => name.toLowerCase().includes(k.toLowerCase()));
   if (key) return COMPANY_CONFIG[key];
-  return { color: '#00F0FF', logoUrl: '/icons/adobe.png', coverUrl: '/src/assets/images/cards/Google.jpg' };
+  return { color: '#0AFFE4', logoUrl: '/icons/adobe.png', coverUrl: '/src/assets/images/cards/Google.jpg' };
 };
 
 const daily = 24 * 60 * 60 * 1000;
@@ -282,7 +282,7 @@ export default function DashboardPage() {
 
         <div className="glass-strong rounded-2xl p-4 w-full md:w-80 border border-white/5">
           <h3 className="text-sm font-bold flex items-center gap-2 mb-3" style={{ color: '#ffffff' }}>
-            <TrendingUp className="h-4 w-4" style={{ color: '#00F0FF' }} />
+            <TrendingUp className="h-4 w-4" style={{ color: '#0AFFE4' }} />
             Next Steps
           </h3>
           <div className="space-y-3">
@@ -292,7 +292,7 @@ export default function DashboardPage() {
               { title: 'Set a daily learning goal' },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3 text-sm text-white/70 hover:text-white transition-colors cursor-pointer group">
-                <div className="w-4 h-4 rounded border border-white/20 group-hover:border-[#00F0FF] flex items-center justify-center bg-black/20" />
+                <div className="w-4 h-4 rounded border border-white/20 group-hover:border-[#0AFFE4] flex items-center justify-center bg-black/20" />
                 <span>{item.title}</span>
               </div>
             ))}
@@ -426,19 +426,19 @@ export default function DashboardPage() {
                 <AreaChart data={userGrowthData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorDays" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#00F0FF" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#F472B6" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#0AFFE4" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="name" stroke="rgba(255, 255, 255, 1)" fontSize={11} tickLine={false} axisLine={false} />
                   <YAxis orientation="right" allowDecimals={false} stroke="rgba(255, 255, 255, 1)" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip
                     contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                    itemStyle={{ color: '#00F0FF', fontSize: '12px' }}
+                    itemStyle={{ color: '#0AFFE4', fontSize: '12px' }}
                     labelStyle={{ color: '#ffffff', fontSize: '12px' }}
                     cursor={{ stroke: 'rgba(255,255,255,0.1)' }}
                   />
-                  <Area type="monotone" dataKey="days" stroke="#00F0FF" strokeWidth={3} fillOpacity={1} fill="url(#colorDays)" />
+                  <Area type="monotone" dataKey="days" stroke="#0AFFE4" strokeWidth={3} fillOpacity={1} fill="url(#colorDays)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -456,7 +456,7 @@ export default function DashboardPage() {
             <div className="flex-1 overflow-hidden min-h-0">
               {newsLoading ? (
                 <div className="flex items-center justify-center h-full">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#00F0FF]" />
+                  <Loader2 className="w-6 h-6 animate-spin text-[#0AFFE4]" />
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3 h-full pr-1">

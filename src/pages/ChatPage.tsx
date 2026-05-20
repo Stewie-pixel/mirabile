@@ -184,12 +184,12 @@ Assistant:`;
               {!currentRoadmap && (
                 <div className="max-w-md mt-6 relative overflow-hidden rounded-2xl p-6 group transition-all duration-300"
                   style={{ background: 'rgba(255, 255, 255, 0.04)', backdropFilter: 'blur(18px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#00F0FF]/0 to-[#F472B6]/0 group-hover:from-[#00F0FF]/5 group-hover:to-[#F472B6]/5 transition-colors duration-500" />
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl ring-1 ring-inset ring-[#00F0FF]/30" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#0AFFE4]/0 to-[#0EA5E9]/0 group-hover:from-[#0AFFE4]/5 group-hover:to-[#0EA5E9]/5 transition-colors duration-500" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl ring-1 ring-inset ring-[#0AFFE4]/30" />
                   <div className="relative z-10 flex gap-3 text-left">
-                    <Info className="h-5 w-5 text-[#00F0FF] shrink-0" />
+                    <Info className="h-5 w-5 text-[#0AFFE4] shrink-0" />
                     <p className="text-sm text-white/90 leading-relaxed">
-                      <strong className="text-[#00F0FF]">Tip:</strong> Generate a roadmap first so I can provide more personalized advice based on your goals.
+                      <strong className="text-[#0AFFE4]">Tip:</strong> Generate a roadmap first so I can provide more personalized advice based on your goals.
                     </p>
                   </div>
                 </div>
@@ -206,7 +206,7 @@ Assistant:`;
                 {message.role === 'user' ? (
                   <>
                     <AvatarImage src={profile?.avatar_url || ''} />
-                    <AvatarFallback className="bg-white/10 text-[#00F0FF]">
+                    <AvatarFallback className="bg-white/10 text-[#0AFFE4]">
                       <User className="h-5 w-5" />
                     </AvatarFallback>
                   </>
@@ -214,7 +214,7 @@ Assistant:`;
                   <>
                     <AvatarImage src="/images/logo.png" className="object-contain" />
                     <AvatarFallback className="bg-transparent">
-                      <Bot className="h-5 w-5 text-[#00F0FF]" />
+                      <Bot className="h-5 w-5 text-[#0AFFE4]" />
                     </AvatarFallback>
                   </>
                 )}
@@ -227,7 +227,7 @@ Assistant:`;
                     : 'text-white rounded-tl-none border border-white/10'
                     }`}
                   style={{
-                    background: message.role === 'user' ? 'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)' : 'rgba(255, 255, 255, 0.06)',
+                    background: message.role === 'user' ? 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)' : 'rgba(255, 255, 255, 0.06)',
                     backdropFilter: message.role !== 'user' ? 'blur(12px)' : 'none'
                   }}
                 >
@@ -251,12 +251,12 @@ Assistant:`;
               <Avatar className="h-10 w-10 shrink-0">
                 <AvatarImage src="/images/logo.png" className="object-contain" />
                 <AvatarFallback className="bg-transparent">
-                  <Bot className="h-5 w-5 text-[#00F0FF]" />
+                  <Bot className="h-5 w-5 text-[#0AFFE4]" />
                 </AvatarFallback>
               </Avatar>
               <div className="rounded-2xl rounded-tl-none px-3 py-2 border border-white/10 flex items-center justify-center"
                 style={{ background: 'rgba(255, 255, 255, 0.06)', backdropFilter: 'blur(12px)' }}>
-                <Loader2 className="h-4 w-4 animate-spin text-[#00F0FF]" />
+                <Loader2 className="h-4 w-4 animate-spin text-[#0AFFE4]" />
               </div>
             </div>
           )}
@@ -282,7 +282,7 @@ Assistant:`;
               </Select>
               <Input
                 placeholder="Message your assistant..."
-                className="pl-[140px] h-12 rounded-xl bg-white/5 border border-white/10 focus-visible:ring-1 focus-visible:ring-[#00F0FF]/50 text-white placeholder:text-white/40 transition-shadow"
+                className="pl-[140px] h-12 rounded-xl bg-white/5 border border-white/10 focus-visible:ring-1 focus-visible:ring-[#0AFFE4]/50 text-white placeholder:text-white/40 transition-shadow"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
@@ -290,8 +290,8 @@ Assistant:`;
             </div>
             <Button
               size="icon"
-              className="h-12 w-12 rounded-xl shrink-0 text-black border-none hover:opacity-90 shadow-lg shadow-[#00F0FF]/20 transition-all disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)' }}
+              className="h-12 w-12 rounded-xl shrink-0 text-black border-none hover:opacity-90 shadow-lg shadow-[#0AFFE4]/20 transition-all disabled:opacity-50"
+              style={{ background: 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)' }}
               disabled={!input.trim() || isLoading}
               onClick={handleSend}
             >

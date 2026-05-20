@@ -13,7 +13,7 @@ export default function InstructionsPage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight" style={{ background: 'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <h1 className="text-3xl font-extrabold tracking-tight" style={{ background: 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             Model Instructions
           </h1>
           <p className="text-muted-foreground mt-1">Learn how to use and configure different AI models</p>

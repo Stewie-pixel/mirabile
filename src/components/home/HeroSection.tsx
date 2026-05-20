@@ -5,13 +5,13 @@ import { ReactiveOrb } from '@/components/home/Interactiveorb';
 
 const T = {
   bg:      '#000000',
-  grad:    'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)',
-  border:  'rgba(0,240,255,0.12)',
-  surface: 'rgba(0,240,255,0.05)',
+  grad:    'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)',
+  border:  'rgba(10,255,228,0.12)',
+  surface: 'rgba(10,255,228,0.05)',
   textHigh: '#E8FFFE',
   textMid:  'rgba(232,255,254,0.55)',
-  teal:    '#00F0FF',
-  cyan:    '#F472B6',
+  teal:    '#0AFFE4',
+  cyan:    '#0EA5E9',
 } as const;
 
 export function HeroSection() {
@@ -40,8 +40,8 @@ export function HeroSection() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background: `
-              radial-gradient(ellipse 60% 55% at 72% 40%, rgba(0,240,255,0.07) 0%, transparent 65%),
-              radial-gradient(ellipse 40% 40% at 15% 75%, rgba(244,114,182,0.06) 0%, transparent 55%)
+              radial-gradient(ellipse 60% 55% at 72% 40%, rgba(10,255,228,0.07) 0%, transparent 65%),
+              radial-gradient(ellipse 40% 40% at 15% 75%, rgba(14,165,233,0.06) 0%, transparent 55%)
             `,
           }}
         />
@@ -50,7 +50,7 @@ export function HeroSection() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: 'radial-gradient(rgba(0,240,255,0.07) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(rgba(10,255,228,0.07) 1px, transparent 1px)',
             backgroundSize: '36px 36px',
             maskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%)',
           }}
@@ -64,12 +64,6 @@ export function HeroSection() {
             {/* Brand pill */}
             <div className="hf1 flex items-center gap-3">
               <img src="/images/logo.png" alt="Mirabile" className="h-20 w-20 object-contain" />
-              <span
-                className="text-base font-semibold uppercase"
-                style={{ color: T.teal, letterSpacing: '0.18em', fontFamily: "'DM Mono', monospace" }}
-              >
-                Mirabile
-              </span>
             </div>
 
             {/* Headline */}
@@ -119,7 +113,7 @@ export function HeroSection() {
                     style={{
                       background: T.grad,
                       color: '#040810',
-                      boxShadow: '0 0 32px rgba(0,240,255,0.22)',
+                      boxShadow: '0 0 32px rgba(10,255,228,0.22)',
                     }}
                   >
                     <Map className="w-4 h-4" />
@@ -136,7 +130,7 @@ export function HeroSection() {
                       backdropFilter: 'blur(8px)',
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(0,240,255,0.32)';
+                      (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(10,255,228,0.32)';
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLAnchorElement).style.borderColor = T.border;
@@ -154,7 +148,7 @@ export function HeroSection() {
                     style={{
                       background: T.grad,
                       color: '#040810',
-                      boxShadow: '0 0 32px rgba(0,240,255,0.22)',
+                      boxShadow: '0 0 32px rgba(10,255,228,0.22)',
                     }}
                   >
                     Get Started Free
@@ -170,7 +164,7 @@ export function HeroSection() {
                       backdropFilter: 'blur(8px)',
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(0,240,255,0.32)';
+                      (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(10,255,228,0.32)';
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLAnchorElement).style.borderColor = T.border;
@@ -185,7 +179,7 @@ export function HeroSection() {
             {/* Social proof */}
             <div className="hf5 flex items-center gap-4 pt-1">
               <div className="flex -space-x-2">
-                {(['#00F0FF', '#F472B6', '#ec4899', '#f97316'] as const).map((c, i) => (
+                {(['#0AFFE4', '#0EA5E9', '#0284C7', '#075985'] as const).map((c, i) => (
                   <div
                     key={i}
                     className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-[9px] font-bold"
@@ -213,7 +207,7 @@ export function HeroSection() {
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  'radial-gradient(circle at 60% 50%, rgba(0,240,255,0.08), transparent 60%)',
+                  'radial-gradient(circle at 60% 50%, rgba(10,255,228,0.08), transparent 60%)',
               }}
             />
             <ReactiveOrb />
