@@ -9,18 +9,18 @@ import { FAQSection } from '@/components/home/FAQ';
 
 const TOKENS = {
   bg: '#000000',
-  gradText: 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)',
-  gradBtn: 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)',
-  surface: 'rgba(10,255,228,0.04)',
-  surfaceHover: 'rgba(10,255,228,0.09)',
-  border: 'rgba(10,255,228,0.12)',
-  borderHover: 'rgba(10,255,228,0.32)',
+  gradText: 'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)',
+  gradBtn: 'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)',
+  surface: 'rgba(0,240,255,0.04)',
+  surfaceHover: 'rgba(0,240,255,0.09)',
+  border: 'rgba(0,240,255,0.12)',
+  borderHover: 'rgba(0,240,255,0.32)',
   textHigh: '#E8FFFE',
   textMid: 'rgba(232,255,254,0.55)',
   badge: {
-    bg: 'rgba(10,255,228,0.07)',
-    border: 'rgba(10,255,228,0.18)',
-    color: '#0AFFE4',
+    bg: 'rgba(0,240,255,0.07)',
+    border: 'rgba(0,240,255,0.18)',
+    color: '#00F0FF',
   },
 } as const;
 
@@ -118,7 +118,7 @@ function WhySection() {
                 const el = e.currentTarget as HTMLDivElement;
                 el.style.border = `1px solid ${TOKENS.borderHover}`;
                 el.style.background = TOKENS.surfaceHover;
-                el.style.boxShadow = '0 0 32px rgba(10,255,228,0.06)';
+                el.style.boxShadow = '0 0 32px rgba(0,240,255,0.06)';
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLDivElement;
@@ -131,7 +131,7 @@ function WhySection() {
               <div
                 className="p-[1px] rounded-2xl"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(10,255,228,0.5) 0%, rgba(14,165,233,0.5) 100%)',
+                  background: 'linear-gradient(135deg, rgba(0,240,255,0.5) 0%, rgba(244,114,182,0.5) 100%)',
                 }}
               >
                 <div
@@ -142,7 +142,7 @@ function WhySection() {
                     className="h-6 w-6"
                     style={{
                       stroke: 'url(#teal-grad)',
-                      color: '#0AFFE4',
+                      color: '#00F0FF',
                     }}
                   />
                 </div>
@@ -181,7 +181,7 @@ function CTASection() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse 55% 55% at 50% 50%, rgba(10,255,228,0.07) 0%, transparent 65%)',
+            'radial-gradient(ellipse 55% 55% at 50% 50%, rgba(0,240,255,0.07) 0%, transparent 65%)',
         }}
       />
 
@@ -189,7 +189,7 @@ function CTASection() {
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-16"
         style={{
-          background: 'linear-gradient(180deg, transparent, rgba(10,255,228,0.3), transparent)',
+          background: 'linear-gradient(180deg, transparent, rgba(0,240,255,0.3), transparent)',
         }}
       />
 
@@ -217,7 +217,7 @@ function CTASection() {
           style={{
             background: TOKENS.gradBtn,
             color: '#040810',
-            boxShadow: '0 0 40px rgba(10,255,228,0.25), 0 2px 0 rgba(255,255,255,0.08) inset',
+            boxShadow: '0 0 40px rgba(0,240,255,0.25), 0 2px 0 rgba(255,255,255,0.08) inset',
             fontWeight: 700,
             letterSpacing: '0.01em',
           }}
@@ -240,8 +240,8 @@ export default function HomePage() {
       <svg width="0" height="0" style={{ position: 'absolute' }}>
         <defs>
           <linearGradient id="teal-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#0AFFE4" />
-            <stop offset="100%" stopColor="#0EA5E9" />
+            <stop offset="0%" stopColor="#00F0FF" />
+            <stop offset="100%" stopColor="#F472B6" />
           </linearGradient>
         </defs>
       </svg>

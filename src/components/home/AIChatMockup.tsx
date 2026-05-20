@@ -3,13 +3,13 @@ import { Bot, User } from 'lucide-react';
 
 const T = {
   bg:       '#000000',
-  grad:     'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)',
-  border:   'rgba(10,255,228,0.12)',
-  surface:  'rgba(10,255,228,0.04)',
+  grad:     'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)',
+  border:   'rgba(0,240,255,0.12)',
+  surface:  'rgba(0,240,255,0.04)',
   textHigh: '#E8FFFE',
   textMid:  'rgba(232,255,254,0.55)',
-  teal:     '#0AFFE4',
-  cyan:     '#0EA5E9',
+  teal:     '#00F0FF',
+  cyan:     '#F472B6',
 } as const;
 
 interface Message { role: 'user' | 'ai'; text: string; delay: number; }
@@ -96,9 +96,9 @@ function MessageBubble({ msg, visible }: { msg: Message; visible: boolean }) {
       <div
         className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-1"
         style={{
-          background: isAI ? T.grad : 'rgba(10,255,228,0.08)',
+          background: isAI ? T.grad : 'rgba(0,240,255,0.08)',
           border:     isAI ? 'none' : `1px solid ${T.border}`,
-          boxShadow:  isAI ? '0 0 14px rgba(10,255,228,0.25)' : 'none',
+          boxShadow:  isAI ? '0 0 14px rgba(0,240,255,0.25)' : 'none',
         }}
       >
         {isAI
@@ -113,15 +113,15 @@ function MessageBubble({ msg, visible }: { msg: Message; visible: boolean }) {
         style={
           isAI
             ? {
-                background:    'rgba(10,255,228,0.04)',
+                background:    'rgba(0,240,255,0.04)',
                 border:        `1px solid ${T.border}`,
                 color:         T.textHigh,
                 backdropFilter: 'blur(12px)',
                 borderRadius:  '4px 18px 18px 18px',
               }
             : {
-                background:    'rgba(14,165,233,0.08)',
-                border:        '1px solid rgba(14,165,233,0.2)',
+                background:    'rgba(244,114,182,0.08)',
+                border:        '1px solid rgba(244,114,182,0.2)',
                 color:         T.textHigh,
                 backdropFilter: 'blur(12px)',
                 borderRadius:  '18px 4px 18px 18px',
@@ -189,7 +189,7 @@ export function AIChatMockup() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse 60% 55% at 50% 50%, rgba(10,255,228,0.05) 0%, transparent 65%)',
+            background: 'radial-gradient(ellipse 60% 55% at 50% 50%, rgba(0,240,255,0.05) 0%, transparent 65%)',
           }}
         />
 
@@ -201,8 +201,8 @@ export function AIChatMockup() {
               className="inline-block text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full mb-5"
               style={{
                 color:      T.teal,
-                background: 'rgba(10,255,228,0.07)',
-                border:     `1px solid rgba(10,255,228,0.18)`,
+                background: 'rgba(0,240,255,0.07)',
+                border:     `1px solid rgba(0,240,255,0.18)`,
                 letterSpacing: '0.18em',
                 fontFamily: "'DM Mono', monospace",
               }}
@@ -237,7 +237,7 @@ export function AIChatMockup() {
               background:    'rgba(8,12,16,0.9)',
               border:        `1px solid ${T.border}`,
               backdropFilter: 'blur(20px)',
-              boxShadow:     '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(10,255,228,0.04)',
+              boxShadow:     '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,240,255,0.04)',
             }}
           >
             {/* Title bar */}
@@ -251,7 +251,7 @@ export function AIChatMockup() {
               <div className="flex items-center gap-2">
                 <div
                   className="w-2 h-2 rounded-full"
-                  style={{ background: '#0AFFE4', boxShadow: '0 0 6px rgba(10,255,228,0.8)' }}
+                  style={{ background: '#00F0FF', boxShadow: '0 0 6px rgba(0,240,255,0.8)' }}
                 />
                 <span
                   className="text-xs font-medium"
@@ -280,14 +280,14 @@ export function AIChatMockup() {
                 <div className="flex items-center gap-3">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ background: T.grad, boxShadow: '0 0 14px rgba(10,255,228,0.25)' }}
+                    style={{ background: T.grad, boxShadow: '0 0 14px rgba(0,240,255,0.25)' }}
                   >
                     <Bot className="w-4 h-4" style={{ color: '#040810' }} />
                   </div>
                   <div
                     className="rounded-2xl"
                     style={{
-                      background:   'rgba(10,255,228,0.04)',
+                      background:   'rgba(0,240,255,0.04)',
                       border:       `1px solid ${T.border}`,
                       borderRadius: '4px 18px 18px 18px',
                     }}
@@ -306,9 +306,9 @@ export function AIChatMockup() {
               <div
                 className="flex-1 rounded-xl px-4 py-2.5 text-sm"
                 style={{
-                  background: 'rgba(10,255,228,0.03)',
+                  background: 'rgba(0,240,255,0.03)',
                   border:     `1px solid ${T.border}`,
-                  color:      'rgba(10,255,228,0.3)',
+                  color:      'rgba(0,240,255,0.3)',
                 }}
               >
                 Ask about your career roadmap…
@@ -318,7 +318,7 @@ export function AIChatMockup() {
                 style={{
                   background: T.grad,
                   color:      '#040810',
-                  boxShadow:  '0 0 20px rgba(10,255,228,0.2)',
+                  boxShadow:  '0 0 20px rgba(0,240,255,0.2)',
                 }}
               >
                 Send

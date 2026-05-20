@@ -276,16 +276,16 @@ export default function ProfilePage() {
                   onClick={() => setSearchParams({ tab: tab.id })}
                   className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-150 relative group border text-left"
                   style={{
-                    background: isActive ? 'rgba(10,255,228,0.10)' : 'transparent',
-                    borderColor: isActive ? 'rgba(10,255,228,0.12)' : 'transparent',
-                    color: isActive ? '#0AFFE4' : 'rgb(232, 255, 254)',
+                    background: isActive ? 'rgba(0,240,255,0.10)' : 'transparent',
+                    borderColor: isActive ? 'rgba(0,240,255,0.12)' : 'transparent',
+                    color: isActive ? '#00F0FF' : 'rgb(232, 255, 254)',
                   }}
                 >
                   <Icon
                     size={18}
                     style={{
                       flexShrink: 0,
-                      color: isActive ? '#0AFFE4' : 'rgba(232,255,254,0.55)',
+                      color: isActive ? '#00F0FF' : 'rgba(232,255,254,0.55)',
                     }}
                   />
                   <span className="text-sm font-medium">{tab.label}</span>
@@ -349,7 +349,7 @@ export default function ProfilePage() {
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="absolute -bottom-1 -right-1 h-7 w-7 bg-[#0AFFE4] hover:bg-[#08e0c8] text-slate-900 rounded-full flex items-center justify-center shadow-lg border border-slate-900 transition-all cursor-pointer z-10"
+                          className="absolute -bottom-1 -right-1 h-7 w-7 bg-[#00F0FF] hover:opacity-90 text-slate-900 rounded-full flex items-center justify-center shadow-lg border border-slate-900 transition-all cursor-pointer z-10"
                         >
                           <Camera className="h-3.5 w-3.5" />
                         </button>

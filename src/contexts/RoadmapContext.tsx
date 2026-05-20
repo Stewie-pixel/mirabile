@@ -21,6 +21,8 @@ interface RoadmapContextType {
     timeline: string,
     aiModel: string
   ) => Promise<Roadmap | null>;
+  deleteRoadmap: (roadmapId: string) => Promise<void>;
+  clearHistory: () => Promise<void>;
 }
 
 const RoadmapContext = createContext<RoadmapContextType | undefined>(undefined);
@@ -292,6 +294,53 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const deleteRoadmap = useCallback(async (roadmapId: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { error: deleteError } = await supabase
+        .from('roadmaps')
+        .delete()
+        .eq('id', roadmapId);
+
+      if (deleteError) throw deleteError;
+
+      setUserRoadmaps(prev => prev.filter(r => r.id !== roadmapId));
+      if (currentRoadmap?.id === roadmapId) {
+        setCurrentRoadmap(null);
+        setRoadmapSteps([]);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete roadmap');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentRoadmap]);
+
+  const clearHistory = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error: deleteError } = await supabase
+        .from('roadmaps')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (deleteError) throw deleteError;
+
+      setUserRoadmaps([]);
+      setCurrentRoadmap(null);
+      setRoadmapSteps([]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to clear history');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return (
     <RoadmapContext.Provider
       value={{
@@ -304,6 +353,8 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
         fetchRoadmap,
         fetchUserRoadmaps,
         generateRoadmap,
+        deleteRoadmap,
+        clearHistory,
       }}
     >
       {children}

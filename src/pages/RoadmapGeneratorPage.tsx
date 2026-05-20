@@ -74,7 +74,7 @@ export default function RoadmapGeneratorPage() {
         <Link 
           to="/instructions" 
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium transition-colors hover:bg-primary/80 hover:text-white"
-          style={{ background: 'rgba(10, 255, 226, 0.5)', color: '#ffffff', border: '1px solid rgba(10,255,228,0.2)' }}
+          style={{ background: 'rgba(0, 240, 255, 0.25)', color: '#ffffff', border: '1px solid rgba(0,240,255,0.2)' }}
         >
           Read model usage instructions here →
         </Link>
@@ -83,7 +83,7 @@ export default function RoadmapGeneratorPage() {
       <Card className="glass-strong rounded-2xl border-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2" style={{ color: '#ffffff' }}>
-            <Sparkles className="h-5 w-5" style={{ color: '#0AFFE4' }} />
+            <Sparkles className="h-5 w-5" style={{ color: '#00F0FF' }} />
             AI-Powered Roadmap Generation
           </CardTitle>
           <CardDescription style={{ color: 'rgba(255,255,255,0.5)' }}>Fill in the details below to generate your personalized career roadmap</CardDescription>
@@ -96,7 +96,7 @@ export default function RoadmapGeneratorPage() {
                 name="career_goal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel style={{ color: '#0AFFE4' }}>Career Goal</FormLabel>
+                    <FormLabel style={{ color: '#00F0FF' }}>Career Goal</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger style={{ color: '#ffffff' }}>
@@ -121,7 +121,7 @@ export default function RoadmapGeneratorPage() {
                 name="target_company"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel style={{ color: '#0AFFE4' }}>Target Company</FormLabel>
+                    <FormLabel style={{ color: '#00F0FF' }}>Target Company</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger style={{ color: '#ffffff' }}>
@@ -149,7 +149,7 @@ export default function RoadmapGeneratorPage() {
                 name="timeline"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel style={{ color: '#0AFFE4' }}>Timeline</FormLabel>
+                    <FormLabel style={{ color: '#00F0FF' }}>Timeline</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger style={{ color: '#ffffff' }}>
@@ -174,7 +174,7 @@ export default function RoadmapGeneratorPage() {
                 name="ai_model"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel style={{ color: '#0AFFE4' }}>AI Model</FormLabel>
+                    <FormLabel style={{ color: '#00F0FF' }}>AI Model</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger style={{ color: '#ffffff' }}>
