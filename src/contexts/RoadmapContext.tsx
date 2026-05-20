@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { getModelById } from '@/constants/aiModels';
 import { puterService } from '~/puter/index.ts';
 import { track } from '@/lib/trackEvent';
+import { checkAndUnlockAchievements } from '@/services/achievementService';
 
 interface RoadmapContextType {
   currentRoadmap: Roadmap | null;
@@ -153,6 +154,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
             setRoadmapSteps(data.steps || []);
             setUserRoadmaps(prev => [data.roadmap, ...prev]);
             await track.roadmapCreated(data.roadmap);
+            await checkAndUnlockAchievements(user.id);
             return data.roadmap;
           }
 
@@ -273,6 +275,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           setRoadmapSteps(steps || []);
           setUserRoadmaps(prev => [roadmap, ...prev]);
           await track.roadmapCreated(roadmap);
+          await checkAndUnlockAchievements(user.id);
           return roadmap;
         }
 

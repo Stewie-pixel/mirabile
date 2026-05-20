@@ -101,6 +101,42 @@ export interface Profile {
   updated_at: string;
 }
 
+export type NotificationType = 'award_received' | 'announcement' | 'newsletter';
+
+export interface UserProfile {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  avatar_url: string | null;
+  github_url: string | null;
+  twitter_url: string | null;
+  website_url: string | null;
+  bio: string | null;
+  status_text: string | null;
+  status_emoji: string | null;
+  status_busy: boolean;
+  status_expires_at: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface UserAchievement {
+  id: string;
+  user_id: string;
+  achievement_key: string;
+  earned_at: string;
+}
+
+export interface UserNotification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  description: string;
+  read: boolean;
+  created_at: string;
+}
+
 export interface RoadmapGenerationRequest {
   career_goal: string;
   target_company: string;

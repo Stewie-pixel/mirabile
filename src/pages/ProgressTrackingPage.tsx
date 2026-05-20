@@ -3,10 +3,12 @@ import { format, subDays, eachDayOfInterval } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { GripVertical, CheckCircle2, Flame, Calendar, Plus, LogIn, Award } from 'lucide-react';
+import { GripVertical, Calendar, CheckCircle2, Flame, Plus } from 'lucide-react';
+import { RecentActivityFeed } from '@/components/activity/RecentActivityFeed';
+import { fetchUserEvents } from '@/lib/userEvents';
+import type { ActivityEvent } from '@/types/activity';
 import { useRoadmap } from '@/contexts/RoadmapContext';
 import { useProgress } from '@/contexts/ProgressContext';
-import { supabase } from '@/lib/supabase';
 import {
   Dialog,
   DialogContent,
@@ -18,16 +20,6 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Milestone, Roadmap, UserProgress } from '@/types';
 import { getBrandColors } from '@/constants/companyBranding';
-
-type EventType = 'sign_in' | 'roadmap_created' | 'roadmap_completed' | 'step_completed' | 'milestone_achieved';
-
-interface ActivityEvent {
-  id: string;
-  type: EventType;
-  title: string;
-  description: string;
-  timestamp: string;
-}
 
 export default function ProgressTrackingPage() {
   const { userRoadmaps } = useRoadmap();
@@ -42,46 +34,13 @@ export default function ProgressTrackingPage() {
   }, [userRoadmaps, fetchAllProgress]);
 
   useEffect(() => {
-    const loadEvents = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('user_events')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        if (data) {
-          const parseEventData = (raw: unknown): Record<string, unknown> => {
-            if (!raw) return {};
-            if (typeof raw === 'string') {
-              try { return JSON.parse(raw); } catch { return {}; }
-            }
-            return raw as Record<string, unknown>;
-          };
-
-          setEvents(
-            data.map(d => {
-              const eventData = parseEventData(d.event_data);
-              return {
-                id: d.id,
-                type: (d.event_type ?? d.type) as EventType,
-                title: (eventData.title as string) ?? d.title ?? d.event_type ?? 'Activity',
-                description: (eventData.description as string) ?? d.description ?? '',
-                timestamp: d.created_at ?? d.timestamp,
-              };
-            })
-          );
-        }
-      } catch (err) {
+    fetchUserEvents()
+      .then(setEvents)
+      .catch(err => {
         console.error('Failed to fetch user events:', err);
         setEvents([]);
-      } finally {
-        setEventsLoading(false);
-      }
-    };
-
-    loadEvents();
+      })
+      .finally(() => setEventsLoading(false));
   }, []);
 
   return (
@@ -562,141 +521,3 @@ function CustomizePinsModal({
   );
 }
 
-function RecentActivityFeed({ events, loading }: { events: ActivityEvent[]; loading: boolean }) {
-  const [displayCount, setDisplayCount] = useState(5);
-
-  const formatTimeAgo = (dateStr: string) => {
-    const diffMs = Date.now() - new Date(dateStr).getTime();
-    const diffMin = Math.floor(diffMs / 60_000);
-    if (diffMin < 1) return 'Just now';
-    if (diffMin < 60) return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
-    const diffHours = Math.floor(diffMin / 60);
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    if (diffDays === 1) return 'Yesterday';
-    return `${diffDays} days ago`;
-  };
-
-  const getEventColor = (type: EventType) => {
-    switch (type) {
-      case 'sign_in': return '#ef4444';
-      case 'roadmap_created': return '#f97316';
-      case 'roadmap_completed': return '#f97316';
-      case 'milestone_achieved': return '#a855f7';
-      case 'step_completed': return '#06b6d4';
-      default: return '#06b6d4';
-    }
-  };
-
-  const getEventIcon = (type: EventType) => {
-    switch (type) {
-      case 'sign_in': return <LogIn className="w-4 h-4" />;
-      case 'roadmap_created': return <Plus className="w-4 h-4" />;
-      case 'roadmap_completed': return <Award className="w-4 h-4" />;
-      case 'step_completed': return <CheckCircle2 className="w-4 h-4" />;
-      case 'milestone_achieved': return <Flame className="w-4 h-4" />;
-      default: return <Calendar className="w-4 h-4" />;
-    }
-  };
-
-  const resolveTitle = (e: ActivityEvent) => {
-    if (e.title && e.title !== e.type) return e.title;
-    switch (e.type) {
-      case 'sign_in': return 'Signed in';
-      case 'roadmap_created': return 'Created a new roadmap';
-      case 'roadmap_completed': return 'Completed a roadmap';
-      case 'step_completed': return 'Completed a step';
-      case 'milestone_achieved': return 'Achieved a milestone';
-      default: return 'Activity';
-    }
-  };
-
-  const visibleEvents = events.slice(0, displayCount);
-
-  return (
-    <div className="space-y-4">
-      <h4 className="text-xl font-semibold text-white">Recent Activity</h4>
-
-      {loading ? (
-        <div className="flex justify-center p-8 text-white/50">Loading activity…</div>
-      ) : events.length === 0 ? (
-        <Card className="border border-cyan-500/20 bg-cyan-950/10 backdrop-blur-md rounded-2xl p-8 text-center">
-          <div className="flex flex-col items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-cyan-500/10 flex items-center justify-center mb-4">
-              <Calendar className="w-8 h-8 text-cyan-500/50" />
-            </div>
-            <p className="text-white/60">No activity yet. Start a roadmap to get going!</p>
-          </div>
-        </Card>
-      ) : (
-        <div className="space-y-3 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-cyan-500/20 before:via-cyan-500/10 before:to-transparent">
-          {visibleEvents.map(event => {
-            const color = getEventColor(event.type);
-            return (
-              <div
-                key={event.id}
-                className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group transition-all"
-              >
-                {/* Timeline marker */}
-                <div
-                  className="flex items-center justify-center w-10 h-10 rounded-full border bg-slate-900 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors"
-                  style={{ borderColor: `${color}50`, color }}
-                >
-                  {getEventIcon(event.type)}
-                </div>
-
-                {/* Card */}
-                <Card
-                  className="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] border bg-cyan-950/10 backdrop-blur-md rounded-xl p-4 transition-all group-hover:-translate-y-0.5"
-                  style={{ borderColor: `${color}30` }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = `${color}80`;
-                    (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 32px ${color}20`;
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = `${color}30`;
-                    (e.currentTarget as HTMLElement).style.boxShadow = 'none';
-                  }}
-                >
-                  <div className="flex flex-col gap-1">
-                    <div className="flex justify-between items-center">
-                      <h5 className="font-medium text-white/90 text-sm">{resolveTitle(event)}</h5>
-                      <span
-                        className="text-xs text-white/40 transition-colors cursor-default"
-                        title={new Date(event.timestamp).toLocaleString()}
-                        onMouseEnter={e => (e.currentTarget.style.color = color)}
-                        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
-                      >
-                        {formatTimeAgo(event.timestamp)}
-                      </span>
-                    </div>
-                    {event.description && (
-                      <p className="text-sm text-white/60">{event.description}</p>
-                    )}
-                  </div>
-                </Card>
-              </div>
-            );
-          })}
-
-          {/* FIX 3: Gradient cyan→blue load more button with glow hover */}
-          {displayCount < events.length && (
-            <div className="flex justify-center pt-6">
-              <Button
-                className="relative rounded-full px-8 py-2 text-sm font-semibold text-white border-0
-                  bg-gradient-to-r from-cyan-500 to-blue-500
-                  shadow-[0_0_16px_rgba(6,182,212,0.3)]
-                  hover:from-cyan-400 hover:to-blue-400
-                  hover:shadow-[0_0_28px_rgba(6,182,212,0.55)]
-                  transition-all duration-200"
-                onClick={() => setDisplayCount(prev => prev + 5)}
-              >
-                Load more
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}

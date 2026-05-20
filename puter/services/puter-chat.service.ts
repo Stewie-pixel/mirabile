@@ -2,7 +2,7 @@ import { PuterAIOptions } from '../types/puter.types.ts';
 import { PuterAuthService } from './puter-auth.service.ts';
 
 export class PuterChatService {
-  constructor(private auth: PuterAuthService) {}
+  constructor(private auth: PuterAuthService) { }
 
   private get puter() {
     return globalThis.puter;
@@ -37,7 +37,6 @@ export class PuterChatService {
     if (typeof response === 'object' && response !== null) {
       const obj = response as Record<string, unknown>;
 
-      // { message: { content: [...] } }
       if (typeof obj.message === 'object' && obj.message !== null) {
         const message = obj.message as Record<string, unknown>;
         if (Array.isArray(message.content)) {
@@ -48,7 +47,6 @@ export class PuterChatService {
         }
       }
 
-      // Flat string fields
       for (const key of ['text', 'content', 'message', 'response', 'data'] as const) {
         if (typeof obj[key] === 'string') {
           return this.assertNonEmpty(obj[key] as string);
