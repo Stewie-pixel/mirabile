@@ -11,6 +11,12 @@
 <p align="center">
   AI-powered career roadmap platform that generates personalised, company-specific learning journeys for engineering roles.
 </p>
+
+## Demo
+
+<p align="center">
+  <img src="docs/demo.gif" alt="Mirabile Demo" width="100%" />
+</p>
  
 ---
  
