@@ -8,6 +8,7 @@ import ProgressTrackingPage from './pages/ProgressTrackingPage';
 import ProfilePage from './pages/ProfilePage';
 import InstructionsPage from './pages/InstructionsPage';
 import ChatPage from './pages/ChatPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 import type { ReactNode } from 'react';
 
 export interface RouteConfig {
@@ -15,7 +16,6 @@ export interface RouteConfig {
   path: string;
   element: ReactNode;
   visible?: boolean;
-  /** Accessible without login. Routes without this flag require authentication. Has no effect when RouteGuard is not in use. */
   public?: boolean;
 }
 
@@ -36,6 +36,12 @@ export const routes: RouteConfig[] = [
     name: 'Register',
     path: '/register',
     element: <RegisterPage />,
+    public: true,
+  },
+  {
+    name: 'Auth Callback',
+    path: '/auth/callback',
+    element: <AuthCallbackPage />,
     public: true,
   },
   {

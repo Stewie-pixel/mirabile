@@ -145,28 +145,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
+      const isProd = globalThis.location.hostname !== 'localhost';
+      const redirectTo = isProd
+        ? 'https://stewie-pixel.github.io/mirabile/auth/callback'
+        : 'http://localhost:5173/auth/callback';
+  
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: `https://stewie-pixel.github.io/mirabile/dashboard`,
-        },
+        options: { redirectTo },
       });
-
+  
       if (error) throw error;
       return { error: null };
     } catch (error) {
       return { error: error as Error };
     }
   };
-
+  
   const signInWithGithub = async () => {
     try {
+      const isProd = globalThis.location.hostname !== 'localhost';
+      const redirectTo = isProd
+        ? 'https://stewie-pixel.github.io/mirabile/auth/callback'
+        : 'http://localhost:5173/auth/callback';
+  
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
-        options: {
-          redirectTo: `https://stewie-pixel.github.io/mirabile/dashboard`,
-        },
+        options: { redirectTo },
       });
+  
       if (error) throw error;
       return { error: null };
     } catch (error) {
