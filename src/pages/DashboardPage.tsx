@@ -193,32 +193,37 @@ export default function DashboardPage() {
   const calculateUserStreak = (eventsList: any[]) => {
     const signInEvents = eventsList.filter(e => e.event_type === 'sign_in');
     if (signInEvents.length === 0) return 0;
-
+  
+    const toUTCDateStr = (date: Date) =>
+      `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+  
     const uniqueDates = new Set(
-      signInEvents.map(e => new Date(e.created_at).toLocaleDateString('en-CA'))
+      signInEvents.map(e => toUTCDateStr(new Date(e.created_at)))
     );
-
-    let streak = 0;
-    const checkDate = new Date();
-    
-    const todayStr = checkDate.toLocaleDateString('en-CA');
-    checkDate.setDate(checkDate.getDate() - 1);
-    const yesterdayStr = checkDate.toLocaleDateString('en-CA');
-
+  
+    const now = new Date();
+    const todayStr = toUTCDateStr(now);
+  
+    const yesterday = new Date(now);
+    yesterday.setUTCDate(now.getUTCDate() - 1);
+    const yesterdayStr = toUTCDateStr(yesterday);
+  
     let currentCheckStr = todayStr;
     if (!uniqueDates.has(todayStr)) {
       if (uniqueDates.has(yesterdayStr)) {
         currentCheckStr = yesterdayStr;
       } else {
-        return 0; // Streak broken
+        return 0;
       }
     }
-
+  
+    let streak = 0;
     const loopDate = new Date(currentCheckStr);
-    while (uniqueDates.has(loopDate.toLocaleDateString('en-CA'))) {
+    while (uniqueDates.has(toUTCDateStr(loopDate))) {
       streak++;
-      loopDate.setDate(loopDate.getDate() - 1);
+      loopDate.setUTCDate(loopDate.getUTCDate() - 1);
     }
+  
     return streak;
   };
 
@@ -446,7 +451,7 @@ export default function DashboardPage() {
 
           <div className="glass-strong rounded-2xl p-5 border border-white/5 flex flex-col h-full">
             <h4 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>Trending Tech News</h4>
-            <button
+            <button type='button'
               onClick={() => fetchNews(true)}
               disabled={newsLoading}
               className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors disabled:opacity-40"

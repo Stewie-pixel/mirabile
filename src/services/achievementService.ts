@@ -111,13 +111,25 @@ export async function checkAndUnlockAchievements(userId: string): Promise<string
     }
 
     // --- Query for 5 additional achievements ---
-    
+
     // AI Collaborator: Ask 5 questions to the AI assistant
-    const { count: chatCount } = await supabase
-      .from('chat_messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'user');
-    const totalChats = chatCount || 0;
+    // First get all session IDs belonging to this user
+    const { data: sessions } = await supabase
+      .from('chat_sessions')
+      .select('id')
+      .eq('user_id', userId);
+
+    const sessionIds = (sessions || []).map(s => s.id);
+
+    const { count: chatCount } = sessionIds.length > 0
+      ? await supabase
+        .from('chat_messages')
+        .select('*', { count: 'exact', head: true })
+        .in('session_id', sessionIds)
+        .eq('role', 'user')
+      : { count: 0 };
+
+    const totalChats = chatCount ?? 0;
     if (totalChats >= 5 && !existingKeys.has('ai_collaborator')) {
       unlocksToTry.push('ai_collaborator');
     }
