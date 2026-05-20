@@ -14,7 +14,7 @@ export const COMPANIES: Company[] = [
   {
     id: 'meta',
     name: 'Meta',
-    logo: 'https://www.meta.com/favicon.ico',
+    logo: 'https://freepnglogo.com/images/all_img/1723808808meta-logo-transparent-PNG.png',
   },
   {
     id: 'amazon',

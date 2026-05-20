@@ -213,66 +213,64 @@ Only use sources from this list. If a source doesn't have what you need, move to
 - https://slack.engineering
 - https://dropbox.tech
 
-### Video Learning (YouTube only)
-- https://www.youtube.com/@TechWithTim
-- https://www.youtube.com/@Fireship
-- https://www.youtube.com/@NeetCode
-- https://www.youtube.com/@WebDevSimplified
-- https://www.youtube.com/@husseinalnasser
-- https://www.youtube.com/@ByteByteGo
-- https://www.youtube.com/@FreeCodeCamp
-- https://www.youtube.com/@TechLead
-- https://www.youtube.com/@CSDojo
-- https://www.youtube.com/@Statquest
-- https://www.youtube.com/@MIT
-- https://www.youtube.com/@Harvard
-- https://www.youtube.com/@Stanford
-- https://www.youtube.com/@Google
-- https://www.youtube.com/@AmazonWebServices
-- https://www.youtube.com/@MicrosoftAzure
-- https://www.youtube.com/@AWS
-- https://www.youtube.com/@CloudGoogle
-- https://www.youtube.com/@Microsoft
-- https://www.youtube.com/@Apple
+### YouTube
+For every video resource, you MUST use web search to find a specific real video.
+Search query format: site:youtube.com "<channel name>" "<step topic>"
+Return the specific video URL (https://www.youtube.com/watch?v=...) only.
+Never return a channel homepage URL. If search returns no result, pick a different channel.
+
+#### General
+- TechWithTim → search: site:youtube.com "Tech With Tim" "<topic>"
+- Fireship → search: site:youtube.com "Fireship" "<topic>"
+- NeetCode → search: site:youtube.com "NeetCode" "<topic>"
+- WebDevSimplified → search: site:youtube.com "Web Dev Simplified" "<topic>"
+- husseinalnasser → search: site:youtube.com "Hussein Nasser" "<topic>"
+- ByteByteGo → search: site:youtube.com "ByteByteGo" "<topic>"
+- FreeCodeCamp → search: site:youtube.com "freeCodeCamp" "<topic>"
+- TechLead → search: site:youtube.com "TechLead" "<topic>"
+- CSDojo → search: site:youtube.com "CS Dojo" "<topic>"
+- Statquest → search: site:youtube.com "StatQuest" "<topic>"
+- MIT → search: site:youtube.com "MIT OpenCourseWare" "<topic>"
+- Harvard → search: site:youtube.com "Harvard University" "<topic>"
+- Stanford → search: site:youtube.com "Stanford University" "<topic>"
 
 #### Google
-- https://www.youtube.com/@GoogleDevelopers          — Google tech, AI, cloud, mobile, web
-- https://www.youtube.com/@Android                   — Android platform updates and best practices
-- https://www.youtube.com/@Google                    — Google product announcements and engineering
-- https://www.youtube.com/@ChromeDevelopers          — Chrome, web standards, and browser APIs
-- https://www.youtube.com/@GoogleCloudTech           — Google Cloud architecture and tutorials
-- https://www.youtube.com/@TensorFlow                — TensorFlow and ML engineering
-- https://www.youtube.com/@googledeepmind            — DeepMind AI research
+- GoogleDevelopers → search: site:youtube.com "Google Developers" "<topic>"
+- Android → search: site:youtube.com "Android Developers" "<topic>"
+- ChromeDevelopers → search: site:youtube.com "Chrome Developers" "<topic>"
+- GoogleCloudTech → search: site:youtube.com "Google Cloud Tech" "<topic>"
+- TensorFlow → search: site:youtube.com "TensorFlow" "<topic>"
+- googledeepmind → search: site:youtube.com "Google DeepMind" "<topic>"
 
 #### Meta
-- https://www.youtube.com/@MetaDevelopers            — Meta platform, AR/VR, AI tools
+- MetaDevelopers → search: site:youtube.com "Meta Developers" "<topic>"
 
 #### Microsoft
-- https://www.youtube.com/@MicrosoftDeveloper        — Azure, .NET, VS Code, TypeScript, DevOps
-- https://www.youtube.com/@visualstudio              — Visual Studio tooling and productivity
-- https://www.youtube.com/@AzureDevOps               — CI/CD, pipelines, and Azure DevOps
+- MicrosoftDeveloper → search: site:youtube.com "Microsoft Developer" "<topic>"
+- visualstudio → search: site:youtube.com "Visual Studio" "<topic>"
+- AzureDevOps → search: site:youtube.com "Azure DevOps" "<topic>"
 
 #### Amazon / AWS
-- https://www.youtube.com/@awsdevelopers            — Hands-on AWS tutorials and builder content
-- https://www.youtube.com/@AmazonWebServices         — AWS announcements and architecture deep dives
+- awsdevelopers → search: site:youtube.com "AWS Developers" "<topic>"
+- AmazonWebServices → search: site:youtube.com "Amazon Web Services" "<topic>"
 
 #### Apple
-- https://www.youtube.com/@AppleDeveloper            — WWDC sessions, Swift, SwiftUI, Xcode
+- AppleDeveloper → search: site:youtube.com "Apple Developer" "<topic>"
 
 #### Netflix
-- https://www.youtube.com/@WeAreNetflix        — Chaos engineering, infra, scale, experimentation
+- WeAreNetflix → search: site:youtube.com "Netflix" "<topic>"
 
 #### LinkedIn
-- https://www.youtube.com/@LinkedInEngineering       — Engineering talks, data infra, distributed systems
+- LinkedInEngineering → search: site:youtube.com "LinkedIn Engineering" "<topic>"
 
 #### GitHub
-- https://www.youtube.com/@GitHub                    — GitHub Actions, Copilot, open source, DevOps
+- GitHub → search: site:youtube.com "GitHub" "<topic>"
 
 #### Vercel / Next.js
-- https://www.youtube.com/@VercelHQ                  — Next.js, frontend performance, edge computing
+- VercelHQ → search: site:youtube.com "Vercel" "<topic>"
 
 #### Cloudflare
-- https://www.youtube.com/@CloudflareDevelopers      — Edge networking, Workers, security engineering
+- CloudflareDevelopers → search: site:youtube.com "Cloudflare Developers" "<topic>"
 
 ### Interview Prep
 - https://www.youtube.com/@LifeatGoogle
