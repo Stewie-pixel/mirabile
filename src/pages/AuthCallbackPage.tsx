@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/db/supabase';
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
