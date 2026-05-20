@@ -37,7 +37,14 @@ export class RoadmapService {
       max_tokens: 4000,
     });
 
-    return this.parseJSON<RoadmapStructure>(response, 'roadmap structure');
+    const structure = this.parseJSON<RoadmapStructure>(response, 'roadmap structure');
+    if (structure.steps && Array.isArray(structure.steps)) {
+      structure.steps = structure.steps.map((step, idx) => ({
+        ...step,
+        step_order: idx + 1,
+      }));
+    }
+    return structure;
   }
 
   private async generateResources(

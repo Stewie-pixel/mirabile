@@ -230,7 +230,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
             description: step.description,
             difficulty: step.difficulty,
             estimated_time: step.estimated_time,
-            step_order: step.step_order || index + 1,
+            step_order: index + 1,
           }));
 
           const { data: steps, error: stepsError } = await supabase

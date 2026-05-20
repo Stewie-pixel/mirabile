@@ -12,4 +12,6 @@ declare global {
   var puter: any;
 }
 
+declare module 'qrcode';
+
 export {};

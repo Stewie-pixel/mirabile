@@ -16,6 +16,8 @@ import { insertProgress } from "./lib/db/insert-progress.ts";
 import { callOpenAI } from "./lib/llm/openai.ts";
 import { callClaude } from "./lib/llm/claude.ts";
 import { callGemini } from "./lib/llm/gemini.ts";
+import { fetchVideoForStep } from "./lib/youtube-resources.ts";
+import { callPuter } from "./lib/llm/puter.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -90,6 +92,10 @@ Deno.serve(async (req) => {
         content = await callGemini(accessToken, projectId, location, modelConfig.modelId, prompt);
         break;
       }
+      case "puter": {
+        content = await callPuter(prompt);
+        break;
+      }
       default:
         throw new Error(`Unsupported provider: ${modelConfig.provider}`);
     }
@@ -110,6 +116,37 @@ Deno.serve(async (req) => {
     const steps = await insertSteps(supabase, roadmap.id, parsed.steps);
     await insertResources(supabase, steps, parsed.resources);
     await insertProgress(supabase, user.id, roadmap.id);
+
+    const youtubeApiKey = Deno.env.get("YOUTUBE_API_KEY");
+    if (youtubeApiKey) {
+      try {
+        const videoResources = await Promise.all(
+          steps.map(async (step: any, idx: number) => {
+            const video = await fetchVideoForStep(
+              youtubeApiKey,
+              step.phase,
+              step.title,
+              career_goal
+            );
+            if (!video) return null;
+            return {
+              step_index: idx,
+              resource_type: "video",
+              title: video.title,
+              url: video.url,
+              description: `Video by ${video.channelTitle} covering ${step.title}.`,
+            };
+          })
+        );
+
+        const validVideos = videoResources.filter(Boolean);
+        if (validVideos.length > 0) {
+          await insertResources(supabase, steps, validVideos);
+        }
+      } catch (youtubeError) {
+        console.error("Error generating or saving YouTube resources:", youtubeError);
+      }
+    }
 
     return new Response(
       JSON.stringify({ roadmap, steps, message: "Roadmap generated successfully" }),
