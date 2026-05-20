@@ -34,3 +34,4 @@ supabase/.temp
 .supabase/functions/**/package-lock.json
 .supabase/functions/**/yarn.lock
 .supabase/functions/**/pnpm-lock.yaml
+node_modules
