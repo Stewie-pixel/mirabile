@@ -6,29 +6,41 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('AuthCallbackPage mounted');
-    console.log('URL:', globalThis.location.href);
-    console.log('Hash:', globalThis.location.hash);
-    console.log('Search:', globalThis.location.search);
+    const handleCallback = async () => {
+      const hashParams = new URLSearchParams(globalThis.location.hash.substring(1));
+      const searchParams = new URLSearchParams(globalThis.location.search);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth event:', event);
-      console.log('Session:', session);
-      if (event === 'SIGNED_IN' && session) {
-        subscription.unsubscribe();
-        navigate('/dashboard', { replace: true });
+      const accessToken = hashParams.get('access_token') || searchParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token') || searchParams.get('refresh_token');
+      const code = searchParams.get('code');
+
+      console.log('access_token:', accessToken);
+      console.log('refresh_token:', refreshToken);
+      console.log('code:', code);
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error) {
+          navigate('/dashboard', { replace: true });
+          return;
+        }
       }
-    });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('getSession result:', session);
-      if (session) {
-        subscription.unsubscribe();
-        navigate('/dashboard', { replace: true });
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (!error) {
+          navigate('/dashboard', { replace: true });
+          return;
+        }
       }
-    });
 
-    return () => subscription.unsubscribe();
+      navigate('/login', { replace: true });
+    };
+
+    handleCallback();
   }, [navigate]);
 
   return (
