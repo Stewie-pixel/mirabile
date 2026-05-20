@@ -157,21 +157,25 @@ export async function checkAndUnlockAchievements(userId: string): Promise<string
       .eq('event_type', 'step_completed');
 
     if (stepEvents && stepEvents.length > 0) {
-      // Night Owl: Complete a step between 11 PM and 4 AM
+      // Night Owl: Complete a step between 11 PM and 4 AM UTC
       const hasNightOwl = stepEvents.some(e => {
-        const hour = new Date(e.created_at).getHours();
+        const hour = new Date(e.created_at).getUTCHours();
         return hour >= 23 || hour < 4;
       });
       if (hasNightOwl && !existingKeys.has('night_owl')) {
         unlocksToTry.push('night_owl');
       }
 
-      // Fast Learner: Complete 5 steps in a single day
+      // Fast Learner: Complete 5 steps in a single day UTC
+      const toUTCDateStr = (date: Date) =>
+        `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+
       const dateCounts: Record<string, number> = {};
       stepEvents.forEach(e => {
-        const dayStr = new Date(e.created_at).toLocaleDateString('en-CA');
+        const dayStr = toUTCDateStr(new Date(e.created_at));
         dateCounts[dayStr] = (dateCounts[dayStr] || 0) + 1;
       });
+
       const maxStepsInADay = Math.max(0, ...Object.values(dateCounts));
       if (maxStepsInADay >= 5 && !existingKeys.has('fast_learner')) {
         unlocksToTry.push('fast_learner');
