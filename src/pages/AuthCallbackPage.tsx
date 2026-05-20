@@ -6,7 +6,14 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('AuthCallbackPage mounted');
+    console.log('URL:', globalThis.location.href);
+    console.log('Hash:', globalThis.location.hash);
+    console.log('Search:', globalThis.location.search);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event);
+      console.log('Session:', session);
       if (event === 'SIGNED_IN' && session) {
         subscription.unsubscribe();
         navigate('/dashboard', { replace: true });
@@ -14,6 +21,7 @@ export default function AuthCallbackPage() {
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('getSession result:', session);
       if (session) {
         subscription.unsubscribe();
         navigate('/dashboard', { replace: true });
