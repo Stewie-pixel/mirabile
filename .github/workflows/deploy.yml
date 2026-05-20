@@ -30,6 +30,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Fix public asset paths
+        run: |
+          find src -type f \( -name "*.tsx" -o -name "*.ts" \) | xargs sed -i 's|src="/icons/|src="/mirabile/icons/|g'
+          find src -type f \( -name "*.tsx" -o -name "*.ts" \) | xargs sed -i 's|src="/images/|src="/mirabile/images/|g'
+          find src -type f \( -name "*.tsx" -o -name "*.ts" \) | xargs sed -i 's|src="/logo.png"|src="/mirabile/logo.png"|g'
+          find src -type f \( -name "*.tsx" -o -name "*.ts" \) | xargs sed -i 's|src="/favicon.png"|src="/mirabile/favicon.png"|g'
+
       - name: Build
         run: pnpm exec vite build
         env:
