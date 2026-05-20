@@ -16,14 +16,14 @@ import type { Roadmap } from '@/types';
 
 /* ── design tokens matching existing Navbar ── */
 const T = {
-  border: 'rgba(10,255,228,0.12)',
-  surface: 'rgba(10,255,228,0.04)',
-  surfaceActive: 'rgba(10,255,228,0.10)',
-  teal: '#0AFFE4',
+  border: 'rgba(0,240,255,0.12)',
+  surface: 'rgba(0,240,255,0.04)',
+  surfaceActive: 'rgba(0,240,255,0.10)',
+  teal: '#00F0FF',
   text: 'rgb(232, 255, 254)',
   textDim: 'rgba(232,255,254,0.55)',
   bg: '#080D12',
-  gradBtn: 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)',
+  gradBtn: 'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)',
 } as const;
 
 /* ── nav items ── */
@@ -109,53 +109,69 @@ function NavItem({ path, label, icon: Icon, collapsed }: {
   );
 }
 
-function HistoryCard({ roadmap, collapsed }: { roadmap: Roadmap; collapsed: boolean }) {
+function HistoryCard({ roadmap, collapsed, onDelete }: {
+  roadmap: Roadmap;
+  collapsed: boolean;
+  onDelete: (e: React.MouseEvent) => void;
+}) {
   const logo = companyLogo(roadmap.target_company);
   return (
-    <Link
-      to={`/roadmap/${roadmap.id}`}
-      className="flex items-start gap-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors group"
-      title={collapsed ? `${roadmap.career_goal} · ${roadmap.target_company}` : undefined}
-    >
-      {/* logo / fallback */}
-      <div
-        className="flex-shrink-0 w-[18px] h-[18px] rounded-sm overflow-hidden mt-0.5 flex items-center justify-center"
-        style={{ background: 'rgba(255,255,255,0.08)' }}
+    <div className="relative group/card flex items-center justify-between w-full rounded-lg hover:bg-white/5 transition-colors">
+      <Link
+        to={`/roadmap/${roadmap.id}`}
+        className="flex items-start gap-2 px-3 py-2 flex-1 min-w-0"
+        title={collapsed ? `${roadmap.career_goal} · ${roadmap.target_company}` : undefined}
       >
-        {logo
-          ? <img src={logo} alt={roadmap.target_company} className="w-full h-full object-cover" />
-          : <Building2 size={11} style={{ color: T.textDim }} />}
-      </div>
-      {!collapsed && (
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium truncate" style={{ color: T.text }}>
-            {roadmap.career_goal} · {roadmap.target_company}
-          </p>
-          <p className="text-xs truncate mt-0.5" style={{ color: T.textDim }}>
-            {relativeTime(roadmap.created_at)} · {roadmap.timeline}
-          </p>
+        {/* logo / fallback */}
+        <div
+          className="flex-shrink-0 w-[18px] h-[18px] rounded-sm overflow-hidden mt-0.5 flex items-center justify-center"
+          style={{ background: 'rgba(255,255,255,0.08)' }}
+        >
+          {logo
+            ? <img src={logo} alt={roadmap.target_company} className="w-full h-full object-cover" />
+            : <Building2 size={11} style={{ color: T.textDim }} />}
         </div>
+        {!collapsed && (
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium truncate" style={{ color: T.text }}>
+              {roadmap.career_goal} · {roadmap.target_company}
+            </p>
+            <p className="text-xs truncate mt-0.5" style={{ color: T.textDim }}>
+              {relativeTime(roadmap.created_at)} · {roadmap.timeline}
+            </p>
+          </div>
+        )}
+      </Link>
+      {!collapsed && (
+        <button
+          type="button"
+          onClick={onDelete}
+          className="mr-2 p-1 rounded hover:bg-white/10 opacity-0 group-hover/card:opacity-100 transition-opacity"
+          style={{ color: '#F87171' }}
+          title="Delete roadmap"
+        >
+          <Trash2 size={13} fill="none" />
+        </button>
       )}
-    </Link>
+    </div>
   );
 }
 
 export function Sidebar() {
   const { user, profile } = useAuth();
-  const { fetchUserRoadmaps } = useRoadmap();
+  const { fetchUserRoadmaps, userRoadmaps, deleteRoadmap, clearHistory } = useRoadmap();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [history, setHistory] = useState<Roadmap[]>([]);
   const [historyMenuOpen, setHistoryMenuOpen] = useState(false);
   const historyMenuRef = useRef<HTMLDivElement>(null);
 
   /* fetch history on mount */
   useEffect(() => {
     if (!user) return;
-    fetchUserRoadmaps().then(data => setHistory(data.slice(0, 20)));
+    fetchUserRoadmaps();
   }, [user, fetchUserRoadmaps]);
 
   /* close mobile drawer on route change */
@@ -175,10 +191,11 @@ export function Sidebar() {
   }, []);
 
   const handleClearHistory = async () => {
-    await fetch('/api/roadmaps/clear-history', { method: 'POST' });
-    if (!user) return;
-    setHistoryMenuOpen(false);
-    setHistory([]);
+    if (confirm('Are you sure you want to clear all roadmaps? This action cannot be undone.')) {
+      await clearHistory();
+      setHistoryMenuOpen(false);
+      navigate('/instructions');
+    }
   };
 
   /* don't render sidebar on public routes */
@@ -226,7 +243,7 @@ export function Sidebar() {
       </nav>
 
       {/* ── roadmap history ── */}
-      {history.length > 0 && (
+      {userRoadmaps.length > 0 && (
         <div className="mt-4 flex-1 flex flex-col min-h-0">
           {/* section header */}
           <div className="flex items-center justify-between px-3 mb-1">
@@ -269,8 +286,22 @@ export function Sidebar() {
           {/* scrollable list */}
           <div className="flex-1 overflow-y-auto flex flex-col gap-0.5 px-1 pb-2"
             style={{ scrollbarWidth: 'thin', scrollbarColor: `${T.border} transparent` }}>
-            {history.map(r => (
-              <HistoryCard key={r.id} roadmap={r} collapsed={!mobile && collapsed} />
+            {userRoadmaps.slice(0, 20).map(r => (
+              <HistoryCard 
+                key={r.id} 
+                roadmap={r} 
+                collapsed={!mobile && collapsed} 
+                onDelete={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (confirm(`Are you sure you want to delete the roadmap for "${r.career_goal} · ${r.target_company}"?`)) {
+                    await deleteRoadmap(r.id);
+                    if (location.pathname === `/roadmap/${r.id}`) {
+                      navigate('/instructions');
+                    }
+                  }
+                }}
+              />
             ))}
           </div>
         </div>

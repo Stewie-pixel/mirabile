@@ -39,12 +39,12 @@ function initials(name: string | null, email: string | null): string {
 }
 
 const T = {
-  border: 'rgba(10,255,228,0.12)',
-  surface: 'rgba(10,255,228,0.04)',
+  border: 'rgba(0,240,255,0.12)',
+  surface: 'rgba(0,240,255,0.04)',
   textMid: 'rgb(232, 255, 254)',
-  teal: '#0AFFE4',
+  teal: '#00F0FF',
   textDim: 'rgba(232,255,254,0.55)',
-  gradBtn: 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)',
+  gradBtn: 'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)',
 } as const;
 
 function relativeTime(dateStr: string): string {
@@ -75,7 +75,7 @@ function useCursorGlow() {
       className="pointer-events-none absolute inset-0 transition-opacity"
       style={{
         opacity: pos.active ? 1 : 0,
-        background: `radial-gradient(140px circle at ${pos.x}px ${pos.y}px, rgba(10, 255, 226, 0.8), transparent 60%)`,
+        background: `radial-gradient(140px circle at ${pos.x}px ${pos.y}px, rgba(0, 240, 255, 0.8), transparent 60%)`,
       }}
     />
   );
@@ -89,10 +89,7 @@ function LogoLink() {
     <Link to="/" className="relative overflow-hidden flex items-center gap-2.5">
       {glow}
       <img src="/images/logo.png" className="h-8" alt="logo" />
-      <span
-        style={{ background: T.gradBtn, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-        className="text-xl font-bold"
-      >
+      <span className="text-xl font-bold text-white">
         Mirabile
       </span>
     </Link>
@@ -109,7 +106,7 @@ function NavLink({ path, label, active }: { path: string; label: string; active:
       className="relative overflow-hidden px-4 py-1.5 rounded-lg text-sm font-medium"
       style={{
         color: active ? T.teal : T.textMid,
-        background: active ? 'rgba(10,255,228,0.06)' : 'transparent',
+        background: active ? 'rgba(0,240,255,0.06)' : 'transparent',
         border: active ? `1px solid ${T.border}` : '1px solid transparent',
       }}
     >
@@ -203,7 +200,7 @@ function RoadmapNavItem({ active }: { active: boolean }) {
         className="relative overflow-hidden px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5"
         style={{
           color: active || panelOpen ? T.teal : T.textMid,
-          background: active || panelOpen ? 'rgba(10,255,228,0.06)' : 'transparent',
+          background: active || panelOpen ? 'rgba(0,240,255,0.06)' : 'transparent',
           border: `1px solid ${active || panelOpen ? T.border : 'transparent'}`,
         }}
       >
@@ -246,7 +243,7 @@ function RoadmapNavItem({ active }: { active: boolean }) {
                   to={item.path}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150"
                   style={{
-                    background: isActive ? 'rgba(10,255,228,0.10)' : 'transparent',
+                    background: isActive ? 'rgba(0,240,255,0.10)' : 'transparent',
                     color: isActive ? T.teal : T.textMid,
                   }}
                   onClick={() => { setPanelOpen(false); setPinned(false); }}

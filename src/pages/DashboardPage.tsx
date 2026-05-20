@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRoadmap } from '@/contexts/RoadmapContext';
 import { useProgress } from '@/contexts/ProgressContext';
+import { supabase } from '@/lib/supabase';
+import { MirabileMascot } from '@/components/ui/MirabileMascot';
 import {
   Loader2,
   TrendingUp,
@@ -70,6 +72,7 @@ export default function DashboardPage() {
   const [news, setNews] = useState<HackerNewsStory[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
   const [loading, setLoading] = useState(userRoadmaps.length === 0);
+  const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -84,9 +87,27 @@ export default function DashboardPage() {
     if (userRoadmaps.length > 0) {
       setActiveRoadmap(userRoadmaps[0]);
       fetchProgress(userRoadmaps[0].id);
-      const allIds = userRoadmaps.slice(0, 4).map(r => r.id);
+      const allIds = userRoadmaps.map(r => r.id);
       fetchAllProgress(allIds);
     }
+  }, [userRoadmaps]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from('user_events')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+        
+      if (!error && data) {
+        setEvents(data);
+      }
+    };
+    fetchEvents();
   }, [userRoadmaps]);
 
   const fetchNews = useCallback(async (forceRefresh = false) => {
@@ -152,12 +173,12 @@ export default function DashboardPage() {
       <div className="container mx-auto max-w-4xl py-8 px-4">
         <div className="glass-strong rounded-2xl p-8">
           <div className="flex flex-col items-center justify-center space-y-4 py-8">
-            <Target className="h-16 w-16" style={{ color: 'rgba(255,255,255,0.3)' }} />
+            <MirabileMascot size={160} className="mb-2" />
             <h2 className="text-2xl font-semibold" style={{ color: '#ffffff' }}>No Roadmaps Yet</h2>
             <p className="text-center max-w-md" style={{ color: 'rgba(255,255,255,0.5)' }}>
               Start your career journey by generating your first personalized roadmap.
             </p>
-            <Button asChild>
+            <Button asChild variant="gradient">
               <Link to="/generator">
                 Generate Your First Roadmap
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -169,8 +190,45 @@ export default function DashboardPage() {
     );
   }
 
+  const calculateUserStreak = (eventsList: any[]) => {
+    const signInEvents = eventsList.filter(e => e.event_type === 'sign_in');
+    if (signInEvents.length === 0) return 0;
+  
+    const toUTCDateStr = (date: Date) =>
+      `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+  
+    const uniqueDates = new Set(
+      signInEvents.map(e => toUTCDateStr(new Date(e.created_at)))
+    );
+  
+    const now = new Date();
+    const todayStr = toUTCDateStr(now);
+  
+    const yesterday = new Date(now);
+    yesterday.setUTCDate(now.getUTCDate() - 1);
+    const yesterdayStr = toUTCDateStr(yesterday);
+  
+    let currentCheckStr = todayStr;
+    if (!uniqueDates.has(todayStr)) {
+      if (uniqueDates.has(yesterdayStr)) {
+        currentCheckStr = yesterdayStr;
+      } else {
+        return 0;
+      }
+    }
+  
+    let streak = 0;
+    const loopDate = new Date(currentCheckStr);
+    while (uniqueDates.has(toUTCDateStr(loopDate))) {
+      streak++;
+      loopDate.setUTCDate(loopDate.getUTCDate() - 1);
+    }
+  
+    return streak;
+  };
+
   const activeRoadmapsCount = userRoadmaps.length;
-  const currentStreak = progress?.streak_days || 0;
+  const currentStreak = calculateUserStreak(events);
   const currentMilestones = progress?.milestones?.filter(m => m.achieved).length || 0;
 
   const activeRoadmapsData = [
@@ -182,7 +240,7 @@ export default function DashboardPage() {
   const roadmapsUp = activeRoadmapsData[activeRoadmapsData.length - 1].value >= activeRoadmapsData[activeRoadmapsData.length - 2].value;
 
   const streakData = [
-    { value: Math.max(0, currentStreak - 5) },
+    { value: Math.max(0, currentStreak - 3) },
     { value: Math.max(0, currentStreak - 2) },
     { value: Math.max(0, currentStreak - 1) },
     { value: currentStreak },
@@ -204,15 +262,19 @@ export default function DashboardPage() {
     return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
   };
 
-  const userGrowthData = [
-    { name: getDayLabel(6), days: Math.max(0, currentStreak - 6) },
-    { name: getDayLabel(5), days: Math.max(0, currentStreak - 5) },
-    { name: getDayLabel(4), days: Math.max(0, currentStreak - 4) },
-    { name: getDayLabel(3), days: Math.max(0, currentStreak - 3) },
-    { name: getDayLabel(2), days: Math.max(0, currentStreak - 2) },
-    { name: getDayLabel(1), days: Math.max(0, currentStreak - 1) },
-    { name: getDayLabel(0), days: currentStreak },
-  ];
+  const userGrowthData = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - (6 - i));
+    const dateStr = d.toLocaleDateString('en-CA');
+    const activityCount = events.filter(e => {
+      return new Date(e.created_at).toLocaleDateString('en-CA') === dateStr;
+    }).length;
+
+    return {
+      name: getDayLabel(6 - i),
+      days: activityCount
+    };
+  });
 
   return (
     <div className="container mx-auto max-w-6xl py-8 px-4">
@@ -301,7 +363,7 @@ export default function DashboardPage() {
       <div className="mb-8">
         <h3 className="text-xl font-bold mb-4" style={{ color: '#ffffff' }}>Roadmap</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {userRoadmaps.slice(0, 4).map(roadmap => {
+          {userRoadmaps.map(roadmap => {
             const config = getCompanyConfig(roadmap.target_company);
             const roadmapProgress = progressMap[roadmap.id]?.progress_percentage ?? 0;
             return (
@@ -369,19 +431,19 @@ export default function DashboardPage() {
                 <AreaChart data={userGrowthData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorDays" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#a855f7" stopOpacity={0.5} />
-                      <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#0AFFE4" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="name" stroke="rgba(255, 255, 255, 1)" fontSize={11} tickLine={false} axisLine={false} />
                   <YAxis orientation="right" allowDecimals={false} stroke="rgba(255, 255, 255, 1)" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip
                     contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                    itemStyle={{ color: '#a855f7', fontSize: '12px' }}
+                    itemStyle={{ color: '#0AFFE4', fontSize: '12px' }}
                     labelStyle={{ color: '#ffffff', fontSize: '12px' }}
                     cursor={{ stroke: 'rgba(255,255,255,0.1)' }}
                   />
-                  <Area type="monotone" dataKey="days" stroke="#a855f7" strokeWidth={3} fillOpacity={1} fill="url(#colorDays)" />
+                  <Area type="monotone" dataKey="days" stroke="#0AFFE4" strokeWidth={3} fillOpacity={1} fill="url(#colorDays)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -389,7 +451,7 @@ export default function DashboardPage() {
 
           <div className="glass-strong rounded-2xl p-5 border border-white/5 flex flex-col h-full">
             <h4 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>Trending Tech News</h4>
-            <button
+            <button type='button'
               onClick={() => fetchNews(true)}
               disabled={newsLoading}
               className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors disabled:opacity-40"

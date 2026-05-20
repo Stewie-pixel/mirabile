@@ -105,7 +105,7 @@ return (
                       background 0.25s ease, 
                       border-color 0.25s ease;
           background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgb(255, 255, 255);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
         }
@@ -116,7 +116,7 @@ return (
           inset: 0;
           background: radial-gradient(
             300px circle at var(--mouse-x) var(--mouse-y),
-            rgb(0, 255, 225),
+            rgb(0, 240, 255),
             transparent 80%
           );
           opacity: 0;
@@ -132,7 +132,7 @@ return (
         .company-card:hover {
           transform: translateY(-6px); /* The lift */
           background: rgba(255, 255, 255, 0.06);
-          border-color: rgb(255, 255, 255);
+          border-color: rgba(10, 255, 228, 0.3);
           box-shadow: 
             0 12px 24px -10px rgba(0, 0, 0, 0.5),
             0 0 20px rgba(10, 255, 228, 0.05);
@@ -159,7 +159,7 @@ return (
         <p
           className="text-center text-lg font-semibold uppercase mb-7"
           style={{
-            color: 'rgb(10, 255, 226)',
+            color: 'rgb(0, 240, 255)',
             letterSpacing: '0.22em',
             fontFamily: "'DM Mono', monospace",
           }}

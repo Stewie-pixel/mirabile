@@ -64,12 +64,6 @@ export function HeroSection() {
             {/* Brand pill */}
             <div className="hf1 flex items-center gap-3">
               <img src="/images/logo.png" alt="Mirabile" className="h-20 w-20 object-contain" />
-              <span
-                className="text-base font-semibold uppercase"
-                style={{ color: T.teal, letterSpacing: '0.18em', fontFamily: "'DM Mono', monospace" }}
-              >
-                Mirabile
-              </span>
             </div>
 
             {/* Headline */}

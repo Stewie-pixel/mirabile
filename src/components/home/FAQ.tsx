@@ -3,15 +3,15 @@ import { ChevronDown } from 'lucide-react';
 
 const T = {
   bg:       '#000000',
-  grad:     'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)',
-  border:   'rgba(10,255,228,0.12)',
-  surface:  'rgba(10,255,228,0.04)',
-  surface2: 'rgba(10,255,228,0.07)',
+  grad:     'linear-gradient(135deg, #00F0FF 0%, #F472B6 100%)',
+  border:   'rgba(0,240,255,0.12)',
+  surface:  'rgba(0,240,255,0.04)',
+  surface2: 'rgba(0,240,255,0.07)',
   textHigh: '#E8FFFE',
   textMid:  'rgba(232,255,254,0.55)',
   textLow:  'rgba(232,255,254,0.35)',
-  teal:     '#0AFFE4',
-  cyan:     '#0EA5E9',
+  teal:     '#00F0FF',
+  cyan:     '#F472B6',
 } as const;
 
 const FAQS = [

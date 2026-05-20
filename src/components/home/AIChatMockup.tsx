@@ -120,8 +120,8 @@ function MessageBubble({ msg, visible }: { msg: Message; visible: boolean }) {
                 borderRadius:  '4px 18px 18px 18px',
               }
             : {
-                background:    'rgba(14,165,233,0.08)',
-                border:        '1px solid rgba(14,165,233,0.2)',
+                background:    'rgba(244,114,182,0.08)',
+                border:        '1px solid rgba(244,114,182,0.2)',
                 color:         T.textHigh,
                 backdropFilter: 'blur(12px)',
                 borderRadius:  '18px 4px 18px 18px',

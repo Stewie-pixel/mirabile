@@ -74,7 +74,7 @@ export default function RoadmapGeneratorPage() {
         <Link 
           to="/instructions" 
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium transition-colors hover:bg-primary/80 hover:text-white"
-          style={{ background: 'rgba(10, 255, 226, 0.5)', color: '#ffffff', border: '1px solid rgba(10,255,228,0.2)' }}
+          style={{ background: 'rgba(10, 255, 228, 0.25)', color: '#ffffff', border: '1px solid rgba(10,255,228,0.2)' }}
         >
           Read model usage instructions here →
         </Link>

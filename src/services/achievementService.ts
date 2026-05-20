@@ -13,6 +13,11 @@ export const ACHIEVEMENT_DEFINITIONS: readonly AchievementDefinition[] = [
   { key: 'summit_reached', emoji: '🏔️', name: 'Summit Reached', hint: 'Complete an entire roadmap' },
   { key: 'on_a_roll', emoji: '⚡', name: 'On a Roll', hint: '7-day activity streak' },
   { key: 'overachiever', emoji: '🏆', name: 'Overachiever', hint: 'Complete 3 roadmaps' },
+  { key: 'ai_collaborator', emoji: '💬', name: 'AI Collaborator', hint: 'Ask 5 questions to the AI assistant' },
+  { key: 'fast_learner', emoji: '⚡', name: 'Fast Learner', hint: 'Complete 5 steps in a single day' },
+  { key: 'explorer', emoji: '🚀', name: 'Explorer', hint: 'Generate 5 roadmaps for unique career goals' },
+  { key: 'perseverance', emoji: '💪', name: 'Perseverance', hint: 'Complete 10 steps total' },
+  { key: 'night_owl', emoji: '🦉', name: 'Night Owl', hint: 'Complete a step between 11 PM and 4 AM' },
 ] as const;
 
 /**
@@ -103,6 +108,78 @@ export async function checkAndUnlockAchievements(userId: string): Promise<string
     // Overachiever: complete 3 roadmaps
     if (completedRoadmapsCount >= 3 && !existingKeys.has('overachiever')) {
       unlocksToTry.push('overachiever');
+    }
+
+    // --- Query for 5 additional achievements ---
+
+    // AI Collaborator: Ask 5 questions to the AI assistant
+    // First get all session IDs belonging to this user
+    const { data: sessions } = await supabase
+      .from('chat_sessions')
+      .select('id')
+      .eq('user_id', userId);
+
+    const sessionIds = (sessions || []).map(s => s.id);
+
+    const { count: chatCount } = sessionIds.length > 0
+      ? await supabase
+        .from('chat_messages')
+        .select('*', { count: 'exact', head: true })
+        .in('session_id', sessionIds)
+        .eq('role', 'user')
+      : { count: 0 };
+
+    const totalChats = chatCount ?? 0;
+    if (totalChats >= 5 && !existingKeys.has('ai_collaborator')) {
+      unlocksToTry.push('ai_collaborator');
+    }
+
+    // Perseverance: Complete 10 steps total
+    if (totalCompletedSteps >= 10 && !existingKeys.has('perseverance')) {
+      unlocksToTry.push('perseverance');
+    }
+
+    // Explorer: Generate 5 roadmaps for unique career goals
+    const { data: roadmapsData } = await supabase
+      .from('roadmaps')
+      .select('career_goal')
+      .eq('user_id', userId);
+    const uniqueGoals = new Set((roadmapsData || []).map(r => r.career_goal.toLowerCase().trim()));
+    if (uniqueGoals.size >= 5 && !existingKeys.has('explorer')) {
+      unlocksToTry.push('explorer');
+    }
+
+    // Step-based timing/frequency achievements
+    const { data: stepEvents } = await supabase
+      .from('user_events')
+      .select('created_at')
+      .eq('user_id', userId)
+      .eq('event_type', 'step_completed');
+
+    if (stepEvents && stepEvents.length > 0) {
+      // Night Owl: Complete a step between 11 PM and 4 AM UTC
+      const hasNightOwl = stepEvents.some(e => {
+        const hour = new Date(e.created_at).getUTCHours();
+        return hour >= 23 || hour < 4;
+      });
+      if (hasNightOwl && !existingKeys.has('night_owl')) {
+        unlocksToTry.push('night_owl');
+      }
+
+      // Fast Learner: Complete 5 steps in a single day UTC
+      const toUTCDateStr = (date: Date) =>
+        `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+
+      const dateCounts: Record<string, number> = {};
+      stepEvents.forEach(e => {
+        const dayStr = toUTCDateStr(new Date(e.created_at));
+        dateCounts[dayStr] = (dateCounts[dayStr] || 0) + 1;
+      });
+
+      const maxStepsInADay = Math.max(0, ...Object.values(dateCounts));
+      if (maxStepsInADay >= 5 && !existingKeys.has('fast_learner')) {
+        unlocksToTry.push('fast_learner');
+      }
     }
 
     // Insert newly unlocked achievements

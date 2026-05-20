@@ -227,7 +227,7 @@ Assistant:`;
                     : 'text-white rounded-tl-none border border-white/10'
                     }`}
                   style={{
-                    background: message.role === 'user' ? 'linear-gradient(135deg, #0affe2dc 0%, #0EA5E9 100%)' : 'rgba(255, 255, 255, 0.06)',
+                    background: message.role === 'user' ? 'linear-gradient(135deg, #0AFFE4 0%, #0EA5E9 100%)' : 'rgba(255, 255, 255, 0.06)',
                     backdropFilter: message.role !== 'user' ? 'blur(12px)' : 'none'
                   }}
                 >

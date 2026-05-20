@@ -31,7 +31,7 @@ export function RecentActivityFeed({ events, loading, compact = false }: RecentA
       case 'roadmap_created':
       case 'roadmap_completed': return '#f97316'; // Orange
       case 'milestone_achieved': return '#a855f7'; // Purple
-      default: return '#06b6d4'; // Cyan
+      default: return '#0AFFE4'; // Themed Cyan
     }
   };
 
@@ -73,8 +73,8 @@ export function RecentActivityFeed({ events, loading, compact = false }: RecentA
     return (
       <div className="space-y-4">
         {!compact && <h2 className="text-2xl font-bold text-white mb-8">Recent Activity</h2>}
-        <Card className="border border-cyan-500/20 bg-cyan-950/10 rounded-2xl p-8 text-center backdrop-blur-md">
-          <Calendar className="w-12 h-12 text-cyan-500/40 mx-auto mb-4" />
+        <Card className="border border-[#0AFFE4]/20 bg-[#0AFFE4]/5 rounded-2xl p-8 text-center backdrop-blur-md">
+          <Calendar className="w-12 h-12 text-[#0AFFE4]/40 mx-auto mb-4" />
           <h3 className="text-white font-medium mb-1">No activity yet</h3>
           <p className="text-white/50 text-sm">Start a roadmap or complete steps to track your progress!</p>
         </Card>
@@ -116,7 +116,7 @@ export function RecentActivityFeed({ events, loading, compact = false }: RecentA
         {displayCount < events.length && (
           <Button 
             variant="ghost" 
-            className="w-full text-xs text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/5 rounded-xl py-2" 
+            className="w-full text-xs text-[#0AFFE4] hover:text-[#0AFFE4]/80 hover:bg-[#0AFFE4]/5 rounded-xl py-2" 
             onClick={() => setDisplayCount(prev => prev + 5)}
           >
             Show more
@@ -161,7 +161,7 @@ export function RecentActivityFeed({ events, loading, compact = false }: RecentA
 
                 {/* Card container */}
                 <Card 
-                  className="w-full md:w-[calc(50%-1.75rem)] border bg-slate-900/40 backdrop-blur-md rounded-2xl p-5 hover:border-cyan-500/35 hover:shadow-[0_4px_24px_rgba(6,182,212,0.08)] transition-all duration-300"
+                  className="w-full md:w-[calc(50%-1.75rem)] border bg-slate-900/40 backdrop-blur-md rounded-2xl p-5 hover:border-[#0AFFE4]/35 hover:shadow-[0_4px_24px_rgba(10,255,228,0.08)] transition-all duration-300"
                   style={{ borderColor: `${color}22` }}
                 >
                   <div className="flex justify-between items-start gap-4">
@@ -192,7 +192,7 @@ export function RecentActivityFeed({ events, loading, compact = false }: RecentA
       {displayCount < events.length && (
         <div className="flex justify-center pt-6">
           <Button 
-            className="px-8 py-5 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/35 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0" 
+            className="px-8 py-5 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-[#0AFFE4] to-[#0EA5E9] hover:opacity-90 shadow-lg shadow-[#0AFFE4]/15 hover:shadow-[#0AFFE4]/25 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0" 
             onClick={() => setDisplayCount(prev => prev + 5)}
           >
             Load more
