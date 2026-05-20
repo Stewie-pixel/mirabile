@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./images/cover.gif" alt="Mirabile Cover" width="100%" />
+  <img src="public/images/Cover.gif" alt="Mirabile Cover" height="400" width="100%" />
 </p>
 
 <p align="center">
