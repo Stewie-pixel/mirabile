@@ -72,7 +72,11 @@ export async function searchYouTubeVideo(
             `https://www.googleapis.com/youtube/v3/search?${params}`
         );
 
-        if (!res.ok) return null;
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error(`[searchYouTubeVideo] API error ${res.status}: ${errorText}`);
+            return null;
+        }
 
         const data = await res.json();
         const item = data.items?.[0];
