@@ -87,7 +87,7 @@ pipeline {
             }
         }
 
-        // 5. DEPLOY (Staging)
+        // 5. DEPLOY
         stage('Deploy') {
             steps {
                 echo 'Deploying to staging...'
