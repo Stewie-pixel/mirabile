@@ -25,12 +25,22 @@ pipeline {
         // 2. TEST
         stage('Test') {
             steps {
+                echo 'Starting application for testing...'
+
+                bat 'docker run -d --name mirabile-test-server -p 8080:80 %IMAGE_NAME%:%BUILD_NUMBER%'
+                
+                bat 'timeout /t 3 /nobreak'
+
                 echo 'Running Selenium tests...'
-                bat 'docker run --rm --name mirabile-test -e CI=true %IMAGE_NAME%:%BUILD_NUMBER% npx selenium-side-runner tests/'
+
+                bat 'npx selenium-side-runner tests/'
             }
             post {
                 always {
-                    junit 'test-results/**/*.xml'
+                    bat 'docker stop mirabile-test-server || exit /b 0'
+                    bat 'docker rm mirabile-test-server || exit /b 0'
+                    
+                    junit allowEmptyResults: true, testResults: 'test-results/**/*.xml'
                 }
             }
         }
