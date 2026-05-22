@@ -8,53 +8,42 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     let mounted = true;
 
-    const handleCallback = async () => {
-      // 1. Check if Supabase already created the session
-      const { data: { session } } = await supabase.auth.getSession();
-      
+    // 1. Check if Supabase already created the session
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session && mounted) {
         navigate('/dashboard', { replace: true });
-        return;
       }
+    });
 
-      // 2. If not, wait for the automatic PKCE exchange in the background
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN' && session && mounted) {
-          navigate('/dashboard', { replace: true });
-        }
-      });
+    // 2. Wait for the automatic PKCE exchange in the background
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      if (event === 'SIGNED_IN' && session) {
+        navigate('/dashboard', { replace: true });
+      } else if (event === 'SIGNED_OUT') {
+        navigate('/login', { replace: true });
+      }
+    });
 
-      // 3. Fallback: if no sign in happens after 3 seconds, redirect to login
-      setTimeout(() => {
-        if (mounted) {
-          supabase.auth.getSession().then(({ data: { session } }) => {
-            if (!session) {
-              navigate('/login', { replace: true });
-            } else {
-              navigate('/dashboard', { replace: true });
-            }
-          });
-        }
-      }, 3000);
-
-      return () => {
-        subscription.unsubscribe();
-      };
-    };
-
-    handleCallback();
+    // 3. Fallback: if no sign in happens after 3 seconds, redirect to login
+    const timeoutId = setTimeout(() => {
+      if (mounted) {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          navigate(session ? '/dashboard' : '/login', { replace: true });
+        });
+      }
+    }, 3000);
 
     return () => {
       mounted = false;
+      subscription.unsubscribe();
+      clearTimeout(timeoutId);
     };
   }, [navigate]);
 
   return (
-    <div className="flex items-center justify-center h-screen bg-black">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-white/60 text-sm">Completing sign in...</p>
-      </div>
+    <div className="flex items-center justify-center h-screen">
+      <p className="text-white/60 text-sm">Signing you in...</p>
     </div>
   );
 }
