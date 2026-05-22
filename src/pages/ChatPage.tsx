@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { assetUrl } from '@/lib/assetUrl';
 import ReactMarkdown from 'react-markdown';
 import { useParams, useNavigate } from 'react-router';
 import type { Components } from 'react-markdown';
@@ -175,7 +176,7 @@ Assistant:`;
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
               <div className="h-20 w-20 flex items-center justify-center mb-4">
-                <img src="/images/logo.png" className="w-full h-full object-contain" alt="AI" />
+                <img src={assetUrl('images/logo.png')} className="w-full h-full object-contain" alt="AI" />
               </div>
               <h2 className="text-2xl font-bold text-white">Hello! I'm your career assistant.</h2>
               <p className="text-white/70 max-w-sm">
@@ -212,7 +213,7 @@ Assistant:`;
                   </>
                 ) : (
                   <>
-                    <AvatarImage src="/images/logo.png" className="object-contain" />
+                    <AvatarImage src={assetUrl('images/logo.png')} className="object-contain" />
                     <AvatarFallback className="bg-transparent">
                       <Bot className="h-5 w-5 text-[#0AFFE4]" />
                     </AvatarFallback>
@@ -249,7 +250,7 @@ Assistant:`;
           {isLoading && (
             <div className="flex gap-3">
               <Avatar className="h-10 w-10 shrink-0">
-                <AvatarImage src="/images/logo.png" className="object-contain" />
+                <AvatarImage src={assetUrl('images/logo.png')} className="object-contain" />
                 <AvatarFallback className="bg-transparent">
                   <Bot className="h-5 w-5 text-[#0AFFE4]" />
                 </AvatarFallback>

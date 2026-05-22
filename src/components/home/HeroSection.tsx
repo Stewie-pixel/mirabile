@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { assetUrl } from '@/lib/assetUrl';
 import { ArrowRight, LayoutDashboard, Map } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ReactiveOrb } from '@/components/home/Interactiveorb';
@@ -63,7 +64,7 @@ export function HeroSection() {
 
             {/* Brand pill */}
             <div className="hf1 flex items-center gap-3">
-              <img src="/images/logo.png" alt="Mirabile" className="h-20 w-20 object-contain" />
+              <img src={assetUrl('images/logo.png')} alt="Mirabile" className="h-20 w-20 object-contain" />
             </div>
 
             {/* Headline */}

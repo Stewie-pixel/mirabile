@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { assetUrl } from '@/lib/assetUrl';
 import { useNavigate, Link } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -72,7 +73,7 @@ export default function RegisterPage() {
     <div
       className="relative flex min-h-screen w-full items-center justify-center overflow-hidden p-4"
       style={{
-        backgroundImage: 'url(/images/background.png)',
+        backgroundImage: `url(${assetUrl('images/background.png')})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
@@ -104,7 +105,7 @@ export default function RegisterPage() {
         <CardHeader className="relative z-10 space-y-1 pb-4">
           <div className="mb-3 flex justify-center">
             <img
-              src="/images/logo.png"
+              src={assetUrl('images/logo.png')}
               alt="Mirabile"
               className="h-12 drop-shadow-[0_0_15px_rgba(255,255,255,0.35)]"
             />
