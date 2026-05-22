@@ -14,6 +14,12 @@ importers:
 
   .:
     dependencies:
+      '@datadog/browser-rum':
+        specifier: ^7.1.0
+        version: 7.1.0
+      '@datadog/browser-rum-react':
+        specifier: ^7.1.0
+        version: 7.1.0(@datadog/browser-rum@7.1.0)(react-router-dom@7.14.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-router@7.14.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.74.0(react@18.3.1))
@@ -438,6 +444,43 @@ packages:
 
   '@chevrotain/utils@12.0.0':
     resolution: {integrity: sha512-lB59uJoaGIfOOL9knQqQRfhl9g7x8/wqFkp13zTdkRu1huG9kg6IJs1O8hqj9rs6h7orGxHJUKb+mX3rPbWGhA==}
+
+  '@datadog/browser-core@7.1.0':
+    resolution: {integrity: sha512-loR/1/ZpqczABeGHFW6Az4hgGYmWwUaA2ame8gwOa3W16BtXnk+67suzo+pbaiG5gNjMpwDIFpUAYQjGYcoxUg==}
+
+  '@datadog/browser-rum-core@7.1.0':
+    resolution: {integrity: sha512-VHg8tpHAiWmuwUW7icBjeLcek/uM7EbTCoBc017Vp2RNzkLfqIiXfpmdm+vilWO1mYbW2adVR2AF2CTHQhVcgQ==}
+
+  '@datadog/browser-rum-react@7.1.0':
+    resolution: {integrity: sha512-9Xy2BvwGmFibY/VWZyteNmsVBBBE5jmcFEOqIF/mYFLezh4SHvO8DN5hBsAY3p3CGXQss1gjeEhgXulHFpXvgQ==}
+    peerDependencies:
+      '@datadog/browser-rum': '*'
+      '@datadog/browser-rum-slim': '*'
+      '@tanstack/react-router': '>=1.64.0 <2'
+      react: 18 || 19
+      react-router: 6 || 7
+      react-router-dom: 6 || 7
+    peerDependenciesMeta:
+      '@datadog/browser-rum':
+        optional: true
+      '@datadog/browser-rum-slim':
+        optional: true
+      '@tanstack/react-router':
+        optional: true
+      react:
+        optional: true
+      react-router:
+        optional: true
+      react-router-dom:
+        optional: true
+
+  '@datadog/browser-rum@7.1.0':
+    resolution: {integrity: sha512-JCtA7NWgH1XUvwBSKdsgU7qIeKFR68QtQVqPBoaNhyTx8Q5Ftec5Mz7cAKIYI/wvF0fSpwcqjp0JI1g1morWkw==}
+    peerDependencies:
+      '@datadog/browser-logs': 7.1.0
+    peerDependenciesMeta:
+      '@datadog/browser-logs':
+        optional: true
 
   '@date-fns/tz@1.4.1':
     resolution: {integrity: sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA==}
@@ -3848,6 +3891,27 @@ snapshots:
   '@chevrotain/types@12.0.0': {}
 
   '@chevrotain/utils@12.0.0': {}
+
+  '@datadog/browser-core@7.1.0': {}
+
+  '@datadog/browser-rum-core@7.1.0':
+    dependencies:
+      '@datadog/browser-core': 7.1.0
+
+  '@datadog/browser-rum-react@7.1.0(@datadog/browser-rum@7.1.0)(react-router-dom@7.14.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-router@7.14.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@datadog/browser-core': 7.1.0
+      '@datadog/browser-rum-core': 7.1.0
+    optionalDependencies:
+      '@datadog/browser-rum': 7.1.0
+      react: 18.3.1
+      react-router: 7.14.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-router-dom: 7.14.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+
+  '@datadog/browser-rum@7.1.0':
+    dependencies:
+      '@datadog/browser-core': 7.1.0
+      '@datadog/browser-rum-core': 7.1.0
 
   '@date-fns/tz@1.4.1': {}
 
