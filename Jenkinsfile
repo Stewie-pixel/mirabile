@@ -29,7 +29,7 @@ pipeline {
 
                 bat 'docker run -d --name mirabile-test-server -p 8095:80 %IMAGE_NAME%:%BUILD_NUMBER%'
                 
-                bat 'timeout /t 3 /nobreak'
+                sleep(time: 3, unit: 'SECONDS')
 
                 echo 'Running Selenium tests...'
 
@@ -84,7 +84,8 @@ pipeline {
                 bat 'docker-compose -f docker-compose.staging.yml down || exit /b 0'
                 bat 'docker-compose -f docker-compose.staging.yml up -d'
                 echo 'Waiting for staging to be healthy...'
-                bat 'timeout /t 10 /nobreak && curl -f http://localhost:%STAGING_PORT% || exit /b 1'
+                sleep(time: 10, unit: 'SECONDS')
+                bat 'curl -f http://localhost:%STAGING_PORT% || exit /b 1'
             }
         }
 
