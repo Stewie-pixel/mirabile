@@ -1,4 +1,5 @@
 import { useState, MouseEvent } from "react";
+import { assetUrl } from '@/lib/assetUrl';
 
 type Company = {
   name: string,
@@ -7,18 +8,18 @@ type Company = {
 }
 
 const COMPANIES: Company[] = [
-  { name: 'Google',    icon: '/icons/google.png',    color: '#4285F4' },
-  { name: 'Meta',      icon: '/icons/meta.png',      color: '#0082FB' },
-  { name: 'Amazon',    icon: '/icons/amazon.png',    color: '#FF9900' },
-  { name: 'Microsoft', icon: '/icons/microsoft.png', color: '#00A4EF' },
-  { name: 'Apple',     icon: '/icons/apple.png',     color: '#A2AAAD' },
-  { name: 'Stripe',    icon: '/icons/stripe.png',    color: '#635BFF' },
-  { name: 'Adobe',     icon: '/icons/adobe.png',     color: '#EE1515' },
-  { name: 'LinkedIn',  icon: '/icons/linkedin.png',  color: '#0A66C2' },
-  { name: 'NVIDIA',    icon: '/icons/nvidia.png',    color: '#76B900' },
-  { name: 'IBM',       icon: '/icons/ibm.png',       color: '#8C8686' },
-  { name: 'OpenAI',    icon: '/icons/openai.png',    color: '#AAAAAA' },
-  { name: 'Pinterest', icon: '/icons/pinterest.png', color: '#E60023' },
+  { name: 'Google',    icon: assetUrl('icons/google.png'),    color: '#4285F4' },
+  { name: 'Meta',      icon: assetUrl('icons/meta.png'),      color: '#0082FB' },
+  { name: 'Amazon',    icon: assetUrl('icons/amazon.png'),    color: '#FF9900' },
+  { name: 'Microsoft', icon: assetUrl('icons/microsoft.png'), color: '#00A4EF' },
+  { name: 'Apple',     icon: assetUrl('icons/apple.png'),     color: '#A2AAAD' },
+  { name: 'Stripe',    icon: assetUrl('icons/stripe.png'),    color: '#635BFF' },
+  { name: 'Adobe',     icon: assetUrl('icons/adobe.png'),     color: '#EE1515' },
+  { name: 'LinkedIn',  icon: assetUrl('icons/linkedin.png'),  color: '#0A66C2' },
+  { name: 'NVIDIA',    icon: assetUrl('icons/nvidia.png'),    color: '#76B900' },
+  { name: 'IBM',       icon: assetUrl('icons/ibm.png'),       color: '#8C8686' },
+  { name: 'OpenAI',    icon: assetUrl('icons/openai.png'),    color: '#AAAAAA' },
+  { name: 'Pinterest', icon: assetUrl('icons/pinterest.png'), color: '#E60023' },
 ];
 
 const TRACK = [...COMPANIES, ...COMPANIES];

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { assetUrl } from '@/lib/assetUrl';
 import { format, subDays, eachDayOfInterval } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -228,7 +229,7 @@ function CompanyIcon({ company, color }: { company: string; color: string }) {
   }
   return (
     <img
-      src={`/icons/${company.toLowerCase().replace(/\s+/g, '')}.png`}
+      src={assetUrl(`icons/${company.toLowerCase().replace(/\s+/g, '')}.png`)}
       alt={company}
       className="w-10 h-10 rounded-lg object-contain bg-white/5 p-1 shrink-0"
       onError={() => setError(true)}

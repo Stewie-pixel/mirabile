@@ -21,25 +21,26 @@ import type { Roadmap } from '@/types';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Google, Meta, Apple, Microsoft, Amazon, Netflix, Nvidia, Oracle, Tesla, Adobe, Salesforce } from '@/assets/images/cards';
 import { getBrandColors } from '../constants/companyBranding.ts';
+import { assetUrl } from '@/lib/assetUrl';
 
 const COMPANY_CONFIG: Record<string, { color: string, logoUrl: string, coverUrl: string }> = {
-  'Google': { color: getBrandColors('Google').primary, logoUrl: '/icons/google.png', coverUrl: Google },
-  'Meta': { color: getBrandColors('Meta').primary, logoUrl: '/icons/meta.png', coverUrl: Meta },
-  'Apple': { color: getBrandColors('Apple').primary, logoUrl: '/icons/apple.png', coverUrl: Apple },
-  'Microsoft': { color: getBrandColors('Microsoft').primary, logoUrl: '/icons/microsoft.png', coverUrl: Microsoft },
-  'Amazon': { color: getBrandColors('Amazon').primary, logoUrl: '/icons/amazon.png', coverUrl: Amazon },
-  'Netflix': { color: getBrandColors('Netflix').primary, logoUrl: '/icons/netflix.png', coverUrl: Netflix },
-  'Nvidia': { color: getBrandColors('Nvidia').primary, logoUrl: '/icons/nvidia.png', coverUrl: Nvidia },
-  'Oracle': { color: getBrandColors('Oracle').primary, logoUrl: '/icons/oracle.png', coverUrl: Oracle },
-  'Tesla': { color: getBrandColors('Tesla').primary, logoUrl: '/icons/tesla.png', coverUrl: Tesla },
-  'Adobe': { color: getBrandColors('Adobe').primary, logoUrl: '/icons/adobe.png', coverUrl: Adobe },
-  'Salesforce': { color: getBrandColors('Salesforce').primary, logoUrl: '/icons/salesforce.png', coverUrl: Salesforce },
+  'Google':     { color: getBrandColors('Google').primary,     logoUrl: assetUrl('icons/google.png'),     coverUrl: Google },
+  'Meta':       { color: getBrandColors('Meta').primary,       logoUrl: assetUrl('icons/meta.png'),       coverUrl: Meta },
+  'Apple':      { color: getBrandColors('Apple').primary,      logoUrl: assetUrl('icons/apple.png'),      coverUrl: Apple },
+  'Microsoft':  { color: getBrandColors('Microsoft').primary,  logoUrl: assetUrl('icons/microsoft.png'),  coverUrl: Microsoft },
+  'Amazon':     { color: getBrandColors('Amazon').primary,     logoUrl: assetUrl('icons/amazon.png'),     coverUrl: Amazon },
+  'Netflix':    { color: getBrandColors('Netflix').primary,    logoUrl: assetUrl('icons/netflix.png'),    coverUrl: Netflix },
+  'Nvidia':     { color: getBrandColors('Nvidia').primary,     logoUrl: assetUrl('icons/nvidia.png'),     coverUrl: Nvidia },
+  'Oracle':     { color: getBrandColors('Oracle').primary,     logoUrl: assetUrl('icons/oracle.png'),     coverUrl: Oracle },
+  'Tesla':      { color: getBrandColors('Tesla').primary,      logoUrl: assetUrl('icons/tesla.png'),      coverUrl: Tesla },
+  'Adobe':      { color: getBrandColors('Adobe').primary,      logoUrl: assetUrl('icons/adobe.png'),      coverUrl: Adobe },
+  'Salesforce': { color: getBrandColors('Salesforce').primary, logoUrl: assetUrl('icons/salesforce.png'), coverUrl: Salesforce },
 };
 
 const getCompanyConfig = (name: string) => {
   const key = Object.keys(COMPANY_CONFIG).find(k => name.toLowerCase().includes(k.toLowerCase()));
   if (key) return COMPANY_CONFIG[key];
-  return { color: '#0AFFE4', logoUrl: '/icons/adobe.png', coverUrl: '/src/assets/images/cards/Google.jpg' };
+  return { color: '#0AFFE4', logoUrl: assetUrl('icons/adobe.png'), coverUrl: Google };
 };
 
 const daily = 24 * 60 * 60 * 1000;

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { assetUrl } from '@/lib/assetUrl';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -88,7 +89,7 @@ function LogoLink() {
   return (
     <Link to="/" className="relative overflow-hidden flex items-center gap-2.5">
       {glow}
-      <img src="/images/logo.png" className="h-8" alt="logo" />
+      <img src={assetUrl('images/logo.png')} className="h-8" alt="logo" />
       <span className="text-xl font-bold text-white">
         Mirabile
       </span>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { assetUrl } from '@/lib/assetUrl';
 import { useParams } from 'react-router';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,23 +16,23 @@ import { getHiringStat } from '@/constants/companyHiringStats';
 
 /* ── Company icon from /public/icons/ ── */
 const COMPANY_ICONS: Record<string, string> = {
-  google: '/icons/google.png',
-  microsoft: '/icons/microsoft.png',
-  meta: '/icons/meta.png',
-  amazon: '/icons/amazon.png',
-  apple: '/icons/apple.png',
-  nvidia: '/icons/nvidia.png',
-  adobe: '/icons/adobe.png',
-  ibm: '/icons/ibm.png',
-  linkedin: '/icons/linkedin.png',
-  openai: '/icons/openai.png',
-  pinterest: '/icons/pinterest.png',
-  stripe: '/icons/stripe.png',
+  google:    assetUrl('icons/google.png'),
+  microsoft: assetUrl('icons/microsoft.png'),
+  meta:      assetUrl('icons/meta.png'),
+  amazon:    assetUrl('icons/amazon.png'),
+  apple:     assetUrl('icons/apple.png'),
+  nvidia:    assetUrl('icons/nvidia.png'),
+  adobe:     assetUrl('icons/adobe.png'),
+  ibm:       assetUrl('icons/ibm.png'),
+  linkedin:  assetUrl('icons/linkedin.png'),
+  openai:    assetUrl('icons/openai.png'),
+  pinterest: assetUrl('icons/pinterest.png'),
+  stripe:    assetUrl('icons/stripe.png'),
 };
 
 function getCompanyIcon(companyName: string): string {
   const id = companyName.toLowerCase().replace(/\s+/g, '');
-  return COMPANY_ICONS[id] ?? `/icons/${id}.png`;
+  return COMPANY_ICONS[id] ?? assetUrl(`icons/${id}.png`);
 }
 
 /* ── Phase config: color + icon ── */
