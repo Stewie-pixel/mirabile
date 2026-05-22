@@ -1,0 +1,9 @@
+services:
+  mirabile-staging:
+    image: mirabile:${BUILD_NUMBER:-latest}
+    container_name: mirabile-staging
+    ports:
+      - "3001:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=staging
