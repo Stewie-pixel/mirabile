@@ -1,0 +1,35 @@
+{
+  "id": "e0b57e7d-1c39-4d64-83a3-ec2d7c0e5a97",
+  "version": "2.0",
+  "name": "Mirabile Tests",
+  "url": "http://localhost:8095",
+  "tests": [{
+    "id": "b1b57e7d-1c39-4d64-83a3-ec2d7c0e5a98",
+    "name": "Load Home Page",
+    "commands": [{
+      "id": "c1b57e7d-1c39-4d64-83a3-ec2d7c0e5a99",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "d1b57e7d-1c39-4d64-83a3-ec2d7c0e5a90",
+      "comment": "",
+      "command": "assertTitle",
+      "target": "Career Roadmap AI",
+      "targets": [],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "f1b57e7d-1c39-4d64-83a3-ec2d7c0e5a91",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["b1b57e7d-1c39-4d64-83a3-ec2d7c0e5a98"]
+  }],
+  "urls": ["http://localhost:8095/"],
+  "plugins": []
+}
