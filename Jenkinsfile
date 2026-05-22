@@ -27,13 +27,13 @@ pipeline {
             steps {
                 echo 'Starting application for testing...'
 
-                bat 'docker run -d --name mirabile-test-server -p 8080:80 %IMAGE_NAME%:%BUILD_NUMBER%'
+                bat 'docker run -d --name mirabile-test-server -p 8095:80 %IMAGE_NAME%:%BUILD_NUMBER%'
                 
                 bat 'timeout /t 3 /nobreak'
 
                 echo 'Running Selenium tests...'
 
-                bat 'npx selenium-side-runner tests/'
+                bat 'npx selenium-side-runner --base-url http://localhost:8095 tests/'
             }
             post {
                 always {
