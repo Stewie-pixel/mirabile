@@ -10,9 +10,11 @@ import { AppLayout } from '@/components/layouts/AppLayout';
 
 import { routes } from './routes';
 
+const basename = import.meta.env.PROD ? '/mirabile' : '/';
+
 const App: React.FC = () => {
   return (
-    <Router basename="/mirabile">
+    <Router basename={basename}>
       <AuthProvider>
         <RoadmapProvider>
           <ProgressProvider>
