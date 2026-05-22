@@ -17,8 +17,8 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building Docker image...'
-                sh 'docker build -t $IMAGE_NAME:$BUILD_NUMBER .'
-                sh 'docker tag $IMAGE_NAME:$BUILD_NUMBER $IMAGE_NAME:latest'
+                bat 'docker build -t %IMAGE_NAME%:%BUILD_NUMBER% .'
+                bat 'docker tag %IMAGE_NAME%:%BUILD_NUMBER% %IMAGE_NAME%:latest'
             }
         }
 
@@ -26,13 +26,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running Selenium tests...'
-                sh '''
-                    docker run --rm \
-                        --name mirabile-test \
-                        -e CI=true \
-                        $IMAGE_NAME:$BUILD_NUMBER \
-                        npx selenium-side-runner tests/
-                '''
+                bat 'docker run --rm --name mirabile-test -e CI=true %IMAGE_NAME%:%BUILD_NUMBER% npx selenium-side-runner tests/'
             }
             post {
                 always {
@@ -46,13 +40,7 @@ pipeline {
             steps {
                 echo 'Running SonarQube analysis...'
                 withSonarQubeEnv('SonarQube') {
-                    sh '''
-                        sonar-scanner \
-                            -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-                            -Dsonar.projectName=Mirabile \
-                            -Dsonar.sources=src \
-                            -Dsonar.exclusions=**/node_modules/**,**/dist/**
-                    '''
+                    bat 'sonar-scanner -Dsonar.projectKey=%SONAR_PROJECT_KEY% -Dsonar.projectName=Mirabile -Dsonar.sources=src -Dsonar.exclusions=**/node_modules/**,**/dist/**'
                 }
             }
         }
@@ -70,15 +58,7 @@ pipeline {
         stage('Security') {
             steps {
                 echo 'Running OWASP Dependency-Check...'
-                sh '''
-                    dependency-check.sh \
-                        --project "Mirabile" \
-                        --scan . \
-                        --exclude "**/node_modules/**" \
-                        --format HTML \
-                        --format XML \
-                        --out reports/dependency-check
-                '''
+                bat 'dependency-check.bat --project "Mirabile" --scan . --exclude "**/node_modules/**" --format HTML --format XML --out reports/dependency-check'
             }
             post {
                 always {
@@ -91,12 +71,10 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying to staging...'
-                sh '''
-                    docker-compose -f docker-compose.staging.yml down || true
-                    docker-compose -f docker-compose.staging.yml up -d
-                '''
+                bat 'docker-compose -f docker-compose.staging.yml down || exit /b 0'
+                bat 'docker-compose -f docker-compose.staging.yml up -d'
                 echo 'Waiting for staging to be healthy...'
-                sh 'sleep 10 && curl -f http://localhost:$STAGING_PORT || exit 1'
+                bat 'timeout /t 10 /nobreak && curl -f http://localhost:%STAGING_PORT% || exit /b 1'
             }
         }
 
@@ -105,15 +83,9 @@ pipeline {
             steps {
                 echo 'Promoting to production...'
                 input message: 'Deploy to production?', ok: 'Release'
-                sh '''
-                    docker stop $PROD_CONTAINER || true
-                    docker rm $PROD_CONTAINER || true
-                    docker run -d \
-                        --name $PROD_CONTAINER \
-                        --restart unless-stopped \
-                        -p $PROD_PORT:80 \
-                        $IMAGE_NAME:$BUILD_NUMBER
-                '''
+                bat 'docker stop %PROD_CONTAINER% || exit /b 0'
+                bat 'docker rm %PROD_CONTAINER% || exit /b 0'
+                bat 'docker run -d --name %PROD_CONTAINER% --restart unless-stopped -p %PROD_PORT%:80 %IMAGE_NAME%:%BUILD_NUMBER%'
             }
         }
 
@@ -121,18 +93,7 @@ pipeline {
         stage('Monitoring') {
             steps {
                 echo 'Registering deployment with Datadog...'
-                sh '''
-                    curl -X POST "https://api.datadoghq.com/api/v1/events" \
-                        -H "Content-Type: application/json" \
-                        -H "DD-API-KEY: $DD_API_KEY" \
-                        -d '{
-                            "title": "Mirabile deployed to production",
-                            "text": "Build #'"$BUILD_NUMBER"' deployed successfully.",
-                            "priority": "normal",
-                            "tags": ["env:production", "app:mirabile"],
-                            "alert_type": "info"
-                        }'
-                '''
+                bat 'curl -X POST "https://api.datadoghq.com/api/v1/events" -H "Content-Type: application/json" -H "DD-API-KEY: %DD_API_KEY%" -d "{\"title\": \"Mirabile deployed to production\", \"text\": \"Build #%BUILD_NUMBER% deployed successfully.\", \"priority\": \"normal\", \"tags\": [\"env:production\", \"app:mirabile\"], \"alert_type\": \"info\"}"'
             }
         }
     }
@@ -143,18 +104,7 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed.'
-            sh '''
-                curl -X POST "https://api.datadoghq.com/api/v1/events" \
-                    -H "Content-Type: application/json" \
-                    -H "DD-API-KEY: $DD_API_KEY" \
-                    -d '{
-                        "title": "Mirabile pipeline FAILED",
-                        "text": "Build #'"$BUILD_NUMBER"' failed. Check Jenkins logs.",
-                        "priority": "high",
-                        "tags": ["env:production", "app:mirabile"],
-                        "alert_type": "error"
-                    }'
-            '''
+            bat 'curl -X POST "https://api.datadoghq.com/api/v1/events" -H "Content-Type: application/json" -H "DD-API-KEY: %DD_API_KEY%" -d "{\"title\": \"Mirabile pipeline FAILED\", \"text\": \"Build #%BUILD_NUMBER% failed. Check Jenkins logs.\", \"priority\": \"high\", \"tags\": [\"env:production\", \"app:mirabile\"], \"alert_type\": \"error\"}"'
         }
     }
 }
