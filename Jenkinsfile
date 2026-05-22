@@ -33,7 +33,7 @@ pipeline {
 
                 echo 'Running Selenium tests...'
 
-                bat 'npx selenium-side-runner --base-url http://localhost:8095 tests/'
+                bat '.\\node_modules\\.bin\\selenium-side-runner --base-url http://localhost:8095 "test/**/*.side" --output-directory test-results'
             }
             post {
                 always {
