@@ -6,41 +6,39 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleCallback = async () => {
-      const hashParams = new URLSearchParams(globalThis.location.hash.substring(1));
-      const searchParams = new URLSearchParams(globalThis.location.search);
+    let mounted = true;
 
-      const accessToken = hashParams.get('access_token') || searchParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token') || searchParams.get('refresh_token');
-      const code = searchParams.get('code');
-
-      console.log('access_token:', accessToken);
-      console.log('refresh_token:', refreshToken);
-      console.log('code:', code);
-
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (!error) {
-          navigate('/dashboard', { replace: true });
-          return;
-        }
+    // 1. Check if Supabase already created the session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session && mounted) {
+        navigate('/dashboard', { replace: true });
       }
+    });
 
-      if (accessToken && refreshToken) {
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
+    // 2. Wait for the automatic PKCE exchange in the background
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      if (event === 'SIGNED_IN' && session) {
+        navigate('/dashboard', { replace: true });
+      } else if (event === 'SIGNED_OUT') {
+        navigate('/login', { replace: true });
+      }
+    });
+
+    // 3. Fallback: if no sign in happens after 3 seconds, redirect to login
+    const timeoutId = setTimeout(() => {
+      if (mounted) {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          navigate(session ? '/dashboard' : '/login', { replace: true });
         });
-        if (!error) {
-          navigate('/dashboard', { replace: true });
-          return;
-        }
       }
+    }, 3000);
 
-      navigate('/login', { replace: true });
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+      clearTimeout(timeoutId);
     };
-
-    handleCallback();
   }, [navigate]);
 
   return (
