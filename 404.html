@@ -4,8 +4,11 @@
     <meta charset="utf-8" />
     <script>
       var path = window.location.pathname;
+      var search = window.location.search;
+      var hash = window.location.hash;
       window.location.replace(
-        window.location.origin + '/mirabile/?redirect=' + encodeURIComponent(path)
+        window.location.origin + '/mirabile/?redirect=' + 
+        encodeURIComponent(path + search + hash)
       );
     </script>
   </head>
