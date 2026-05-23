@@ -127,16 +127,8 @@ def sendDatadogEvent(title, text, alertType) {
     withCredentials([string(credentialsId: 'datadog-api-key', variable: 'DD_KEY')]) {
         powershell """
             \$apiKey = \$env:DD_KEY
-            Invoke-RestMethod -Uri "https://api.datadoghq.com/api/v1/events" \`
-                -Method Post \`
-                -Headers @{ "DD-API-KEY" = \$apiKey; "Content-Type" = "application/json" } \`
-                -Body (@{
-                    title      = "${title}"
-                    text       = "${text}"
-                    priority   = "normal"
-                    tags       = @("env:production", "app:mirabile")
-                    alert_type = "${alertType}"
-                } | ConvertTo-Json)
+            \$body = @{ title = "${title}"; text = "${text}"; priority = "normal"; tags = @("env:production", "app:mirabile"); alert_type = "${alertType}" } | ConvertTo-Json
+            Invoke-RestMethod -Uri "https://api.datadoghq.com/api/v1/events" -Method Post -Headers @{ "DD-API-KEY" = \$apiKey; "Content-Type" = "application/json" } -Body \$body
         """
     }
 }
