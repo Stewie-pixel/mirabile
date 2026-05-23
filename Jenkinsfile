@@ -8,7 +8,8 @@ pipeline {
         STAGING_PORT = '3001'
         PROD_PORT = '3000'
         SONAR_PROJECT_KEY = 'mirabile'
-        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\Program Files\\nodejs;C:\\Program Files\\Java\\latest\\bin;${env.PATH}"
+        JAVA_HOME = 'C:\\Program Files\\Java\\latest\\jdk-21'
+        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\Program Files\\nodejs;C:\\Program Files\\Java\\latest\\jdk-21\\bin;${env.PATH}"
     }
 
     stages {
