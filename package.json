@@ -2,6 +2,10 @@
   "name": "miaoda-react-admin",
   "version": "0.0.1",
   "type": "module",
+  "jest-junit": {
+    "outputDirectory": "test-results",
+    "outputName": "junit.xml"
+  },
   "scripts": {
     "predeploy": "vite build",
     "deploy": "gh-pages -d dist",
@@ -94,6 +98,7 @@
     "@vitejs/plugin-react": "^5.1.4",
     "autoprefixer": "^10.4.27",
     "gh-pages": "^6.3.0",
+    "jest-junit": "^17.0.0",
     "postcss": "^8.5.6",
     "selenium-side-runner": "^4.0.13",
     "tailwindcss": "^3.4.11",

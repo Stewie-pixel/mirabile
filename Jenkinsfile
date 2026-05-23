@@ -26,20 +26,22 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Starting application for testing...'
-
                 bat 'docker run -d --name mirabile-test-server -p 8095:80 %IMAGE_NAME%:%BUILD_NUMBER%'
-                
                 sleep(time: 3, unit: 'SECONDS')
-
                 echo 'Running Selenium tests...'
-
-                bat 'npx --yes selenium-side-runner --base-url http://localhost:8095 "tests/**/*.side" --output-directory test-results'
+                powershell '''
+                    $files = Get-ChildItem -Path tests -Filter *.side -Recurse | Select-Object -ExpandProperty FullName
+                    if ($files) {
+                        pnpm exec selenium-side-runner --base-url http://localhost:8095 $files --output-directory test-results --jest-options="--reporters=jest-junit"
+                    } else {
+                        Write-Host "No .side files found in tests directory"
+                    }
+                '''
             }
             post {
                 always {
                     bat 'docker stop mirabile-test-server || exit /b 0'
                     bat 'docker rm mirabile-test-server || exit /b 0'
-                    
                     junit allowEmptyResults: true, testResults: 'test-results/**/*.xml'
                 }
             }
