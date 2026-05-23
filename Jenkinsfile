@@ -32,7 +32,7 @@ pipeline {
                 powershell '''
                     $files = Get-ChildItem -Path tests -Filter *.side -Recurse | Select-Object -ExpandProperty FullName
                     if ($files) {
-                        pnpm exec selenium-side-runner --base-url http://localhost:8095 $files --output-directory test-results --jest-options="--reporters=jest-junit"
+                        npx selenium-side-runner --base-url http://localhost:8095 $files --output-directory test-results --jest-options="--reporters=jest-junit"
                     } else {
                         Write-Host "No .side files found in tests directory"
                     }
