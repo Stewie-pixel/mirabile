@@ -15,15 +15,15 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building Docker image...'
-                bat "docker build -t ${env.IMAGE_NAME}:${env.BUILD_NUMBER} ."
-                bat "docker tag ${env.IMAGE_NAME}:${env.BUILD_NUMBER} ${env.IMAGE_NAME}:latest"
+                powershell "docker build -t ${env.IMAGE_NAME}:${env.BUILD_NUMBER} ."
+                powershell "docker tag ${env.IMAGE_NAME}:${env.BUILD_NUMBER} ${env.IMAGE_NAME}:latest"
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Starting application for testing...'
-                bat "docker run -d --name mirabile-test-server -p 8095:80 ${env.IMAGE_NAME}:${env.BUILD_NUMBER}"
+                powershell "docker run -d --name mirabile-test-server -p 8095:80 ${env.IMAGE_NAME}:${env.BUILD_NUMBER}"
                 sleep(time: 3, unit: 'SECONDS')
                 
                 echo 'Running Selenium tests...'
@@ -38,8 +38,8 @@ pipeline {
             }
             post {
                 always {
-                    bat "docker stop mirabile-test-server || exit /b 0"
-                    bat "docker rm mirabile-test-server || exit /b 0"
+                    powershell "docker stop mirabile-test-server; exit 0"
+                    powershell "docker rm mirabile-test-server; exit 0"
                     junit allowEmptyResults: true, testResults: 'test-results/junit.xml'
                 }
             }
@@ -49,7 +49,7 @@ pipeline {
             steps {
                 echo 'Running SonarQube analysis...'
                 withSonarQubeEnv('SonarQube') {
-                    bat "D:\\Packages\\sonar-scanner-8.0.1.6346-windows-x64\\bin\\sonar-scanner.bat -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} -Dsonar.projectName=Mirabile -Dsonar.sources=src -Dsonar.exclusions=**/node_modules/**,**/dist/**"
+                    powershell "& 'D:\\Packages\\sonar-scanner-8.0.1.6346-windows-x64\\bin\\sonar-scanner.bat' -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} -Dsonar.projectName=Mirabile -Dsonar.sources=src -Dsonar.exclusions=**/node_modules/**,**/dist/**"
                 }
             }
         }
@@ -66,7 +66,7 @@ pipeline {
         stage('Security') {
             steps {
                 echo 'Running OWASP Dependency-Check...'
-                bat "dependency-check.bat --project \"Mirabile\" --scan . --exclude \"**/node_modules/**\" --format HTML --format XML --out reports/dependency-check"
+                powershell "dependency-check.bat --project \"Mirabile\" --scan . --exclude \"**/node_modules/**\" --format HTML --format XML --out reports/dependency-check"
             }
             post {
                 always {
@@ -78,12 +78,12 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying to staging...'
-                bat "docker-compose -f docker-compose.staging.yml down || exit /b 0"
-                bat "docker-compose -f docker-compose.staging.yml up -d"
+                powershell "docker-compose -f docker-compose.staging.yml down; exit 0"
+                powershell "docker-compose -f docker-compose.staging.yml up -d"
                 
                 echo 'Waiting for staging to be healthy...'
                 sleep(time: 10, unit: 'SECONDS')
-                bat "curl -f http://localhost:${env.STAGING_PORT}"
+                powershell "curl.exe -f http://localhost:${env.STAGING_PORT}"
             }
         }
 
@@ -92,9 +92,9 @@ pipeline {
                 echo 'Promoting to production...'
                 input message: 'Deploy to production?', ok: 'Release'
                 
-                bat "docker stop ${env.PROD_CONTAINER} || exit /b 0"
-                bat "docker rm ${env.PROD_CONTAINER} || exit /b 0"
-                bat "docker run -d --name ${env.PROD_CONTAINER} --restart unless-stopped -p ${env.PROD_PORT}:80 ${env.IMAGE_NAME}:${env.BUILD_NUMBER}"
+                powershell "docker stop ${env.PROD_CONTAINER}; exit 0"
+                powershell "docker rm ${env.PROD_CONTAINER}; exit 0"
+                powershell "docker run -d --name ${env.PROD_CONTAINER} --restart unless-stopped -p ${env.PROD_PORT}:80 ${env.IMAGE_NAME}:${env.BUILD_NUMBER}"
             }
         }
 
