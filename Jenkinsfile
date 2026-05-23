@@ -30,21 +30,43 @@ pipeline {
                 sleep(time: 3, unit: 'SECONDS')
                 echo 'Running Selenium tests...'
                 powershell '''
-                    $env:JEST_JUNIT_OUTPUT_DIR = "test-results"
-                    $env:JEST_JUNIT_OUTPUT_NAME = "junit.xml"
                     $files = Get-ChildItem -Path tests -Filter *.side -Recurse | Select-Object -ExpandProperty FullName
                     if ($files) {
-                        npx selenium-side-runner --base-url http://localhost:8095 $files --output-directory test-results --jest-options="{`"reporters`": [`"default`", `"jest-junit`"]}"
+                        npx selenium-side-runner --base-url http://localhost:8095 $files --output-directory test-results
                     } else {
                         Write-Host "No .side files found in tests directory"
                     }
+                '''
+                powershell '''
+                    $jsonFiles = Get-ChildItem -Path test-results -Filter *.json -Recurse
+                    $xml = "<?xml version=`"1.0`" encoding=`"UTF-8`"?>`n<testsuites>"
+                    foreach ($file in $jsonFiles) {
+                        $data = Get-Content $file.FullName | ConvertFrom-Json
+                        foreach ($suite in $data.testResults) {
+                            $suiteName = $suite.testFilePath
+                            $xml += "`n<testsuite name=`"$suiteName`">"
+                            foreach ($test in $suite.testResults) {
+                                $name = $test.fullName
+                                $time = $test.duration / 1000
+                                if ($test.status -eq "passed") {
+                                    $xml += "`n<testcase name=`"$name`" time=`"$time`"/>"
+                                } else {
+                                    $xml += "`n<testcase name=`"$name`" time=`"$time`"><failure>$($test.failureMessages -join "`n")</failure></testcase>"
+                                }
+                            }
+                            $xml += "`n</testsuite>"
+                        }
+                    }
+                    $xml += "`n</testsuites>"
+                    $xml | Out-File -FilePath "test-results/junit.xml" -Encoding UTF8
+                    Write-Host "JUnit XML generated at test-results/junit.xml"
                 '''
             }
             post {
                 always {
                     bat 'docker stop mirabile-test-server || exit /b 0'
                     bat 'docker rm mirabile-test-server || exit /b 0'
-                    junit allowEmptyResults: true, testResults: 'test-results/**/*.xml'
+                    junit allowEmptyResults: true, testResults: 'test-results/junit.xml'
                 }
             }
         }
