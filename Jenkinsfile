@@ -120,14 +120,12 @@ pipeline {
 
 def sendDatadogEvent(title, text, alertType) {
     powershell """
-        \\$body = @{
+        Invoke-RestMethod -Uri "https://api.datadoghq.com/api/v1/events" -Method Post -Headers @{ "DD-API-KEY" = "${env.DD_API_KEY}"; "Content-Type" = "application/json" } -Body (@{
             title      = "${title}"
             text       = "${text}"
             priority   = "normal"
             tags       = @("env:production", "app:mirabile")
             alert_type = "${alertType}"
-        } | ConvertTo-Json
-
-        Invoke-RestMethod -Uri "https://api.datadoghq.com/api/v1/events" -Method Post -Headers @{ "DD-API-KEY" = "${env.DD_API_KEY}"; "Content-Type" = "application/json" } -Body \\$body
+        } | ConvertTo-Json)
     """
 }
