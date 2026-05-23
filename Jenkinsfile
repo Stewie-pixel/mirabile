@@ -25,16 +25,17 @@ pipeline {
                 echo 'Starting application for testing...'
                 powershell "docker run -d --name mirabile-test-server -p 8095:80 ${env.IMAGE_NAME}:${env.BUILD_NUMBER}"
                 sleep(time: 3, unit: 'SECONDS')
-
+        
                 echo 'Running Selenium tests...'
-
                 powershell '''
+                    New-Item -ItemType Directory -Force -Path test-results | Out-Null
                     $files = Get-ChildItem -Path tests -Filter *.side -Recurse | Select-Object -ExpandProperty FullName
                     if ($files) {
-                        npx --yes selenium-side-runner --base-url http://localhost:8095 $files --output-directory test-results --output-format junit
+                        npx --yes selenium-side-runner --base-url http://localhost:8095 $files
                     } else {
-                        Write-Host "No .side files found - creating empty result"
-                        New-Item -ItemType Directory -Force -Path test-results | Out-Null
+                        Write-Host "No .side files found"
+                    }
+                    if (-not (Test-Path test-results\\junit.xml)) {
                         Set-Content test-results\\junit.xml '<?xml version="1.0"?><testsuites/>'
                     }
                 '''
