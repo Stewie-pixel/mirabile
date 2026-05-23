@@ -16,6 +16,10 @@
 
 https://github.com/user-attachments/assets/1596a4be-87d6-4c78-8636-006bce7be2ce
 
+## Pipeline
+
+<img width="1824" height="857" alt="image" src="https://github.com/user-attachments/assets/237ca8e3-7d15-445a-a7a4-6ecd869c3253" />
+
 ---
 
 ## Table of Contents
@@ -26,11 +30,11 @@ https://github.com/user-attachments/assets/1596a4be-87d6-4c78-8636-006bce7be2ce
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
-- [Supabase Setup](#supabase-setup)
 - [Edge Functions](#edge-functions)
 - [AI Models](#ai-models)
 - [YouTube Integration](#youtube-integration)
 - [Achievements System](#achievements-system)
+- [CI/CD Pipeline](#cicd-pipeline)
 - [Contributing](#contributing)
 
 ---
@@ -61,6 +65,7 @@ Interview Preparation
 - **Hacker News feed** — top tech stories cached daily via the HN API with
   Unsplash cover images
 - **Dark mode UI** — custom glass-morphism design system
+- **CI/CD pipeline** — automated build, test, code quality, security, and deployment via Jenkins
 
 ---
 
@@ -79,6 +84,12 @@ Interview Preparation
 | Video resources | YouTube Data API v3                   |
 | Charts          | Recharts                              |
 | Icons           | Lucide React                          |
+| CI/CD           | Jenkins (Declarative Pipeline)        |
+| Containerisation| Docker, Docker Compose                |
+| Code Quality    | SonarQube, SonarScanner               |
+| Security        | OWASP Dependency-Check                |
+| Testing         | Selenium IDE, selenium-side-runner, Jest, jest-junit |
+| Monitoring      | Datadog Events API                    |
 
 ---
 
@@ -122,6 +133,16 @@ mirabile/
 │                   ├── insert-steps.ts
 │                   ├── insert-resources.ts
 │                   └── insert-progress.ts
+├── tests/
+│   └── *.side                     # Selenium IDE test suites
+├── reports/
+│   └── dependency-check/          # OWASP scan output (HTML + XML)
+├── test-results/
+│   └── junit.xml                  # Jest test report
+├── jest.config.cjs                # Jest config (forceExit + jest-junit reporter)
+├── docker-compose.staging.yml     # Staging environment definition
+├── Dockerfile                     # Nginx-based production image
+├── Jenkinsfile                    # Declarative CI/CD pipeline
 └── public/
     └── icons/                     # Company logo icons
 ```
@@ -197,88 +218,6 @@ supabase secrets set GCP_PROJECT_ID=your_project_id
  
 # Verify
 supabase secrets list
-```
-
----
-
-## Supabase Setup
-
-### Required tables
-
-```sql
--- Roadmaps
-create table roadmaps (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null,
-  career_goal text not null,
-  target_company text not null,
-  timeline text not null,
-  ai_model text,
-  phases jsonb,
-  created_at timestamptz default now()
-);
- 
--- Steps
-create table steps (
-  id uuid primary key default gen_random_uuid(),
-  roadmap_id uuid references roadmaps on delete cascade,
-  phase text,
-  title text,
-  description text,
-  difficulty text,
-  estimated_time text,
-  step_order int,
-  created_at timestamptz default now()
-);
- 
--- Resources
-create table resources (
-  id uuid primary key default gen_random_uuid(),
-  step_id uuid references steps on delete cascade,
-  resource_type text,
-  media_platform text,
-  title text,
-  url text,
-  description text,
-  created_at timestamptz default now()
-);
- 
--- Progress
-create table user_progress (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null,
-  roadmap_id uuid references roadmaps on delete cascade,
-  completed_steps jsonb default '[]',
-  progress_percentage numeric default 0,
-  streak_days int default 0,
-  milestones jsonb default '[]',
-  created_at timestamptz default now()
-);
- 
--- Achievements
-create table user_achievements (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null,
-  achievement_key text not null,
-  earned_at timestamptz default now()
-);
- 
--- Events
-create table user_events (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null,
-  event_type text not null,
-  created_at timestamptz default now()
-);
- 
--- Chat messages
-create table chat_messages (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null,
-  role text not null,
-  content text,
-  created_at timestamptz default now()
-);
 ```
 
 ---
@@ -375,6 +314,93 @@ calculations use UTC to avoid timezone bugs.
 | `explorer`        | Explorer 🚀        | Generate 5 roadmaps for unique career goals |
 | `perseverance`    | Perseverance 💪    | Complete 10 steps total                     |
 | `night_owl`       | Night Owl 🦉       | Complete a step between 11 PM and 4 AM UTC  |
+
+---
+
+## CI/CD Pipeline
+
+Mirabile uses a Jenkins declarative pipeline defined in `Jenkinsfile` at the repository root. The pipeline runs on a Windows agent and covers 8 stages from build through to production deployment and monitoring.
+
+### Pipeline Overview
+
+```
+Build → Test → Code Quality → Quality Gate → Security → Deploy → Release → Monitoring
+```
+
+### Prerequisites
+
+The following tools must be installed and configured on the Jenkins agent:
+
+- Docker Desktop
+- Node.js (added to `PATH`)
+- Java 21 (added to `PATH`, required for OWASP Dependency-Check)
+- SonarScanner CLI
+- Jenkins plugins: SonarQube Scanner, OWASP Dependency-Check, Datadog
+
+### Jenkins Setup
+
+1. In Jenkins, create a new **Pipeline** job
+2. Set **Definition** to `Pipeline script from SCM`
+3. Point SCM to this repository and set **Script Path** to `Jenkinsfile`
+4. Under **Manage Jenkins → Global Tool Configuration**, configure:
+   - SonarQube Scanner installation
+   - OWASP Dependency-Check installation named `OWASP-Dependency-Check`
+5. Under **Manage Jenkins → Configure System**, add a SonarQube server named `SonarQube`
+6. Add the following Jenkins credentials:
+   - `datadog-api-key` — Datadog API key (Secret text)
+
+### Stage Descriptions
+
+| # | Stage | Description | Tools |
+|---|-------|-------------|-------|
+| 1 | **Build** | Builds a versioned Docker image tagged with the build number and `latest` | Docker |
+| 2 | **Test** | Runs Selenium IDE test suites via selenium-side-runner; publishes JUnit results | Selenium IDE, Jest, jest-junit |
+| 3 | **Code Quality** | Static analysis scan of `src/` excluding node_modules and dist | SonarQube, SonarScanner |
+| 4 | **Quality Gate** | Waits up to 2 minutes for SonarQube quality gate; aborts pipeline on failure | SonarQube |
+| 5 | **Security** | Scans dependencies for CVEs; publishes HTML and XML vulnerability reports | OWASP Dependency-Check |
+| 6 | **Deploy** | Starts staging environment via Docker Compose on port 3001; health-checks with curl | Docker Compose |
+| 7 | **Release** | Manual approval gate; promotes versioned image to production on port 3000 | Docker |
+| 8 | **Monitoring** | Sends deployment event to Datadog; fires failure event if pipeline fails | Datadog Events API |
+
+### Running the Pipeline
+
+```bash
+# Trigger via Jenkins UI
+# Navigate to your pipeline job → Build Now
+
+# Or trigger via Jenkins CLI
+java -jar jenkins-cli.jar -s http://localhost:8080 build Mirabile
+```
+
+### Test Configuration
+
+Selenium tests live in the `tests/` directory as `.side` files. Jest is configured via `jest.config.cjs`:
+
+```js
+module.exports = {
+  forceExit: true,
+  reporters: [
+    "default",
+    ["jest-junit", {
+      outputDirectory: "test-results",
+      outputName: "junit.xml"
+    }]
+  ]
+}
+```
+
+### Environment Variables (Jenkins)
+
+The following environment variables are set in the pipeline:
+
+| Variable | Value |
+|----------|-------|
+| `IMAGE_NAME` | `mirabile` |
+| `STAGING_PORT` | `3001` |
+| `PROD_PORT` | `3000` |
+| `STAGING_CONTAINER` | `mirabile-staging` |
+| `PROD_CONTAINER` | `mirabile-prod` |
+| `JAVA_HOME` | Path to Java 21 installation |
 
 ---
 
