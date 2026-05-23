@@ -8,7 +8,6 @@ pipeline {
         STAGING_PORT      = '3001'
         PROD_PORT         = '3000'
         SONAR_PROJECT_KEY = 'mirabile'
-        DD_API_KEY        = credentials('datadog-api-key')
         PATH              = "C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\Program Files\\nodejs;${env.PATH}"
     }
 
@@ -26,14 +25,17 @@ pipeline {
                 echo 'Starting application for testing...'
                 powershell "docker run -d --name mirabile-test-server -p 8095:80 ${env.IMAGE_NAME}:${env.BUILD_NUMBER}"
                 sleep(time: 3, unit: 'SECONDS')
-                
+
                 echo 'Running Selenium tests...'
+
                 powershell '''
                     $files = Get-ChildItem -Path tests -Filter *.side -Recurse | Select-Object -ExpandProperty FullName
                     if ($files) {
-                        npx --yes selenium-side-runner --base-url http://localhost:8095 $files --output-directory test-results
+                        npx --yes selenium-side-runner --base-url http://localhost:8095 $files --output-directory test-results --output-format junit
                     } else {
-                        Write-Host "No .side files found in tests directory"
+                        Write-Host "No .side files found - creating empty result"
+                        New-Item -ItemType Directory -Force -Path test-results | Out-Null
+                        Set-Content test-results\\junit.xml '<?xml version="1.0"?><testsuites/>'
                     }
                 '''
             }
@@ -67,7 +69,10 @@ pipeline {
         stage('Security') {
             steps {
                 echo 'Running OWASP Dependency-Check...'
-                bat "dependency-check.bat --project \"Mirabile\" --scan . --exclude \"**/node_modules/**\" --format HTML --format XML --out reports/dependency-check"
+                dependencyCheck(
+                    additionalArguments: '--project "Mirabile" --exclude "**/node_modules/**" --format HTML --format XML --out reports/dependency-check',
+                    odcInstallation: 'OWASP-Dependency-Check'
+                )
             }
             post {
                 always {
@@ -119,13 +124,19 @@ pipeline {
 }
 
 def sendDatadogEvent(title, text, alertType) {
-    powershell """
-        Invoke-RestMethod -Uri "https://api.datadoghq.com/api/v1/events" -Method Post -Headers @{ "DD-API-KEY" = "${env.DD_API_KEY}"; "Content-Type" = "application/json" } -Body (@{
-            title      = "${title}"
-            text       = "${text}"
-            priority   = "normal"
-            tags       = @("env:production", "app:mirabile")
-            alert_type = "${alertType}"
-        } | ConvertTo-Json)
-    """
+    withCredentials([string(credentialsId: 'datadog-api-key', variable: 'DD_KEY')]) {
+        powershell """
+            \$apiKey = \$env:DD_KEY
+            Invoke-RestMethod -Uri "https://api.datadoghq.com/api/v1/events" \`
+                -Method Post \`
+                -Headers @{ "DD-API-KEY" = \$apiKey; "Content-Type" = "application/json" } \`
+                -Body (@{
+                    title      = "${title}"
+                    text       = "${text}"
+                    priority   = "normal"
+                    tags       = @("env:production", "app:mirabile")
+                    alert_type = "${alertType}"
+                } | ConvertTo-Json)
+        """
+    }
 }
