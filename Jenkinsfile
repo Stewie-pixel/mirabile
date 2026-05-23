@@ -30,11 +30,9 @@ pipeline {
                 sleep(time: 3, unit: 'SECONDS')
                 echo 'Running Selenium tests...'
                 powershell '''
-                    $env:JEST_JUNIT_OUTPUT_DIR = "test-results"
-                    $env:JEST_JUNIT_OUTPUT_NAME = "junit.xml"
                     $files = Get-ChildItem -Path tests -Filter *.side -Recurse | Select-Object -ExpandProperty FullName
                     if ($files) {
-                        npx selenium-side-runner --base-url http://localhost:8095 $files --output-directory test-results --jest-options "--reporters=default --reporters=jest-junit"
+                        npx selenium-side-runner --base-url http://localhost:8095 $files --output-directory test-results --jest-options="--config=jest.config.cjs"
                     } else {
                         Write-Host "No .side files found in tests directory"
                     }
