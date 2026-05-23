@@ -9,7 +9,7 @@ pipeline {
         PROD_PORT         = '3000'
         SONAR_PROJECT_KEY = 'mirabile'
         DD_API_KEY        = credentials('datadog-api-key')
-        PATH              = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
+        PATH              = "C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\Program Files\\nodejs;${env.PATH}"
     }
 
     stages {
