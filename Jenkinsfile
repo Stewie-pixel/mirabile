@@ -50,7 +50,7 @@ pipeline {
             steps {
                 echo 'Running SonarQube analysis...'
                 withSonarQubeEnv('SonarQube') {
-                    powershell "& 'D:\\Packages\\sonar-scanner-8.0.1.6346-windows-x64\\bin\\sonar-scanner.bat' -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} -Dsonar.projectName=Mirabile -Dsonar.sources=src -Dsonar.exclusions=**/node_modules/**,**/dist/**"
+                    bat "D:\\Packages\\sonar-scanner-8.0.1.6346-windows-x64\\bin\\sonar-scanner.bat -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} -Dsonar.projectName=Mirabile -Dsonar.sources=src -Dsonar.exclusions=**/node_modules/**,**/dist/**"
                 }
             }
         }
@@ -67,7 +67,7 @@ pipeline {
         stage('Security') {
             steps {
                 echo 'Running OWASP Dependency-Check...'
-                powershell "dependency-check.bat --project \"Mirabile\" --scan . --exclude \"**/node_modules/**\" --format HTML --format XML --out reports/dependency-check"
+                bat "dependency-check.bat --project \"Mirabile\" --scan . --exclude \"**/node_modules/**\" --format HTML --format XML --out reports/dependency-check"
             }
             post {
                 always {
