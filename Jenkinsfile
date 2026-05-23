@@ -17,8 +17,8 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building Docker image...'
-                bat 'docker build -t %IMAGE_NAME%:%BUILD_NUMBER% .'
-                bat 'docker tag %IMAGE_NAME%:%BUILD_NUMBER% %IMAGE_NAME%:latest'
+                powershell 'docker build -t $env:IMAGE_NAME`:$env:BUILD_NUMBER .'
+                powershell 'docker tag $env:IMAGE_NAME`:$env:BUILD_NUMBER $env:IMAGE_NAME`:latest'
             }
         }
 
@@ -26,7 +26,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Starting application for testing...'
-                bat 'docker run -d --name mirabile-test-server -p 8095:80 %IMAGE_NAME%:%BUILD_NUMBER%'
+                powershell 'docker run -d --name mirabile-test-server -p 8095:80 $env:IMAGE_NAME`:$env:BUILD_NUMBER'
                 sleep(time: 3, unit: 'SECONDS')
                 echo 'Running Selenium tests...'
                 powershell '''
@@ -64,8 +64,8 @@ pipeline {
             }
             post {
                 always {
-                    bat 'docker stop mirabile-test-server || exit /b 0'
-                    bat 'docker rm mirabile-test-server || exit /b 0'
+                    powershell 'docker stop mirabile-test-server; exit 0'
+                    powershell 'docker rm mirabile-test-server; exit 0'
                     junit allowEmptyResults: true, testResults: 'test-results/junit.xml'
                 }
             }
@@ -76,7 +76,7 @@ pipeline {
             steps {
                 echo 'Running SonarQube analysis...'
                 withSonarQubeEnv('SonarQube') {
-                    bat 'sonar-scanner -Dsonar.projectKey=%SONAR_PROJECT_KEY% -Dsonar.projectName=Mirabile -Dsonar.sources=src -Dsonar.exclusions=**/node_modules/**,**/dist/**'
+                    powershell 'D:\\Packages\\sonar-scanner-8.0.1.6346-windows-x64\\bin\\sonar-scanner.bat -Dsonar.projectKey=$env:SONAR_PROJECT_KEY -Dsonar.projectName=Mirabile -Dsonar.sources=src -Dsonar.exclusions=**/node_modules/**,**/dist/**'
                 }
             }
         }
@@ -94,7 +94,7 @@ pipeline {
         stage('Security') {
             steps {
                 echo 'Running OWASP Dependency-Check...'
-                bat 'dependency-check.bat --project "Mirabile" --scan . --exclude "**/node_modules/**" --format HTML --format XML --out reports/dependency-check'
+                powershell 'dependency-check.bat --project "Mirabile" --scan . --exclude "**/node_modules/**" --format HTML --format XML --out reports/dependency-check'
             }
             post {
                 always {
@@ -107,11 +107,11 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying to staging...'
-                bat 'docker-compose -f docker-compose.staging.yml down || exit /b 0'
-                bat 'docker-compose -f docker-compose.staging.yml up -d'
+                powershell 'docker-compose -f docker-compose.staging.yml down; exit 0'
+                powershell 'docker-compose -f docker-compose.staging.yml up -d'
                 echo 'Waiting for staging to be healthy...'
                 sleep(time: 10, unit: 'SECONDS')
-                bat 'curl -f http://localhost:%STAGING_PORT% || exit /b 1'
+                powershell 'curl -f http://localhost:$env:STAGING_PORT'
             }
         }
 
@@ -120,9 +120,9 @@ pipeline {
             steps {
                 echo 'Promoting to production...'
                 input message: 'Deploy to production?', ok: 'Release'
-                bat 'docker stop %PROD_CONTAINER% || exit /b 0'
-                bat 'docker rm %PROD_CONTAINER% || exit /b 0'
-                bat 'docker run -d --name %PROD_CONTAINER% --restart unless-stopped -p %PROD_PORT%:80 %IMAGE_NAME%:%BUILD_NUMBER%'
+                powershell 'docker stop $env:PROD_CONTAINER; exit 0'
+                powershell 'docker rm $env:PROD_CONTAINER; exit 0'
+                powershell 'docker run -d --name $env:PROD_CONTAINER --restart unless-stopped -p $env:PROD_PORT`:80 $env:IMAGE_NAME`:$env:BUILD_NUMBER'
             }
         }
 
@@ -130,7 +130,17 @@ pipeline {
         stage('Monitoring') {
             steps {
                 echo 'Registering deployment with Datadog...'
-                bat 'curl -X POST "https://api.datadoghq.com/api/v1/events" -H "Content-Type: application/json" -H "DD-API-KEY: %DD_API_KEY%" -d "{\"title\": \"Mirabile deployed to production\", \"text\": \"Build #%BUILD_NUMBER% deployed successfully.\", \"priority\": \"normal\", \"tags\": [\"env:production\", \"app:mirabile\"], \"alert_type\": \"info\"}"'
+                powershell '''
+                    $body = @{
+                        title      = "Mirabile deployed to production"
+                        text       = "Build #$env:BUILD_NUMBER deployed successfully."
+                        priority   = "normal"
+                        tags       = @("env:production", "app:mirabile")
+                        alert_type = "info"
+                    } | ConvertTo-Json
+
+                    Invoke-RestMethod -Uri "https://api.datadoghq.com/api/v1/events" -Method Post -Headers @{ "DD-API-KEY" = "$env:DD_API_KEY"; "Content-Type" = "application/json" } -Body $body
+                '''
             }
         }
     }
@@ -141,7 +151,17 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed.'
-            bat 'curl -X POST "https://api.datadoghq.com/api/v1/events" -H "Content-Type: application/json" -H "DD-API-KEY: %DD_API_KEY%" -d "{\"title\": \"Mirabile pipeline FAILED\", \"text\": \"Build #%BUILD_NUMBER% failed. Check Jenkins logs.\", \"priority\": \"high\", \"tags\": [\"env:production\", \"app:mirabile\"], \"alert_type\": \"error\"}"'
+            powershell '''
+                $body = @{
+                    title      = "Mirabile pipeline FAILED"
+                    text       = "Build #$env:BUILD_NUMBER failed. Check Jenkins logs."
+                    priority   = "high"
+                    tags       = @("env:production", "app:mirabile")
+                    alert_type = "error"
+                } | ConvertTo-Json
+
+                Invoke-RestMethod -Uri "https://api.datadoghq.com/api/v1/events" -Method Post -Headers @{ "DD-API-KEY" = "$env:DD_API_KEY"; "Content-Type" = "application/json" } -Body $body
+            '''
         }
     }
 }
