@@ -1,0 +1,14 @@
+# .dockerignore
+node_modules
+.git
+.gitignore
+*.md
+.env*
+.vscode
+build
+coverage
+.nyc_output
+dist
+*.log
+.DS_Store
+Thumbs.db
