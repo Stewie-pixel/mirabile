@@ -13,25 +13,14 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/pipeline%20stages-8-orange?style=flat-square&logo=jenkins&logoColor=white" alt="Pipeline Stages" />
+  <img src="https://img.shields.io/badge/achievements-10-gold?style=flat-square" alt="Achievements" />
   <img src="https://img.shields.io/badge/build-passing-brightgreen?style=flat-square&logo=jenkins&logoColor=white" alt="Build Status" />
   <img src="https://img.shields.io/badge/tests-passing-brightgreen?style=flat-square&logo=jest&logoColor=white" alt="Tests" />
   <img src="https://img.shields.io/badge/quality%20gate-passed-brightgreen?style=flat-square&logo=sonarqube&logoColor=white" alt="SonarQube Quality Gate" />
   <img src="https://img.shields.io/badge/security-OWASP%20scanned-blue?style=flat-square&logo=owasp&logoColor=white" alt="OWASP Dependency Check" />
-  <img src="https://img.shields.io/badge/monitoring-Datadog-632CA6?style=flat-square&logo=datadog&logoColor=white" alt="Datadog" />
-  <img src="https://img.shields.io/badge/pipeline%20stages-8-orange?style=flat-square&logo=jenkins&logoColor=white" alt="Pipeline Stages" />
-  <img src="https://img.shields.io/badge/achievements-10-gold?style=flat-square" alt="Achievements" />
 </p>
 
-<p align="center">
-  <!-- Stack -->
-  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite" />
-  <img src="https://img.shields.io/badge/Tailwind%20CSS-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" />
-  <img src="https://img.shields.io/badge/Docker-containerised-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker" />
-  <img src="https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js" />
-</p>
 
 ## Demo
 
