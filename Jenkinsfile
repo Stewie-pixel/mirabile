@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME        = 'mirabile'
+        IMAGE_NAME = 'mirabile'
         STAGING_CONTAINER = 'mirabile-staging'
-        PROD_CONTAINER    = 'mirabile-prod'
-        STAGING_PORT      = '3001'
-        PROD_PORT         = '3000'
+        PROD_CONTAINER = 'mirabile-prod'
+        STAGING_PORT = '3001'
+        PROD_PORT = '3000'
         SONAR_PROJECT_KEY = 'mirabile'
-        PATH              = "C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\Program Files\\nodejs;${env.PATH}"
+        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\Program Files\\nodejs;C:\\Program Files\\Java\\latest\\bin;${env.PATH}"
     }
 
     stages {
@@ -31,7 +31,7 @@ pipeline {
                     New-Item -ItemType Directory -Force -Path test-results | Out-Null
                     $files = Get-ChildItem -Path tests -Filter *.side -Recurse | Select-Object -ExpandProperty FullName
                     if ($files) {
-                        npx --yes selenium-side-runner --base-url http://localhost:8095 --jest-options "--forceExit" $files
+                        npx --yes selenium-side-runner --base-url http://localhost:8095 $files
                     } else {
                         Write-Host "No .side files found"
                     }
