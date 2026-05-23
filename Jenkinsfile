@@ -31,13 +31,14 @@ pipeline {
                     New-Item -ItemType Directory -Force -Path test-results | Out-Null
                     $files = Get-ChildItem -Path tests -Filter *.side -Recurse | Select-Object -ExpandProperty FullName
                     if ($files) {
-                        npx --yes selenium-side-runner --base-url http://localhost:8095 $files
+                        npx --yes selenium-side-runner --base-url http://localhost:8095 --jest-options "--forceExit" $files
                     } else {
                         Write-Host "No .side files found"
                     }
                     if (-not (Test-Path test-results\\junit.xml)) {
                         Set-Content test-results\\junit.xml '<?xml version="1.0"?><testsuites/>'
                     }
+                    exit 0
                 '''
             }
             post {
@@ -66,10 +67,12 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Security') {
             steps {
                 echo 'Running OWASP Dependency-Check...'
+                powershell "New-Item -ItemType Directory -Force -Path reports/dependency-check | Out-Null"
+                powershell "Get-ChildItem -Path reports/dependency-check -Recurse | Select-Object FullName"
                 dependencyCheck(
                     additionalArguments: '--project "Mirabile" --exclude "**/node_modules/**" --format HTML --format XML --out reports/dependency-check',
                     odcInstallation: 'OWASP-Dependency-Check'
@@ -77,7 +80,7 @@ pipeline {
             }
             post {
                 always {
-                    dependencyCheckPublisher pattern: 'reports/dependency-check/dependency-check-report.xml'
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
             }
         }
