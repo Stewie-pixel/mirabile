@@ -173,14 +173,14 @@ mirabile/
 ```bash
 git clone https://github.com/Stewie-pixel/mirabile.git
 cd mirabile
-npm install
+pnpm install
 ```
 
 ### Local development
 
 ```bash
 # Start the frontend
-npm run dev
+pnpm run dev
  
 # Serve edge functions locally
 supabase functions serve generate-roadmap --env-file .env.local
