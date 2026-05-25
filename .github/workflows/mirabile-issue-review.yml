@@ -1,0 +1,137 @@
+name: Mirabile Code Review
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  mirabile:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@mirabile')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@mirabile')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@mirabile')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@mirabile') || contains(github.event.issue.title, '@mirabile')))
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Extract issue data
+        run: |
+          TITLE="${{ github.event.issue.title }}"
+
+          BODY=$(cat <<'EOF'
+          ${{ github.event.issue.body }}
+          EOF
+          )
+
+          echo "TITLE<<EOF" >> $GITHUB_ENV
+          echo "$TITLE" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          echo "BODY<<EOF" >> $GITHUB_ENV
+          echo "$BODY" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Run code review
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: "openrouter/free"
+        run: |
+          NUMBER="${{ github.event.issue.number }}"
+          URL="https://github.com/${{ github.repository }}/issues/$NUMBER"
+
+          PROMPT="You are a senior software engineer and product reviewer.
+          
+          Your task is to critically review the following GitHub issue and provide detailed, actionable feedback.
+          
+          Focus on:
+          
+          1. Clarity
+          - Is the problem clearly explained?
+          - Are there ambiguous or vague statements?
+          
+          2. Completeness
+          - Are requirements fully specified?
+          - Are acceptance criteria missing?
+          
+          3. Technical Feasibility
+          - Are there hidden challenges or risks?
+          - Are there edge cases not considered?
+          
+          4. Scope & Boundaries
+          - Is the scope well-defined?
+          - Is it too broad or too narrow?
+          
+          5. Missing Information
+          - What important details are not included?
+          - What questions should be asked before starting?
+          
+          6. Suggested Improvements
+          - Rewrite unclear parts if needed
+          - Suggest a better structure if applicable
+          
+          7. Priority & Complexity Assessment
+          - Estimate complexity (Low / Medium / High)
+          - Identify potential blockers
+          
+          ---
+          
+          Issue Details:
+          Issue: #$NUMBER
+          Link: $URL
+          Title: $TITLE
+          Description:
+          $BODY
+          
+          ---
+          
+          Output your response in clean markdown with headings and bullet points. Be concise but insightful."
+
+          RESPONSE=$(curl -s https://openrouter.ai/api/v1/chat/completions \
+            -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg model "$OPENROUTER_MODEL" \
+              --arg content "$PROMPT" \
+              '{model: $model, messages: [{role: "user", content: $content}]}'
+            )")
+
+          REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+
+          echo "REVIEW<<EOF" >> $GITHUB_ENV
+          echo "$REVIEW" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Post review to GitHub
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments \
+            -d "$(jq -n --arg body "$REVIEW" '{body: $body}')"

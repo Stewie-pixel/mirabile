@@ -1,0 +1,173 @@
+name: Mirabile PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  mirabile-review:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Check Workflow Kill Switch
+        run: |
+          if [ -f ".github/WORKFLOW_KILLSWITCH" ]; then
+            STATUS=$(grep "STATUS:" .github/WORKFLOW_KILLSWITCH | awk '{print $2}')
+            if [ "$STATUS" = "DISABLED" ]; then
+              echo "Workflows disabled by kill switch"
+              exit 0
+            fi
+          fi
+
+      - name: Check for Review Bypass
+        id: bypass
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_LABELS="${{ toJSON(github.event.pull_request.labels.*.name) }}"
+
+          if echo "$PR_TITLE" | grep -qE '\[EMERGENCY\]|\[SKIP REVIEW\]|\[HOTFIX\]'; then
+            echo "bypass=true" >> $GITHUB_OUTPUT
+            echo "reason=PR title contains bypass marker" >> $GITHUB_OUTPUT
+            echo "BYPASS: PR title contains bypass marker"
+            exit 0
+          fi
+
+          if echo "$PR_LABELS" | grep -qE 'emergency|skip-review|hotfix'; then
+            echo "bypass=true" >> $GITHUB_OUTPUT
+            echo "reason=PR has bypass label" >> $GITHUB_OUTPUT
+            echo "BYPASS: PR has bypass label"
+            exit 0
+          fi
+
+          echo "bypass=false" >> $GITHUB_OUTPUT
+          echo "No bypass detected - review will proceed"
+
+      - name: Post Bypass Notice
+        if: steps.bypass.outputs.bypass == 'true'
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+            -d "$(jq -n --arg body '## Code Review Bypassed
+
+          **Reason**: ${{ steps.bypass.outputs.reason }}
+
+          **Manual review recommended** — This PR was merged without automated code review.' '{body: $body}')"
+
+      - name: Checkout repository
+        if: steps.bypass.outputs.bypass != 'true'
+        uses: actions/checkout@v4
+
+      - name: Extract PR data
+        if: steps.bypass.outputs.bypass != 'true'
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+
+          BODY=$(cat <<'EOF'
+          ${{ github.event.pull_request.body }}
+          EOF
+          )
+
+          echo "TITLE<<EOF" >> $GITHUB_ENV
+          echo "$TITLE" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          echo "BODY<<EOF" >> $GITHUB_ENV
+          echo "$BODY" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Run Mirabile PR Review
+        if: steps.bypass.outputs.bypass != 'true'
+        id: mirabile-review
+        continue-on-error: true
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: "openrouter/free"
+        run: |
+          NUMBER="${{ github.event.pull_request.number }}"
+          URL="https://github.com/${{ github.repository }}/pull/$NUMBER"
+
+          PROMPT="Please review this pull request and provide feedback on:
+          - Code quality and best practices
+          - Potential bugs or issues
+          - Performance considerations
+          - Security concerns
+          - Test coverage
+
+          Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+
+          ---
+
+          PR Details:
+          PR: #$NUMBER
+          Link: $URL
+          Title: $TITLE
+          Description:
+          $BODY
+
+          ---
+
+          Output your response in clean markdown with headings and bullet points. Be concise but insightful."
+
+          RESPONSE=$(curl -s https://openrouter.ai/api/v1/chat/completions \
+            -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg model "$OPENROUTER_MODEL" \
+              --arg content "$PROMPT" \
+              '{model: $model, messages: [{role: "user", content: $content}]}'
+            )")
+
+          REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content')
+
+          echo "REVIEW<<EOF" >> $GITHUB_ENV
+          echo "$REVIEW" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Post review to GitHub
+        if: steps.bypass.outputs.bypass != 'true'
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+            -d "$(jq -n --arg body "$REVIEW" '{body: $body}')"
+
+      - name: Post fallback review note
+        if: steps.mirabile-review.outcome != 'success'
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+            -d "$(jq -n '{body: "## Automated Review Skipped\n\nThe automated review could not complete.\n\nPlease review manually."}')"
+
+      - name: Debug OpenRouter response
+        if: steps.bypass.outputs.bypass != 'true'
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh pr diff ${{ github.event.pull_request.number }} --patch
+          echo "PULL REQUEST DIFF: $PROMPT"
+          echo "RAW AI RESPONSE: $RESPONSE"
